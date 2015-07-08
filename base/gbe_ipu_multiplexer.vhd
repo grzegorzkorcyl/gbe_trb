@@ -94,6 +94,24 @@ begin
 
 	process(CLK_SYS_IN)
 	begin
+		if (RESET = '1') then
+			MLT_CTS_NUMBER_OUT(16 * (client_ptr + 1 ) - 1 downto 16 * client_ptr) <= (others => '0');			
+			MLT_CTS_CODE_OUT(8 * (client_ptr + 1 ) - 1 downto 8 * client_ptr) <= (others => '0');
+			MLT_CTS_INFORMATION_OUT(8 * (client_ptr + 1 ) - 1 downto 8 * client_ptr) <= (others => '0');
+			MLT_CTS_READOUT_TYPE_OUT(4 * (client_ptr + 1 ) - 1 downto 4 * client_ptr) <= (others => '0');
+			MLT_CTS_START_READOUT_OUT(client_ptr) <= '0';
+			CTS_DATA_OUT <= (others => '0');				
+			CTS_DATAREADY_OUT <= '0';		
+			CTS_READOUT_FINISHED_OUT <= '0'
+			MLT_CTS_READ_OUT(client_ptr) <= '0';
+			CTS_LENGTH_OUT <= (others => '0')
+			CTS_ERROR_PATTERN_OUT <= (others => '0')
+			
+			MLT_FEE_DATA_OUT(16 * (client_ptr + 1 ) - 1 downto 16 * client_ptr) <= (others => '0');			
+			MLT_FEE_DATAREADY_OUT(client_ptr) <= '0';
+			FEE_READ_OUT <= '0';
+			MLT_FEE_STATUS_BITS_OUT(32 * (client_ptr + 1 ) - 1 downto 32 * client_ptr) <= (others => '0');
+			MLT_FEE_BUSY_OUT(client_ptr) <= '0';
 		if rising_edge(CLK_SYS_IN) then
 			MLT_CTS_NUMBER_OUT(16 * (client_ptr + 1 ) - 1 downto 16 * client_ptr) <= CTS_NUMBER_IN;			
 			MLT_CTS_CODE_OUT(8 * (client_ptr + 1 ) - 1 downto 8 * client_ptr) <= CTS_CODE_IN;
