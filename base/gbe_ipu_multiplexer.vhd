@@ -96,24 +96,28 @@ begin
 	                    if (LINK_HAS_READOUT(client_ptr + 1) = '1') then client_ptr <= client_ptr + 1; 
 	                    elsif (LINK_HAS_READOUT(client_ptr + 2) = '1') then client_ptr <= client_ptr + 2;
 	                    elsif (LINK_HAS_READOUT(client_ptr + 3) = '1') then client_ptr <= client_ptr + 3;
+						else client_ptr <= client_ptr;
 	                    end if; 
 	                        
 	                when 1 =>
 	                    if (LINK_HAS_READOUT(client_ptr + 1) = '1') then client_ptr <= client_ptr + 1; 
 	                    elsif (LINK_HAS_READOUT(client_ptr + 2) = '1') then client_ptr <= client_ptr + 2;
 	                    elsif (LINK_HAS_READOUT(client_ptr - 1) = '1') then client_ptr <= client_ptr - 1;
+						else client_ptr <= client_ptr;
 	                    end if;
 	                
 	                when 2 =>
 	                    if (LINK_HAS_READOUT(client_ptr + 1) = '1') then client_ptr <= client_ptr + 1; 
 	                    elsif (LINK_HAS_READOUT(client_ptr - 2) = '1') then client_ptr <= client_ptr - 2;
 	                    elsif (LINK_HAS_READOUT(client_ptr - 1) = '1') then client_ptr <= client_ptr - 1;
+						else client_ptr <= client_ptr;
 	                    end if;
 	                
 	                when 3 =>
 	                    if (LINK_HAS_READOUT(client_ptr - 3) = '1') then client_ptr <= client_ptr - 3; 
 	                    elsif (LINK_HAS_READOUT(client_ptr - 2) = '1') then client_ptr <= client_ptr - 2;
 	                    elsif (LINK_HAS_READOUT(client_ptr - 1) = '1') then client_ptr <= client_ptr - 1;
+						else client_ptr <= client_ptr;
 	                    end if;
 	                when others => client_ptr <= client_ptr;
 	            end case;
