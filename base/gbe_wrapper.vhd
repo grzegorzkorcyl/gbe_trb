@@ -970,8 +970,8 @@ begin
 		ACTIVE_MAP_GEN : if (LINK_HAS_SLOWCTRL(i) = '1') generate
 			mlt_gsc_clk(i)                                     <= GSC_CLK_IN;
 			GSC_INIT_DATAREADY_OUT                             <= mlt_gsc_init_dataready(i);
-			GSC_INIT_DATA_OUT                                  <= mlt_gsc_init_data(i * 16 - 1 downto (i - 1) * 16);
-			GSC_INIT_PACKET_NUM_OUT                            <= mlt_gsc_init_packet(i * 3 - 1 downto (i - 1) * 3);
+			GSC_INIT_DATA_OUT                                  <= mlt_gsc_init_data((i + 1) * 16 - 1 downto i* 16);
+			GSC_INIT_PACKET_NUM_OUT                            <= mlt_gsc_init_packet((i + 1) * 3 - 1 downto i * 3);
 			mlt_gsc_init_read(i)                               <= GSC_INIT_READ_IN;
 			mlt_gsc_reply_dataready(i)                         <= GSC_REPLY_DATAREADY_IN;
 			mlt_gsc_reply_data((i + 1) * 16 - 1 downto i * 16) <= GSC_REPLY_DATA_IN;
