@@ -210,46 +210,48 @@ begin
 
 	all_links_ready <= '1' when dhcp_done = x"f" else '0';
 
-	physical : entity work.gbe_med_interface
-		generic map(DO_SIMULATION       => DO_SIMULATION,
-			        NUMBER_OF_GBE_LINKS => NUMBER_OF_GBE_LINKS,
-			        LINKS_ACTIVE        => LINKS_ACTIVE)
-		port map(
-			RESET               => RESET,
-			GSR_N               => GSR_N,
-			CLK_SYS_IN          => CLK_SYS_IN,
-			CLK_125_OUT         => clk_125_from_pcs,
-			CLK_125_IN          => CLK_125_IN,
-			CLK_125_RX_OUT      => clk_125_rx_from_pcs,
-			MAC_READY_CONF_OUT  => mac_ready_conf,
-			MAC_RECONF_IN       => mac_reconf,
-			MAC_AN_READY_OUT    => mac_an_ready,
-			MAC_FIFOAVAIL_IN    => mac_fifoavail,
-			MAC_FIFOEOF_IN      => mac_fifoeof,
-			MAC_FIFOEMPTY_IN    => mac_fifoempty,
-			MAC_RX_FIFOFULL_IN  => mac_rx_fifofull,
-			MAC_TX_DATA_IN      => mac_tx_data,
-			MAC_TX_READ_OUT     => mac_tx_read,
-			MAC_TX_DISCRFRM_OUT => mac_tx_discrfrm,
-			MAC_TX_STAT_EN_OUT  => mac_tx_stat_en,
-			MAC_TX_STATS_OUT    => mac_tx_stats,
-			MAC_TX_DONE_OUT     => mac_tx_done,
-			MAC_RX_FIFO_ERR_OUT => mac_rx_fifo_err,
-			MAC_RX_STATS_OUT    => mac_rx_stats,
-			MAC_RX_DATA_OUT     => mac_rx_data,
-			MAC_RX_WRITE_OUT    => mac_rx_write,
-			MAC_RX_STAT_EN_OUT  => mac_rx_stat_en,
-			MAC_RX_EOF_OUT      => mac_rx_eof,
-			MAC_RX_ERROR_OUT    => mac_rx_err,
-			SD_RXD_P_IN         => SD_RXD_P_IN,
-			SD_RXD_N_IN         => SD_RXD_N_IN,
-			SD_TXD_P_OUT        => SD_TXD_P_OUT,
-			SD_TXD_N_OUT        => SD_TXD_N_OUT,
-			SD_PRSNT_N_IN       => SD_PRSNT_N_IN,
-			SD_LOS_IN           => SD_LOS_IN,
-			SD_TXDIS_OUT        => SD_TXDIS_OUT,
-			DEBUG_OUT           => open
-		);
+	physical_impl_gen : if DO_SIMULATION = 0 generate
+		physical : entity work.gbe_med_interface
+			generic map(DO_SIMULATION       => DO_SIMULATION,
+				        NUMBER_OF_GBE_LINKS => NUMBER_OF_GBE_LINKS,
+				        LINKS_ACTIVE        => LINKS_ACTIVE)
+			port map(
+				RESET               => RESET,
+				GSR_N               => GSR_N,
+				CLK_SYS_IN          => CLK_SYS_IN,
+				CLK_125_OUT         => clk_125_from_pcs,
+				CLK_125_IN          => CLK_125_IN,
+				CLK_125_RX_OUT      => clk_125_rx_from_pcs,
+				MAC_READY_CONF_OUT  => mac_ready_conf,
+				MAC_RECONF_IN       => mac_reconf,
+				MAC_AN_READY_OUT    => mac_an_ready,
+				MAC_FIFOAVAIL_IN    => mac_fifoavail,
+				MAC_FIFOEOF_IN      => mac_fifoeof,
+				MAC_FIFOEMPTY_IN    => mac_fifoempty,
+				MAC_RX_FIFOFULL_IN  => mac_rx_fifofull,
+				MAC_TX_DATA_IN      => mac_tx_data,
+				MAC_TX_READ_OUT     => mac_tx_read,
+				MAC_TX_DISCRFRM_OUT => mac_tx_discrfrm,
+				MAC_TX_STAT_EN_OUT  => mac_tx_stat_en,
+				MAC_TX_STATS_OUT    => mac_tx_stats,
+				MAC_TX_DONE_OUT     => mac_tx_done,
+				MAC_RX_FIFO_ERR_OUT => mac_rx_fifo_err,
+				MAC_RX_STATS_OUT    => mac_rx_stats,
+				MAC_RX_DATA_OUT     => mac_rx_data,
+				MAC_RX_WRITE_OUT    => mac_rx_write,
+				MAC_RX_STAT_EN_OUT  => mac_rx_stat_en,
+				MAC_RX_EOF_OUT      => mac_rx_eof,
+				MAC_RX_ERROR_OUT    => mac_rx_err,
+				SD_RXD_P_IN         => SD_RXD_P_IN,
+				SD_RXD_N_IN         => SD_RXD_N_IN,
+				SD_TXD_P_OUT        => SD_TXD_P_OUT,
+				SD_TXD_N_OUT        => SD_TXD_N_OUT,
+				SD_PRSNT_N_IN       => SD_PRSNT_N_IN,
+				SD_LOS_IN           => SD_LOS_IN,
+				SD_TXDIS_OUT        => SD_TXDIS_OUT,
+				DEBUG_OUT           => open
+			);
+	end generate physical_impl_gen;
 
 	-- sfp8
 	GEN_LINK_3 : if (LINKS_ACTIVE(3) = '1') generate
@@ -1014,5 +1016,387 @@ begin
 
 		DEBUG_OUT(127 downto 4) <= (others => '0');
 	end generate;
+	
+	
+	testbench_sim : if DO_SIMULATION = 1 generate
+		
+		clk_125_rx_from_pcs(0) <= CLK_125_IN;
+		clk_125_rx_from_pcs(1) <= CLK_125_IN;
+		clk_125_rx_from_pcs(2) <= CLK_125_IN;
+		clk_125_rx_from_pcs(3) <= CLK_125_IN;
+		
+		process
+		begin
+			mac_tx_done(0) <= '0';
+			wait until rising_edge(mac_fifoeof(0));
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_tx_done(0) <= '1';
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+		end process;
+		
+		process
+		begin
+			mac_tx_done(1) <= '0';
+			wait until rising_edge(mac_fifoeof(1));
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_tx_done(1) <= '1';
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+		end process;
+		
+		process(clk_125_rx_from_pcs(0))
+		begin
+			if rising_edge(clk_125_rx_from_pcs(0)) then
+				mac_tx_read(0) <= mac_fifoavail(0);
+				mac_tx_read(1) <= mac_fifoavail(1);
+				mac_tx_read(2) <= mac_fifoavail(2);
+				mac_tx_read(3) <= mac_fifoavail(3);
+			end if;
+		end process;
+		
+		mac_rx_eof(1) <= mac_rx_eof(0);
+		mac_rx_eof(2) <= mac_rx_eof(0);
+		mac_rx_eof(3) <= mac_rx_eof(0);
+		mac_rx_write(1) <= mac_rx_write(0);
+		mac_rx_write(2) <= mac_rx_write(0);
+		mac_rx_write(3) <= mac_rx_write(0);
+		mac_rx_data(2 * 8 - 1 downto 1 * 8) <= mac_rx_data(1 * 8 - 1 downto 0 * 8);
+		mac_rx_data(4 * 8 - 1 downto 3 * 8) <= mac_rx_data(1 * 8 - 1 downto 0 * 8);
+		mac_rx_data(5 * 8 - 1 downto 4 * 8) <= mac_rx_data(1 * 8 - 1 downto 0 * 8);
+			
+		
+		testbench_proc : process
+		begin
+			
+			--trigger <= '0';
+			--gbe_ready <= '0';
+			mac_rx_write(0) <= '0';
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			mac_rx_eof(0) <= '0';
+			
+			wait for 5 us;
+		
+		-- FIRST FRAME UDP - DHCP Offer
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_write(0) <= '1';
+		-- dest mac
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+		-- src mac
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"aa";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"bb";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"dd";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ee";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+		-- frame type
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"08";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+		-- ip headers
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"45";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"10";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"5a";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"49";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"11";  -- udp
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+		-- udp headers
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"43";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"44";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"2c";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"aa";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"bb";
+		-- dhcp data
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"06";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";  --transcation id
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";--transcation id
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"fa";--transcation id
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ce";--transcation id
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"10";
+			
+			for i in 0 to 219 loop
+				wait until rising_edge(clk_125_rx_from_pcs(0));
+				mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			end loop;
+			
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"35";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+				mac_rx_eof(0) <= '1';
+			
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_write(0) <='0';
+			mac_rx_eof(0) <= '0';
+			
+			wait for 6 us;
+			
+				wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_write(0) <= '1';
+		-- dest mac
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+		-- src mac
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"aa";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"bb";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"dd";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ee";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+		-- frame type
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"08";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+		-- ip headers
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"45";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"10";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"5a";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"49";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"11";  -- udp
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+		-- udp headers
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"43";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"44";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"2c";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"aa";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"bb";
+		-- dhcp data
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"06";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"fa";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ce";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"10";
+			
+			for i in 0 to 219 loop
+				wait until rising_edge(clk_125_rx_from_pcs(0));
+				mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			end loop;
+			
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"35";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"05";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_eof(0) <= '1';
+			
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_write(0) <='0';
+			mac_rx_eof(0) <= '0';
+			
+			
+			wait for 5 us;
+
+			wait for 2 us;
+			
+			--gbe_ready <= '1';
+			
+			wait for 1 us;
+			
+			--trigger <= '1';
+
+			wait;
+		
+		end process testbench_proc;
+		
+	end generate testbench_sim;
 
 end architecture RTL;
