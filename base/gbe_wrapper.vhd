@@ -1060,8 +1060,8 @@ begin
 		mac_rx_write(2) <= mac_rx_write(0);
 		mac_rx_write(3) <= mac_rx_write(0);
 		mac_rx_data(2 * 8 - 1 downto 1 * 8) <= mac_rx_data(1 * 8 - 1 downto 0 * 8);
+		mac_rx_data(3 * 8 - 1 downto 2 * 8) <= mac_rx_data(1 * 8 - 1 downto 0 * 8);
 		mac_rx_data(4 * 8 - 1 downto 3 * 8) <= mac_rx_data(1 * 8 - 1 downto 0 * 8);
-		mac_rx_data(5 * 8 - 1 downto 4 * 8) <= mac_rx_data(1 * 8 - 1 downto 0 * 8);
 			
 		
 		testbench_proc : process
