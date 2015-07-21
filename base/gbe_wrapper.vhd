@@ -984,14 +984,14 @@ begin
 
 		INACTIVE_MAP_GEN : if (LINK_HAS_SLOWCTRL(i) = '0') generate
 			mlt_gsc_clk(i)                                     <= '0';
-			GSC_INIT_DATAREADY_OUT                             <= '0';
-			GSC_INIT_DATA_OUT                                  <= (others => '0');
-			GSC_INIT_PACKET_NUM_OUT                            <= (others => '0');
+			--GSC_INIT_DATAREADY_OUT                             <= '0';
+			--GSC_INIT_DATA_OUT                                  <= (others => '0');
+			--GSC_INIT_PACKET_NUM_OUT                            <= (others => '0');
 			mlt_gsc_init_read(i)                               <= '0';
 			mlt_gsc_reply_dataready(i)                         <= '0';
 			mlt_gsc_reply_data((i + 1) * 16 - 1 downto i * 16) <= (others => '0');
 			mlt_gsc_reply_packet((i + 1) * 3 - 1 downto i * 3) <= (others => '0');
-			GSC_REPLY_READ_OUT                                 <= '0';
+			--GSC_REPLY_READ_OUT                                 <= '0';
 			mlt_gsc_busy(i)                                    <= '0';
 		end generate INACTIVE_MAP_GEN;
 	end generate SCTRL_MAP_GEN;
