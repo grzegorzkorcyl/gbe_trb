@@ -89,57 +89,6 @@ port(
 );
 end component;
 
-component trb_net16_gbe_ipu_interface is
-	port (
-	CLK_IPU                     : in    std_logic;
-	CLK_GBE                     : in	std_logic;
-	RESET                       : in    std_logic;
-	-- IPU interface directed toward the CTS
-	CTS_NUMBER_IN               : in    std_logic_vector (15 downto 0);
-	CTS_CODE_IN                 : in    std_logic_vector (7  downto 0);
-	CTS_INFORMATION_IN          : in    std_logic_vector (7  downto 0);
-	CTS_READOUT_TYPE_IN         : in    std_logic_vector (3  downto 0);
-	CTS_START_READOUT_IN        : in    std_logic;
-	CTS_READ_IN                 : in    std_logic;
-	CTS_DATA_OUT                : out   std_logic_vector (31 downto 0);
-	CTS_DATAREADY_OUT           : out   std_logic;
-	CTS_READOUT_FINISHED_OUT    : out   std_logic;      --no more data, end transfer, send TRM
-	CTS_LENGTH_OUT              : out   std_logic_vector (15 downto 0);
-	CTS_ERROR_PATTERN_OUT       : out   std_logic_vector (31 downto 0);
-	-- Data from Frontends
-	FEE_DATA_IN                 : in    std_logic_vector (15 downto 0);
-	FEE_DATAREADY_IN            : in    std_logic;
-	FEE_READ_OUT                : out   std_logic;
-	FEE_BUSY_IN                 : in    std_logic;
-	FEE_STATUS_BITS_IN          : in    std_logic_vector (31 downto 0);
-	-- slow control interface
-	START_CONFIG_OUT			: out	std_logic; -- reconfigure MACs/IPs/ports/packet size
-	BANK_SELECT_OUT				: out	std_logic_vector(3 downto 0); -- configuration page address
-	CONFIG_DONE_IN				: in	std_logic; -- configuration finished
-	DATA_GBE_ENABLE_IN			: in	std_logic; -- IPU data is forwarded to GbE
-	DATA_IPU_ENABLE_IN			: in	std_logic; -- IPU data is forwarded to CTS / TRBnet
-	MULT_EVT_ENABLE_IN			: in    std_logic;
-	MAX_SUBEVENT_SIZE_IN		: in	std_logic_vector(15 downto 0);
-	MAX_QUEUE_SIZE_IN           : in    std_logic_vector(15 downto 0);
-	MAX_SUBS_IN_QUEUE_IN        : in    std_logic_vector(15 downto 0);
-	MAX_SINGLE_SUB_SIZE_IN      : in    std_logic_vector(15 downto 0);
-	READOUT_CTR_IN				: in	std_logic_vector(23 downto 0); -- gk 26.04.10
-	READOUT_CTR_VALID_IN		: in	std_logic; -- gk 26.04.10
-	-- PacketConstructor interface
-	PC_WR_EN_OUT                : out   std_logic;
-	PC_DATA_OUT                 : out   std_logic_vector (7 downto 0);
-	PC_READY_IN                 : in    std_logic;
-	PC_SOS_OUT                  : out   std_logic;
-	PC_EOS_OUT                  : out   std_logic;
-	PC_EOQ_OUT                  : out   std_logic;
-	PC_SUB_SIZE_OUT             : out   std_logic_vector(31 downto 0);
-	PC_TRIG_NR_OUT              : out   std_logic_vector(31 downto 0);
-	PC_TRIGGER_TYPE_OUT         : out	std_logic_vector(3 downto 0);
-	MONITOR_OUT                 : out   std_logic_vector(223 downto 0);
-	DEBUG_OUT                   : out   std_logic_vector(383 downto 0)
-	);
-end component;
-
 component gbe_ipu_dummy is
 	generic (
 		DO_SIMULATION : integer range 0 to 1 := 0;

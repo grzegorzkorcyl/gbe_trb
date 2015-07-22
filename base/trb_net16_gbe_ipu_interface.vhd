@@ -15,6 +15,9 @@ use work.trb_net_gbe_protocols.all;
 
 
 entity trb_net16_gbe_ipu_interface is
+	generic (
+	DO_SIMULATION : integer range 0 to 1 := 0
+	)
 port (
 	CLK_IPU                     : in    std_logic;
 	CLK_GBE                     : in	std_logic;

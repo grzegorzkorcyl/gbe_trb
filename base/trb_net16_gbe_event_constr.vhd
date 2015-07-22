@@ -14,7 +14,8 @@ use work.trb_net_gbe_protocols.all;
 
 entity trb_net16_gbe_event_constr is
 generic (
-	READOUT_BUFFER_SIZE : integer range 1 to 4 := 1
+	READOUT_BUFFER_SIZE : integer range 1 to 4 := 1;
+	DO_SIMULATION : integer range 0 to 1 := 0
 );
 port(
 	RESET                   : in    std_logic;

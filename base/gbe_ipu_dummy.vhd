@@ -346,7 +346,7 @@ begin
 		if rising_edge(CLK) then
 			if (current_state = IDLE) then
 				data_ctr <= (others => '0');
-			elsif (current_state = LOOP_OVER_DATA) then
+			elsif (current_state = LOOP_OVER_DATA and FEE_READ_IN = '1') then
 				data_ctr <= data_ctr + x"1";
 			else
 				data_ctr <= data_ctr;

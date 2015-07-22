@@ -306,7 +306,10 @@ port map(
 	STAT            => open
 );
 
-THE_IPU_INTERFACE: trb_net16_gbe_ipu_interface --ipu2gbe
+THE_IPU_INTERFACE: entity work.trb_net16_gbe_ipu_interface
+generic map (
+	DO_SIMULATION => DO_SIMULATION
+)
 port map( 
 	CLK_IPU 			     => CLK,
 	CLK_GBE					 => CLK,
@@ -360,9 +363,10 @@ port map(
 
 MONITOR_SELECT_DROP_OUT_OUT <= ipu_monitor(31 downto 0);
 
-PACKET_CONSTRUCTOR : trb_net16_gbe_event_constr
+PACKET_CONSTRUCTOR : entity work.trb_net16_gbe_event_constr
 generic map(
-	READOUT_BUFFER_SIZE => READOUT_BUFFER_SIZE
+	READOUT_BUFFER_SIZE => READOUT_BUFFER_SIZE,
+	DO_SIMULATION => DO_SIMULATION
 )
 port map(
 	CLK						=> CLK,
