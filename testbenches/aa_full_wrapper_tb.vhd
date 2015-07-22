@@ -30,7 +30,7 @@ begin
 			RX_PATH_ENABLE            => 1,
 			FIXED_SIZE_MODE           => 1,
 			INCREMENTAL_MODE          => 0,
-			FIXED_SIZE                => 100,
+			FIXED_SIZE                => 13750,
 			FIXED_DELAY_MODE          => 1,
 			UP_DOWN_MODE              => 0,
 			UP_DOWN_LIMIT             => 100,
@@ -122,18 +122,6 @@ begin
 		gsr_n <= '1';
 		wait for 20 us;
 		
-		trigger <= '1';
-		wait for 100 ns;
-		trigger <= '0';
-		wait for 3 us;
-		trigger <= '1';
-		wait for 100 ns;
-		trigger <= '0';
-		wait for 3 us;
-		trigger <= '1';
-		wait for 100 ns;
-		trigger <= '0';
-		wait for 3 us;
 		trigger <= '1';
 		wait for 100 ns;
 		trigger <= '0';
