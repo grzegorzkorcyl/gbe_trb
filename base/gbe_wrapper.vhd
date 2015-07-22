@@ -203,10 +203,20 @@ architecture RTL of gbe_wrapper is
 	signal dummy_mode  : std_logic;
 
 begin
-	mac_0 <= master_mac(31 downto 8) & x"f50002";
-	mac_1 <= master_mac(31 downto 8) & x"f60002";
-	mac_2 <= master_mac(31 downto 8) & x"f70002";
-	mac_3 <= master_mac(31 downto 8) & x"f80002";
+	
+	mac_impl_gen : if DO_SIMULATION = 0 generate
+		mac_0 <= master_mac(31 downto 8) & x"f50002";
+		mac_1 <= master_mac(31 downto 8) & x"f60002";
+		mac_2 <= master_mac(31 downto 8) & x"f70002";
+		mac_3 <= master_mac(31 downto 8) & x"f80002";
+	end generate mac_impl_gen;
+	
+	mac_sim_gen : if DO_SIMULATION = 1 generate
+		mac_0 <= x"ffffffffffff";
+		mac_1 <= x"ffffffffffff";
+		mac_2 <= x"ffffffffffff";
+		mac_3 <= x"ffffffffffff";
+	end generate mac_sim_gen;
 
 	all_links_ready <= '1' when dhcp_done = x"f" else '0';
 
