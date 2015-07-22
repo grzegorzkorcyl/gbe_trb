@@ -121,7 +121,7 @@ begin
 		reset <= '0';
 		gsr_n <= '1';
 		
-		
+		wait;
 	end process;
 	
 
