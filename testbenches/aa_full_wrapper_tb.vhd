@@ -125,6 +125,19 @@ begin
 		trigger <= '1';
 		wait for 100 ns;
 		trigger <= '0';
+		wait for 3 us;
+		trigger <= '1';
+		wait for 100 ns;
+		trigger <= '0';
+		trigger <= '1';
+		wait for 100 ns;
+		trigger <= '0';
+		wait for 3 us;
+		trigger <= '1';
+		wait for 100 ns;
+		trigger <= '0';
+		
+		
 		
 		wait;
 	end process;
