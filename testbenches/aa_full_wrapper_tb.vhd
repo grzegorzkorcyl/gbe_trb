@@ -40,7 +40,7 @@ begin
 			LINK_HAS_PING             => "1111",
 			LINK_HAS_ARP              => "1111",
 			LINK_HAS_DHCP             => "1111",
-			LINK_HAS_READOUT          => "1000",
+			LINK_HAS_READOUT          => "0101",
 			LINK_HAS_SLOWCTRL         => "1000",
 			NUMBER_OF_OUTPUT_LINKS    => 4
 		)
