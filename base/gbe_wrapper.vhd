@@ -982,7 +982,7 @@ begin
 		cfg_subevent_id <= x"12345678";
 		cfg_subevent_dec <= x"00010002";
 		cfg_queue_dec <= x"00030004";
-		cfg_max_frame <= x"578";
+		cfg_max_frame <= x"0578";
 		cfg_gbe_enable <= '1';
 		cfg_ipu_enable <= '1';
 		cfg_mult_enable <= '0';
@@ -992,7 +992,7 @@ begin
 		cfg_additional_hdr <= '0';
 		cfg_insert_ttype <= '0';
 		cfg_soft_rst <= '0';
-		cfg_max_reply <= x"fff0";
+		cfg_max_reply <= x"0000fff0";
 		cfg_max_sub <= x"fff0";
 		cfg_max_queue <= x"fff0";
 		cfg_max_subs_in_queue <= x"0001";
