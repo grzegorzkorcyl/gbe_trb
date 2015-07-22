@@ -89,7 +89,7 @@ begin
 	
 	
 	fixed_size_gen : if FIXED_SIZE_MODE = 1 generate
-		test_data_len <= CFG_EVENT_SIZE_IN; --std_logic_vector(to_unsigned(FIXED_SIZE, 16));
+		test_data_len <= std_logic_vector(to_unsigned(FIXED_SIZE, 16)); --CFG_EVENT_SIZE_IN; --std_logic_vector(to_unsigned(FIXED_SIZE, 16));
 	end generate fixed_size_gen;
 	
 	random_size_gen : if FIXED_SIZE_MODE = 0 and INCREMENTAL_MODE = 0 generate
