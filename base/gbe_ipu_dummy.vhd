@@ -524,7 +524,7 @@ begin
 				fee_dready <= '1';
 			elsif (current_state = WAIT_FOR_READ_6) then
 				fee_dready <= '1';
-			elsif (current_state = LOOP_OVER_DATA) then
+			elsif (current_state = LOOP_OVER_DATA and FEE_READ_IN = '1') then
 				fee_dready <= '1';
 			elsif (current_state = SEND_ONE_WORD) then -- and ctr = send_word_pause) then
 				fee_dready <= '1'; 
