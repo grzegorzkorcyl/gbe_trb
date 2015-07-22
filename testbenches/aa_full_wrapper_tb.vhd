@@ -17,7 +17,7 @@ END aa_full_wrapper_tb;
 
 ARCHITECTURE behavior OF aa_full_wrapper_tb IS
 
-signal clk_sys, clk_125, reset, gsr_n : std_logic := '0';
+signal clk_sys, clk_125, reset, gsr_n, trigger : std_logic := '0';
 
 begin
 	
@@ -26,15 +26,15 @@ begin
 			DO_SIMULATION             => 1,
 			INCLUDE_DEBUG             => 0,
 			USE_INTERNAL_TRBNET_DUMMY => 0,
-			USE_EXTERNAL_TRBNET_DUMMY => 0,
+			USE_EXTERNAL_TRBNET_DUMMY => 1,
 			RX_PATH_ENABLE            => 1,
-			FIXED_SIZE_MODE           => 0,
+			FIXED_SIZE_MODE           => 1,
 			INCREMENTAL_MODE          => 0,
 			FIXED_SIZE                => 100,
-			FIXED_DELAY_MODE          => 0,
+			FIXED_DELAY_MODE          => 1,
 			UP_DOWN_MODE              => 0,
 			UP_DOWN_LIMIT             => 100,
-			FIXED_DELAY               => 100,
+			FIXED_DELAY               => 200,
 			NUMBER_OF_GBE_LINKS       => 4,
 			LINKS_ACTIVE              => "1111",
 			LINK_HAS_PING             => "1111",
@@ -56,7 +56,7 @@ begin
 			SD_PRSNT_N_IN            => (others => '0'),
 			SD_LOS_IN                => (others => '0'),
 			SD_TXDIS_OUT             => open,
-			TRIGGER_IN               => '0',
+			TRIGGER_IN               => trigger,
 			CTS_NUMBER_IN            => (others => '0'),
 			CTS_CODE_IN              => (others => '0'),
 			CTS_INFORMATION_IN       => (others => '0'),
@@ -120,6 +120,11 @@ begin
 		wait for 100 ns;
 		reset <= '0';
 		gsr_n <= '1';
+		wait for 20 us;
+		
+		trigger <= '1';
+		wait for 100 ns;
+		trigger <= '0';
 		
 		wait;
 	end process;
