@@ -122,11 +122,13 @@ begin
 		gsr_n <= '1';
 		wait for 20 us;
 		
-		trigger <= '1';
-		wait for 100 ns;
-		trigger <= '0';
 		
-		
+		for i in 0 to 100 loop
+			trigger <= '1';
+			wait for 100 ns;
+			trigger <= '0';
+			wait for 300 us;
+		end loop;
 		
 		wait;
 	end process;
