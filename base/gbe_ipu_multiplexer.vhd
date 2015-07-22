@@ -93,31 +93,31 @@ begin
 	            client_ptr <= client_ptr;
 	            case client_ptr is
 	                when 0 =>
-	                    if (LINK_HAS_READOUT(client_ptr + 1) = '1') then client_ptr <= client_ptr + 1; 
-	                    elsif (LINK_HAS_READOUT(client_ptr + 2) = '1') then client_ptr <= client_ptr + 2;
-	                    elsif (LINK_HAS_READOUT(client_ptr + 3) = '1') then client_ptr <= client_ptr + 3;
-						else client_ptr <= client_ptr;
+	                    if (LINK_HAS_READOUT(1) = '1') then client_ptr <= 1; 
+	                    elsif (LINK_HAS_READOUT(2) = '1') then client_ptr <= 2;
+	                    elsif (LINK_HAS_READOUT(3) = '1') then client_ptr <= 3;
+						else client_ptr <= 0;
 	                    end if; 
 	                        
 	                when 1 =>
-	                    if (LINK_HAS_READOUT(client_ptr + 1) = '1') then client_ptr <= client_ptr + 1; 
-	                    elsif (LINK_HAS_READOUT(client_ptr + 2) = '1') then client_ptr <= client_ptr + 2;
-	                    elsif (LINK_HAS_READOUT(client_ptr - 1) = '1') then client_ptr <= client_ptr - 1;
-						else client_ptr <= client_ptr;
+	                    if (LINK_HAS_READOUT(2) = '1') then client_ptr <= 2; 
+	                    elsif (LINK_HAS_READOUT(3) = '1') then client_ptr <= 3;
+	                    elsif (LINK_HAS_READOUT(0) = '1') then client_ptr <= 0;
+						else client_ptr <= 1;
 	                    end if;
 	                
 	                when 2 =>
-	                    if (LINK_HAS_READOUT(client_ptr + 1) = '1') then client_ptr <= client_ptr + 1; 
-	                    elsif (LINK_HAS_READOUT(client_ptr - 2) = '1') then client_ptr <= client_ptr - 2;
-	                    elsif (LINK_HAS_READOUT(client_ptr - 1) = '1') then client_ptr <= client_ptr - 1;
-						else client_ptr <= client_ptr;
+	                    if (LINK_HAS_READOUT(3) = '1') then client_ptr <= 3; 
+	                    elsif (LINK_HAS_READOUT(0) = '1') then client_ptr <= 0;
+	                    elsif (LINK_HAS_READOUT(1) = '1') then client_ptr <= 1;
+						else client_ptr <= 2;
 	                    end if;
 	                
 	                when 3 =>
-	                    if (LINK_HAS_READOUT(client_ptr - 3) = '1') then client_ptr <= client_ptr - 3; 
-	                    elsif (LINK_HAS_READOUT(client_ptr - 2) = '1') then client_ptr <= client_ptr - 2;
-	                    elsif (LINK_HAS_READOUT(client_ptr - 1) = '1') then client_ptr <= client_ptr - 1;
-						else client_ptr <= client_ptr;
+	                    if (LINK_HAS_READOUT(0) = '1') then client_ptr <= 0; 
+	                    elsif (LINK_HAS_READOUT(1) = '1') then client_ptr <= 1;
+	                    elsif (LINK_HAS_READOUT(2) = '1') then client_ptr <= 2;
+						else client_ptr <= 3;
 	                    end if;
 	                when others => client_ptr <= client_ptr;
 	            end case;
