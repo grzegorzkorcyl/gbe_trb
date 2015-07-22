@@ -977,6 +977,27 @@ begin
 				SCTRL_HIST_IN                => dbg_hist2
 			);
 	end generate;
+	
+	setup_sim_gen : if (DO_SIMULATION = 1) generate
+		cfg_subevent_id <= x"12345678";
+		cfg_subevent_dec <= x"00010002";
+		cfg_queue_dec <= x"00030004";
+		cfg_max_frame <= x"578";
+		cfg_gbe_enable <= '1';
+		cfg_ipu_enable <= '1';
+		cfg_mult_enable <= '0';
+		cfg_readout_ctr <= x"000000";
+		cfg_readout_ctr_valid <= '0';
+		cfg_allow_rx <= '1';
+		cfg_additional_hdr <= '0';
+		cfg_insert_ttype <= '0';
+		cfg_soft_rst <= '0';
+		cfg_max_reply <= x"fff0";
+		cfg_max_sub <= x"fff0";
+		cfg_max_queue <= x"fff0";
+		cfg_max_subs_in_queue <= x"0001";
+		cfg_max_single_sub <= x"fff0";
+	end generate;
 
 	SCTRL_MAP_GEN : for i in 0 to NUMBER_OF_GBE_LINKS - 1 generate
 		ACTIVE_MAP_GEN : if (LINK_HAS_SLOWCTRL(i) = '1') generate
@@ -1012,11 +1033,6 @@ begin
 	sum_tx_frames  <= monitor_tx_frames(4 * 32 - 1 downto 3 * 32) + monitor_tx_frames(3 * 32 - 1 downto 2 * 32) + monitor_tx_frames(2 * 32 - 1 downto 1 * 32) + monitor_tx_frames(1 * 32 - 1 downto 0 * 32);
 	sum_tx_packets <= monitor_tx_packets(4 * 32 - 1 downto 3 * 32) + monitor_tx_packets(3 * 32 - 1 downto 2 * 32) + monitor_tx_packets(2 * 32 - 1 downto 1 * 32) + monitor_tx_packets(1 * 32 - 1 downto 0 * 32);
 	sum_dropped    <= monitor_dropped(4 * 32 - 1 downto 3 * 32) + monitor_dropped(3 * 32 - 1 downto 2 * 32) + monitor_dropped(2 * 32 - 1 downto 1 * 32) + monitor_dropped(1 * 32 - 1 downto 0 * 32);
-
-	setup_sim_gen : if (DO_SIMULATION = 1) generate
-		cfg_gbe_enable <= '1';
-		cfg_allow_rx   <= '1';
-	end generate;
 
 	include_debug_gen : if (INCLUDE_DEBUG = 1) generate
 		DEBUG_OUT(0) <= mac_an_ready(3);
