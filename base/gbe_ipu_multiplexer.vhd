@@ -88,6 +88,7 @@ begin
             elsif (LINK_HAS_READOUT(1) = '1') then client_ptr <= 1;
             elsif (LINK_HAS_READOUT(2) = '1') then client_ptr <= 2;
 			else client_ptr <= 3;
+			end if;
 		elsif rising_edge(CLK_SYS_IN) then
 			cts_readout   <= CTS_START_READOUT_IN;
 			cts_readout_q <= cts_readout;
