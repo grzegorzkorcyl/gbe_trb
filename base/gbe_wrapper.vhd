@@ -871,7 +871,7 @@ begin
 			);
 
 		-- handler for triggers
-		DUMMY_HANDLER : trb_net16_gbe_ipu_interface
+		DUMMY_HANDLER : entity work.trb_net16_gbe_ipu_interface
 			port map(
 				CLK_IPU                  => CLK_SYS_IN,
 				CLK_GBE                  => CLK_125_IN,
