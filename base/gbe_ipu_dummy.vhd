@@ -344,9 +344,11 @@ begin
 	process(CLK, FEE_READ_IN, data_ctr, current_state)
 	begin
 		if (FEE_READ_IN = '0') then
-			data_ctr <= data_ctr;
-		elsif (current_state = IDLE) then
-			data_ctr <= (others => '0');
+			if (current_state = IDLE) then
+				data_ctr <= (others => '0');
+			else
+				data_ctr <= data_ctr;
+			end if;
 		elsif rising_edge(CLK) then
 			if (current_state = LOOP_OVER_DATA) then
 				data_ctr <= data_ctr + x"1";
