@@ -341,16 +341,12 @@ begin
 		end case;	
 	end process state_machine;
 	
-	process(CLK, FEE_READ_IN, data_ctr, current_state)
+	process(CLK)
 	begin
-		if (FEE_READ_IN = '0') then
+		if rising_edge(CLK) then
 			if (current_state = IDLE) then
 				data_ctr <= (others => '0');
-			else
-				data_ctr <= data_ctr;
-			end if;
-		elsif rising_edge(CLK) then
-			if (current_state = LOOP_OVER_DATA) then
+			elsif (current_state = LOOP_OVER_DATA and FEE_READ_IN = '1' and fee_dready = '1') then
 				data_ctr <= data_ctr + x"1";
 			else
 				data_ctr <= data_ctr;

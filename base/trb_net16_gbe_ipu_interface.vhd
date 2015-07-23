@@ -96,7 +96,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal bank_select                                                          : std_logic_vector(3 downto 0);
 	signal readout_ctr                                                          : std_logic_vector(23 downto 0) := x"000000";
 	signal pc_ready_q                                                           : std_logic;
-	signal sf_afull_q                                                           : std_logic;
+	signal sf_afull_q,sf_afull_qq, sf_afull_qqq, sf_afull_qqqq					: std_logic;
 	signal sf_aempty                                                            : std_logic;
 	signal rec_state, load_state                                                : std_logic_vector(3 downto 0);
 	signal queue_size                                                           : std_logic_vector(17 downto 0);
@@ -205,6 +205,9 @@ begin
 	begin
 		if rising_edge(CLK_IPU) then
 			sf_afull_q <= sf_afull;
+			sf_afull_qq <= sf_afull_q;
+			sf_afull_qqq <= sf_afull_qq;
+			sf_afull_qqqq <= sf_afull_qqq;
 
 			if (sf_afull_q = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
 				sf_wr_en <= '1';
