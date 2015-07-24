@@ -53,7 +53,7 @@ begin
 	dummy_inst : entity work.gbe_ipu_dummy
 		generic map(DO_SIMULATION    => 1,
 			        FIXED_SIZE_MODE  => 1,
-			        FIXED_SIZE       => 10,
+			        FIXED_SIZE       => 20,
 			        INCREMENTAL_MODE => 0,
 			        UP_DOWN_MODE     => 0,
 			        UP_DOWN_LIMIT    => 100,
@@ -110,6 +110,13 @@ begin
 	trigger <= '1';
 	wait for 100 ns;
 	trigger <= '0';
+	
+	
+	wait for 500 ns;
+	wait until rising_edge(CLK);
+	FEE_READ_OUT <= '1';
+	wait until rising_edge(CLK);
+	FEE_READ_OUT <= '0';
 	
 	wait;
 
