@@ -199,7 +199,7 @@ end process DF_QQ_PROC;
 		READY_PROC : process
 		begin
 			PC_READY_OUT <= '1';
-			wait for 1700 ns;
+			wait for 3 us;
 			wait until rising_edge(CLK);
 			PC_READY_OUT <= '0';
 			wait until rising_edge(CLK);
