@@ -114,9 +114,9 @@ begin
 	
 	wait for 500 ns;
 	wait until rising_edge(CLK);
-	FEE_READ_OUT <= '1';
-	wait until rising_edge(CLK);
 	FEE_READ_OUT <= '0';
+	wait until rising_edge(CLK);
+	FEE_READ_OUT <= '1';
 	
 	wait;
 
