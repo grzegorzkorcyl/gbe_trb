@@ -186,12 +186,29 @@ begin
 	end if;
 end process DF_QQ_PROC;
 
-READY_PROC : process(CLK)
-begin
-	if rising_edge(CLK) then
-		PC_READY_OUT <= not df_full;
-	end if;	
-end process READY_PROC;
+	ready_impl_gen : if DO_SIMULATION = 0 generate
+		READY_PROC : process(CLK)
+		begin
+			if rising_edge(CLK) then
+				PC_READY_OUT <= not df_full;
+			end if;	
+		end process READY_PROC;
+	end generate ready_impl_gen;
+	
+	ready_sim_gen : if DO_SIMULATION = 1 generate
+		READY_PROC : process
+		begin
+			PC_READY_OUT <= '1';
+			wait for 1700 ns;
+			wait until rising_edge(CLK);
+			PC_READY_OUT <= '0';
+			wait until rising_edge(CLK);
+			wait until rising_edge(CLK);
+			PC_READY_OUT <= '1';
+			
+			wait;
+		end process READY_PROC;
+	end generate ready_sim_gen;
 
 --*****
 -- subevent headers
