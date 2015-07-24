@@ -105,7 +105,7 @@ begin
 		generic map(
 			DO_SIMULATION       => 1,
 			INCLUDE_DEBUG       => 1,
-			LINK_HAS_READOUT    => "1",
+			LINK_HAS_READOUT    => "0001",
 			NUMBER_OF_GBE_LINKS => 1
 		)
 		port map(
