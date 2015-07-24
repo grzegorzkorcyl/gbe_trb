@@ -98,10 +98,9 @@ begin
 	reset <= '1'; 
 	
 	trigger <= '0';
-	gbe_ready <= '0';
-	MAC_RX_EN_IN <= '0';
-	MAC_RXD_IN <= x"00";
-	MAC_RX_EOF_IN <= '0';
+	gbe_ready <= '1';
+	
+	FEE_READ_OUT <= '1';
 
 	wait for 100 ns;
 	reset <= '0';
