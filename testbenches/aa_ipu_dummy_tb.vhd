@@ -246,7 +246,7 @@ begin
 	trigger <= '0';
 	gbe_ready <= '1';
 	
-	FEE_READ_OUT <= '1';
+	--FEE_READ_OUT <= '1';
 
 	wait for 100 ns;
 	reset <= '0';
@@ -260,9 +260,9 @@ begin
 	
 	wait for 500 ns;
 	wait until rising_edge(CLK);
-	FEE_READ_OUT <= '0';
+	--FEE_READ_OUT <= '0';
 	wait until rising_edge(CLK);
-	FEE_READ_OUT <= '1';
+	--FEE_READ_OUT <= '1';
 	
 	wait;
 
