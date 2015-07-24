@@ -622,7 +622,7 @@ begin
 			if (PC_READY_IN = '1') then
 				if (load_current_state = REMOVE) then
 					sf_rd_en <= '1';
-				elsif (load_current_state = LOAD and pc_ready_q = '1') then
+				elsif (load_current_state = LOAD and PC_READY_IN = '1') then --pc_ready_q = '1') then
 					sf_rd_en <= '1';
 				else
 					sf_rd_en <= '0';
@@ -799,8 +799,8 @@ begin
 	PC_WR_EN_PROC : process(CLK_GBE)
 	begin
 		if rising_edge(CLK_GBE) then
-			pc_ready_q <= PC_READY_IN;
-			if (pc_ready_q = '1') then
+			--pc_ready_q <= PC_READY_IN;
+			if (PC_READY_IN = '1') then
 				if (load_current_state = LOAD) then
 					PC_WR_EN_OUT <= '1';
 				else
