@@ -106,8 +106,11 @@ begin
 	wait for 100 ns;
 	reset <= '0';
 	
-	wait for 5 us;
+	wait for 1 us;
 
+	trigger <= '1';
+	wait for 100 ns;
+	trigger <= '0';
 	
 	wait;
 
