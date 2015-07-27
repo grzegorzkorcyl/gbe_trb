@@ -149,7 +149,7 @@ begin
 	end case;
 end process TRANSMIT_MACHINE;
 
---tc_rd               <= '1' when transmit_current_state = TRANSMIT else '0';
+tc_rd               <= '1' when transmit_current_state = TRANSMIT else '0';
 
 TC_RD_EN_OUT        <= tc_rd;
 
@@ -157,11 +157,11 @@ SYNC_PROC : process(CLK)
 begin
 	if rising_edge(CLK) then
 		
-		if (transmit_current_state = TRANSMIT) then
-			tc_rd <= '1';
-		else
-			tc_rd <= '0';
-		end if;		
+--		if (transmit_current_state = TRANSMIT) then
+--			tc_rd <= '1';
+--		else
+--			tc_rd <= '0';
+--		end if;		
 		
 		tc_rd_q <= tc_rd;
 		tc_rd_qq <= tc_rd_q;
