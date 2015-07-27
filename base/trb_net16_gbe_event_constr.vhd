@@ -524,7 +524,7 @@ begin
 				if (insert_padding = '1') then
 					load_next_state <= LOAD_PADDING;
 				else
-					if (loaded_queue_bytes >= actual_q_size) then
+					if (loaded_queue_bytes = actual_q_size) then
 						load_next_state <= LOAD_TERM;
 					else
 						load_next_state <= LOAD_SUB;
@@ -536,7 +536,7 @@ begin
 			
 		when LOAD_PADDING =>
 			if (header_ctr = 0) then
-				if (loaded_queue_bytes >= actual_q_size) then
+				if (loaded_queue_bytes = actual_q_size) then
 					load_next_state <= LOAD_TERM;
 				else
 					load_next_state <= LOAD_SUB;
