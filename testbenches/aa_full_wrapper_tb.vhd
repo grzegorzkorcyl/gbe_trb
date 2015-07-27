@@ -127,7 +127,7 @@ begin
 			trigger <= '1';
 			wait for 100 ns;
 			trigger <= '0';
-			wait for 300 us;
+			wait for 10 us;
 		end loop;
 		
 		wait;
