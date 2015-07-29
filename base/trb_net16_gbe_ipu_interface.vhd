@@ -413,7 +413,7 @@ begin
 		process
 		begin
 			sf_afull <= '0';
-			wait for 20650 ns;
+			wait for 20850 ns;
 			sf_afull <= '1';
 			wait for 20 ns;
 			sf_afull <= '0';			
@@ -433,7 +433,7 @@ begin
 		process(save_ctr, sf_data_qqqqq)
 		begin
 			if (save_ctr > x"000c") then
-				assert (save_ctr - x"000a" = sf_data_qqqqq) report "fuck" severity warning;
+				assert (save_ctr - x"000c" = sf_data_qqqqq) report "fuck" severity warning;
 			end if;
 		end process;
 		
