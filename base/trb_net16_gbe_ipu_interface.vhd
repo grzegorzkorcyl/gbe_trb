@@ -213,7 +213,7 @@ begin
 			sf_afull_qqqqq <= sf_afull_qqqq;
 
 			--if (sf_afull_q = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
-			if (sf_afull_qqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
+			if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
 				sf_wr_en <= '1';
 			elsif (save_current_state = SAVE_EVT_ADDR) then
 				sf_wr_en <= '1';
