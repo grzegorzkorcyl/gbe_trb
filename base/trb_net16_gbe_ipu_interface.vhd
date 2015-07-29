@@ -437,9 +437,9 @@ begin
 	
 	size_check_debug : if DO_SIMULATION = 1 generate
 		
-		process(save_ctr, sf_data_qqqqq)
+		process(save_ctr, sf_data_qqqqq, save_current_state)
 		begin
-			if (save_ctr > x"000c") then
+			if (save_ctr > x"000c" and save_current_state = SAVE_DATA) then
 				assert (save_ctr - x"000c" = sf_data_qqqqq) report "IPU_INTERFACE: Mismatch between data and internal counters" severity warning;
 			end if;
 		end process;
