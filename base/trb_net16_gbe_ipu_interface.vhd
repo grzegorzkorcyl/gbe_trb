@@ -470,7 +470,7 @@ begin
 			Data(17)          => save_eod_qqqqq,
 			WrClock           => CLK_IPU,
 			RdClock           => CLK_GBE,
-			WrEn              => sf_wr_qqqqq, --sf_wr_q, -- sf_wr_en
+			WrEn              => sf_wr_q, -- sf_wr_en
 			RdEn              => sf_rd_en,
 			Reset             => sf_reset,
 			RPReset           => sf_reset,
