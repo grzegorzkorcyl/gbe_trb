@@ -428,6 +428,17 @@ begin
 		
 	end generate sf_afull_impl_gen;
 	
+	size_check_debug : if DO_SIMULATION = 1 generate
+		
+		process(save_ctr, sf_data_qqqqq)
+		begin
+			if (save_ctr > x"000c") then
+				assert (save_ctr - x"000a" = sf_data_qqqqq) report "fuck" severity warning;
+			end if;
+		end process;
+		
+	end generate size_check_debug;
+	
 	FEE_READ_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then

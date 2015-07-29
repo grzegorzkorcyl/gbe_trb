@@ -346,8 +346,6 @@ begin
 		if rising_edge(CLK) then
 			if (current_state = IDLE) then
 				data_ctr <= (others => '0');
-			elsif (current_state = WAIT_A_SEC_6 and ctr = pause_wait_6) then
-				data_ctr <= data_ctr + x"1";
 			elsif (current_state = LOOP_OVER_DATA and fee_dready = '1' and FEE_READ_IN = '1') then
 				data_ctr <= data_ctr + x"1";
 			else
