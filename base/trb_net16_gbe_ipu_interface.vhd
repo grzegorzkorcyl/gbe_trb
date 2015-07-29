@@ -105,6 +105,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal sf_data_q, sf_data_qq, sf_data_qqq, sf_data_qqqq, sf_data_qqqqq      : std_logic_vector(15 downto 0);
 	signal sf_wr_q, sf_wr_lock                                                  : std_logic;
 	signal save_eod_q, save_eod_qq, save_eod_qqq, save_eod_qqqq, save_eod_qqqqq : std_logic;
+	signal sf_wr_qq, sf_wr_qqq, sf_wr_qqqq, sf_wr_qqqqq                         : std_logic;
 	signal too_large_dropped                                                    : std_logic_vector(31 downto 0);
 	signal previous_ttype, previous_bank                                        : std_logic_vector(3 downto 0);
 	signal sf_afull_real : std_logic;
@@ -291,6 +292,10 @@ begin
 			end if;
 
 			sf_wr_q <= sf_wr_en and (not sf_wr_lock) and DATA_GBE_ENABLE_IN;
+			sf_wr_qq <= sf_wr_q;
+			sf_wr_qqq <= sf_wr_qq;
+			sf_wr_qqqq <= sf_wr_qqq;
+			sf_wr_qqqqq <= sf_wr_qqqq;
 
 		end if;
 	end process;
@@ -433,7 +438,7 @@ begin
 		process(save_ctr, sf_data_qqqqq)
 		begin
 			if (save_ctr > x"000c") then
-				assert (save_ctr - x"000c" = sf_data_qqqqq) report "fuck" severity warning;
+				assert (save_ctr - x"000c" = sf_data_qqqqq) report "IPU_INTERFACE: Mismatch between data and internal counters" severity warning;
 			end if;
 		end process;
 		
@@ -463,7 +468,7 @@ begin
 			Data(17)          => save_eod_qqqqq,
 			WrClock           => CLK_IPU,
 			RdClock           => CLK_GBE,
-			WrEn              => sf_wr_q, -- sf_wr_en
+			WrEn              => sf_wr_qqqqq, --sf_wr_q, -- sf_wr_en
 			RdEn              => sf_rd_en,
 			Reset             => sf_reset,
 			RPReset           => sf_reset,
