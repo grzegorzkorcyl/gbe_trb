@@ -107,6 +107,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal save_eod_q, save_eod_qq, save_eod_qqq, save_eod_qqqq, save_eod_qqqqq : std_logic;
 	signal too_large_dropped                                                    : std_logic_vector(31 downto 0);
 	signal previous_ttype, previous_bank                                        : std_logic_vector(3 downto 0);
+	signal sf_afull_real : std_logic;
 
 begin
 
@@ -407,38 +408,40 @@ begin
 		end if;
 	end process SAVE_CTR_PROC;
 
-	ready_sim_gen : if DO_SIMULATION = 1 generate
+	sf_afull_sim_gen : if DO_SIMULATION = 1 generate
 		
 		process
 		begin
-			FEE_READ_OUT <= '1';
+			sf_afull <= '0';
 			wait for 20650 ns;
-			FEE_READ_OUT <= '0';
+			sf_afull <= '1';
 			wait for 20 ns;
-			FEE_READ_OUT <= '1';			
+			sf_afull <= '0';			
 			wait;
 		end process;
 	
-	end generate ready_sim_gen;
+	end generate sf_afull_sim_gen;
 	
-	ready_impl_gen : if DO_SIMULATIOn = 0 generate 
+	sf_afull_impl_gen : if DO_SIMULATION = 0 generate 
 
-		FEE_READ_PROC : process(CLK_IPU)
-		begin
-			if rising_edge(CLK_IPU) then
-				if (sf_afull = '0') then
-					if (save_current_state = IDLE or save_current_state = SAVE_EVT_ADDR or save_current_state = WAIT_FOR_DATA or save_current_state = SAVE_DATA) then
-						FEE_READ_OUT <= '1';
-					else
-						FEE_READ_OUT <= '0';
-					end if;
+		sf_afull <= sf_afull_real;
+		
+	end generate sf_afull_impl_gen;
+	
+	FEE_READ_PROC : process(CLK_IPU)
+	begin
+		if rising_edge(CLK_IPU) then
+			if (sf_afull = '0') then
+				if (save_current_state = IDLE or save_current_state = SAVE_EVT_ADDR or save_current_state = WAIT_FOR_DATA or save_current_state = SAVE_DATA) then
+					FEE_READ_OUT <= '1';
 				else
 					FEE_READ_OUT <= '0';
 				end if;
+			else
+				FEE_READ_OUT <= '0';
 			end if;
-		end process FEE_READ_PROC;
-		
-	end generate ready_impl_gen;
+		end if;
+	end process FEE_READ_PROC;
 
 	THE_SPLIT_FIFO : fifo_32kx16x8_mb2  --fifo_16kx18x9
 		port map(
@@ -462,7 +465,7 @@ begin
 			Empty             => sf_empty,
 			AlmostEmpty       => sf_aempty,
 			Full              => sf_full, -- WARNING, JUST FOR DEBUG
-			AlmostFull        => sf_afull
+			AlmostFull        => sf_afull_real
 		);
 
 	sf_reset <= RESET;
