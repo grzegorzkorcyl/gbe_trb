@@ -417,15 +417,17 @@ begin
 
 	sf_afull_sim_gen : if DO_SIMULATION = 1 generate
 		
-		process
-		begin
-			sf_afull <= '0';
-			wait for 20850 ns;
-			sf_afull <= '1';
-			wait for 20 ns;
-			sf_afull <= '0';			
-			wait;
-		end process;
+--		process
+--		begin
+--			sf_afull <= '0';
+--			wait for 20850 ns;
+--			sf_afull <= '1';
+--			wait for 20 ns;
+--			sf_afull <= '0';			
+--			wait;
+--		end process;
+		
+		sf_afull <= sf_afull_real;
 	
 	end generate sf_afull_sim_gen;
 	
