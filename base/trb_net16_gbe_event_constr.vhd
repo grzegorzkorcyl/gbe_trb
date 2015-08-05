@@ -87,7 +87,7 @@ architecture RTL of trb_net16_gbe_event_constr is
 	signal shf_padding                            : std_logic;
 	signal block_shf_after_divide, previous_tc_rd : std_logic;
 	signal block_term_after_divide                : std_logic;
-	signal df_full_real : std_logic;
+	signal df_full_real, df_afull : std_logic;
 
 begin
 
@@ -126,7 +126,7 @@ begin
 	end process DF_WR_EN_PROC;
 
 	df_64k_gen : if READOUT_BUFFER_SIZE = 4 generate
-		DATA_FIFO : fifo_64kx9
+		DATA_FIFO : entity work.fifo_64kx9_af
 			port map(
 				Data(7 downto 0) => df_data,
 				Data(8)          => df_eos_q,
@@ -139,7 +139,8 @@ begin
 				Q(7 downto 0)    => df_q,
 				Q(8)             => load_eod,
 				Empty            => df_empty,
-				Full             => df_full_real
+				Full             => df_full_real,
+				AlmostFull       => df_afull
 			);
 	end generate df_64k_gen;
 
@@ -194,26 +195,28 @@ begin
 			end if;
 		end process READY_PROC;
 		
-		df_full <= df_full_real;
+		df_full <= df_afull; --df_full_real;
 	end generate ready_impl_gen;
 
 	ready_sim_gen : if DO_SIMULATION = 1 generate
 		
 		
-		FULL_PROC : process
-		begin
-			df_full <= '0';
+--		FULL_PROC : process
+--		begin
+--			df_full <= '0';
+--
+--			wait for 22000 ns;
+--			wait until rising_edge(CLK);
+--			df_full <= '1';
+--			wait until rising_edge(CLK);
+--			wait until rising_edge(CLK);
+--			wait until rising_edge(CLK);
+--			df_full <= '0';
+--
+--			wait;
+--		end process FULL_PROC;
 
-			wait for 22000 ns;
-			wait until rising_edge(CLK);
-			df_full <= '1';
-			wait until rising_edge(CLK);
-			wait until rising_edge(CLK);
-			wait until rising_edge(CLK);
-			df_full <= '0';
-
-			wait;
-		end process FULL_PROC;
+			df_full <= df_afull;
 
 			READY_PROC : process(CLK)
 			begin
