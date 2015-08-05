@@ -1,0 +1,50 @@
+[Device]
+Family=latticeecp3
+PartType=LFE3-150EA
+PartName=LFE3-150EA-8FN1156C
+SpeedGrade=8
+Package=FPBGA1156
+OperatingCondition=COM
+Status=P
+
+[IP]
+VendorName=Lattice Semiconductor Corporation
+CoreType=LPM
+CoreStatus=Demo
+CoreName=FIFO_DC
+CoreRevision=5.8
+ModuleName=fifo_64kx9_af
+SourceFormat=VHDL
+ParameterFileVersion=1.0
+Date=08/05/2015
+Time=16:55:11
+
+[Parameters]
+Verilog=0
+VHDL=1
+EDIF=1
+Destination=Synplicity
+Expression=BusA(0 to 7)
+Order=Big Endian [MSB:LSB]
+IO=0
+FIFOImp=EBR Based
+Depth=65536
+Width=9
+RDepth=65536
+RWidth=9
+regout=0
+CtrlByRdEn=0
+EmpFlg=0
+PeMode=Static - Dual Threshold
+PeAssert=10
+PeDeassert=12
+FullFlg=1
+PfMode=Static - Dual Threshold
+PfAssert=65500
+PfDeassert=65490
+RDataCount=0
+WDataCount=0
+EnECC=0
+
+[Command]
+cmd_line= -w -n fifo_64kx9_af -lang vhdl -synth synplify -bus_exp 7 -bb -arch ep5c00 -type fifodc -addr_width 16 -data_width 9 -num_words 65536 -rdata_width 9 -no_enable -pe -1 -pf 65500 -pf2 65490
