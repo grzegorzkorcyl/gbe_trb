@@ -87,6 +87,7 @@ architecture RTL of trb_net16_gbe_event_constr is
 	signal shf_padding                            : std_logic;
 	signal block_shf_after_divide, previous_tc_rd : std_logic;
 	signal block_term_after_divide                : std_logic;
+	signal df_full_real : std_logic;
 
 begin
 
@@ -138,7 +139,7 @@ begin
 				Q(7 downto 0)    => df_q,
 				Q(8)             => load_eod,
 				Empty            => df_empty,
-				Full             => df_full
+				Full             => df_full_real
 			);
 	end generate df_64k_gen;
 
@@ -156,7 +157,7 @@ begin
 				Q(7 downto 0)    => df_q,
 				Q(8)             => load_eod,
 				Empty            => df_empty,
-				Full             => df_full
+				Full             => df_full_real
 			);
 	end generate df_8k_gen;
 
@@ -174,7 +175,7 @@ begin
 				Q(7 downto 0)    => df_q,
 				Q(8)             => load_eod,
 				Empty            => df_empty,
-				Full             => df_full
+				Full             => df_full_real
 			);
 	end generate df_4k_gen;
 
@@ -192,23 +193,27 @@ begin
 				PC_READY_OUT <= not df_full;
 			end if;
 		end process READY_PROC;
+		
+		df_full <= df_full_real;
 	end generate ready_impl_gen;
 
 	ready_sim_gen : if DO_SIMULATION = 1 generate
---		READY_PROC : process
---		begin
---			PC_READY_OUT <= '1';
---
---			wait for 22000 ns;
---			wait until rising_edge(CLK);
---			PC_READY_OUT <= '0';
---			wait until rising_edge(CLK);
---			wait until rising_edge(CLK);
---			wait until rising_edge(CLK);
---			PC_READY_OUT <= '1';
---
---			wait;
---		end process READY_PROC;
+		
+		
+		FULL_PROC : process
+		begin
+			df_full <= '0';
+
+			wait for 22000 ns;
+			wait until rising_edge(CLK);
+			df_full <= '1';
+			wait until rising_edge(CLK);
+			wait until rising_edge(CLK);
+			wait until rising_edge(CLK);
+			df_full <= '0';
+
+			wait;
+		end process FULL_PROC;
 
 			READY_PROC : process(CLK)
 			begin
