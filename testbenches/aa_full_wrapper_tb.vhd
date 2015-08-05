@@ -123,7 +123,7 @@ begin
 		wait for 20 us;
 		
 		
-		for i in 0 to 100 loop
+		for i in 0 to 10000 loop
 			trigger <= '1';
 			wait for 100 ns;
 			trigger <= '0';
