@@ -378,6 +378,10 @@ begin
 				MAKE_RESET_OUT           => make_reset3
 			);
 	end generate GEN_LINK_3;
+	
+	NO_LINK3_GEN : if (LINKS_ACTIVE(3) = '0') generate
+		make_reset3 <= '0';	
+	end generate NO_LINK3_GEN;		
 
 	-- sfp7
 	GEN_LINK_2 : if (LINKS_ACTIVE(2) = '1') generate
@@ -499,6 +503,10 @@ begin
 				MAKE_RESET_OUT           => make_reset2
 			);
 	end generate GEN_LINK_2;
+	
+	NO_LINK2_GEN : if (LINKS_ACTIVE(2) = '0') generate
+		make_reset2 <= '0';	
+	end generate NO_LINK2_GEN;	
 
 	-- sfp6
 	GEN_LINK_1 : if (LINKS_ACTIVE(1) = '1') generate
@@ -620,6 +628,10 @@ begin
 				MAKE_RESET_OUT           => make_reset1
 			);
 	end generate GEN_LINK_1;
+	
+	NO_LINK1_GEN : if (LINKS_ACTIVE(1) = '0') generate
+		make_reset1 <= '0';	
+	end generate NO_LINK1_GEN;	
 
 	-- sfp5
 	GEN_LINK_0 : if (LINKS_ACTIVE(0) = '1') generate
@@ -741,6 +753,10 @@ begin
 				MAKE_RESET_OUT           => make_reset0
 			);
 	end generate GEN_LINK_0;
+	
+	NO_LINK0_GEN : if (LINKS_ACTIVE(0) = '0') generate
+		make_reset0 <= '0';	
+	end generate NO_LINK0_GEN;	
 
 	real_ipu_gen : if USE_EXTERNAL_TRBNET_DUMMY = 0 generate
 		ipu_mult : entity work.gbe_ipu_multiplexer

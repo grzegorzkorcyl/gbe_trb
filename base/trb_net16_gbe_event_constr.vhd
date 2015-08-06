@@ -88,7 +88,12 @@ architecture RTL of trb_net16_gbe_event_constr is
 	signal block_shf_after_divide, previous_tc_rd : std_logic;
 	signal block_term_after_divide                : std_logic;
 	signal df_full_real, df_afull : std_logic;
-
+	signal df_wcnt : std_logic_vector(16 downto 0);
+	
+	attribute syn_keep : string;
+	attribute syn_keep of df_wcnt : signal is "true";
+	
+	
 begin
 
 	--*******
@@ -140,7 +145,8 @@ begin
 				Q(8)             => load_eod,
 				Empty            => df_empty,
 				Full             => df_full_real,
-				AlmostFull       => df_afull
+				AlmostFull       => df_afull,
+				WCNT             => df_wcnt
 			);
 	end generate df_64k_gen;
 
