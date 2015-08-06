@@ -201,6 +201,7 @@ architecture RTL of gbe_wrapper is
 
 	signal dummy_event : std_logic_vector(15 downto 0);
 	signal dummy_mode  : std_logic;
+	signal make_reset0, make_reset1, make_reset2, make_reset3 : std_logic := '0';
 
 begin
 	
@@ -219,6 +220,8 @@ begin
 	end generate mac_sim_gen;
 
 	all_links_ready <= '1' when dhcp_done = x"f" else '0';
+	
+	MAKE_RESET_OUT <= '1' when make_reset3 = '1' or make_reset2 = '1' or make_reset1 = '1' or make_reset0 = '1' else '0';
 
 	physical_impl_gen : if DO_SIMULATION = 0 generate
 		physical : entity work.gbe_med_interface
@@ -372,7 +375,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(4 * 32 - 1 downto 3 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(4 * 32 - 1 downto 3 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(4 * 32 - 1 downto 3 * 32),
-				MAKE_RESET_OUT           => MAKE_RESET_OUT
+				MAKE_RESET_OUT           => make_reset3
 			);
 	end generate GEN_LINK_3;
 
@@ -493,7 +496,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(3 * 32 - 1 downto 2 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(3 * 32 - 1 downto 2 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(3 * 32 - 1 downto 2 * 32),
-				MAKE_RESET_OUT           => open --MAKE_RESET_OUT
+				MAKE_RESET_OUT           => make_reset2
 			);
 	end generate GEN_LINK_2;
 
@@ -614,7 +617,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(2 * 32 - 1 downto 1 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(2 * 32 - 1 downto 1 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(2 * 32 - 1 downto 1 * 32),
-				MAKE_RESET_OUT           => open --MAKE_RESET_OUT
+				MAKE_RESET_OUT           => make_reset1
 			);
 	end generate GEN_LINK_1;
 
@@ -735,7 +738,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(1 * 32 - 1 downto 0 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(1 * 32 - 1 downto 0 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(1 * 32 - 1 downto 0 * 32),
-				MAKE_RESET_OUT           => open --MAKE_RESET_OUT
+				MAKE_RESET_OUT           => make_reset0
 			);
 	end generate GEN_LINK_0;
 
