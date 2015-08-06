@@ -131,7 +131,7 @@ begin
 	end process DF_WR_EN_PROC;
 
 	df_64k_gen : if READOUT_BUFFER_SIZE = 4 generate
-		DATA_FIFO : entity work.fifo_64kx9_af
+		DATA_FIFO : entity work.fifo_64kx9_af_cnt
 			port map(
 				Data(7 downto 0) => df_data,
 				Data(8)          => df_eos_q,
