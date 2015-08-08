@@ -162,7 +162,7 @@ begin
 
 MAKE_RESET_OUT <= make_reset;
 
-receive_fifo : entity work.fifo_2048x8x16_cnt
+receive_fifo : entity work.fifo_2kx9x18_cnt
   PORT map(
     Reset            => RESET,
 	RPReset          => RESET,
