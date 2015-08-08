@@ -519,10 +519,12 @@ end process DISSECT_MACHINE_PROC;
 
 DISSECT_MACHINE : process(dissect_current_state, reset_detected, too_much_data, PS_WR_EN_IN, PS_ACTIVATE_IN, PS_DATA_IN, PS_SELECTED_IN, GSC_INIT_READ_IN, GSC_REPLY_DATAREADY_IN, tx_loaded_ctr, tx_data_ctr, rx_fifo_q, GSC_BUSY_IN)
 begin
+	state <= x"0";
+	
 	case dissect_current_state is
 	
 		when IDLE =>
-			state <= x"0";
+			state <= x"1";
 			if (PS_WR_EN_IN = '1' and PS_ACTIVATE_IN = '1') then
 				dissect_next_state <= READ_FRAME;
 			else
@@ -530,7 +532,7 @@ begin
 			end if;
 		
 		when READ_FRAME =>
-			state <= x"1";
+			state <= x"2";
 			if (PS_DATA_IN(8) = '1') then
 				dissect_next_state <= WAIT_FOR_HUB;
 			else
@@ -538,7 +540,7 @@ begin
 			end if;
 			
 		when WAIT_FOR_HUB =>
-			state <= x"2";
+			state <= x"3";
 			if (GSC_INIT_READ_IN = '1') then
 				dissect_next_state <= LOAD_TO_HUB;
 			else
@@ -546,7 +548,7 @@ begin
 			end if;						
 		
 		when LOAD_TO_HUB =>
-			state <= x"3";
+			state <= x"4";
 			if (rx_fifo_q(17) = '1') then
 				if (reset_detected = '1') then
 					dissect_next_state <= CLEANUP;
@@ -558,7 +560,7 @@ begin
 			end if;	
 			
 		when WAIT_FOR_RESPONSE =>
-			state <= x"4";
+			state <= x"5";
 			if (GSC_REPLY_DATAREADY_IN = '1') then
 				dissect_next_state <= SAVE_RESPONSE;
 			else
@@ -566,7 +568,7 @@ begin
 			end if;
 			
 		when SAVE_RESPONSE =>
-			state <= x"5";
+			state <= x"6";
 			if (GSC_REPLY_DATAREADY_IN = '0' and GSC_BUSY_IN = '0') then
 				if (too_much_data = '0') then
 					dissect_next_state <= WAIT_FOR_LOAD;
@@ -578,7 +580,7 @@ begin
 			end if;			
 			
 		when WAIT_FOR_LOAD =>
-			state <= x"6";
+			state <= x"7";
 			if (PS_SELECTED_IN = '1') then
 				dissect_next_state <= LOAD_FRAME;
 			else
@@ -586,7 +588,7 @@ begin
 			end if;
 			
 		when LOAD_FRAME =>
-			state <= x"7";
+			state <= x"8";
 			if (tx_loaded_ctr = tx_data_ctr) then
 				dissect_next_state <= CLEANUP;
 			else
@@ -594,8 +596,10 @@ begin
 			end if;
 		
 		when CLEANUP =>
-			state <= x"8";
+			state <= x"9";
 			dissect_next_state <= IDLE;
+			
+		when others => dissect_next_state <= IDLE;
 	
 	end case;
 end process DISSECT_MACHINE;

@@ -146,7 +146,9 @@ port (
 	MONITOR_SELECT_GEN_DBG_OUT    : out	std_logic_vector(2*c_MAX_PROTOCOLS * 32 - 1 downto 0);
 	
 	DATA_HIST_OUT : out hist_array;
-	SCTRL_HIST_OUT : out hist_array
+	SCTRL_HIST_OUT : out hist_array;
+	
+	DEBUG_OUT : out std_logic_vector(63 downto 0)
 );
 end trb_net16_gbe_protocol_selector;
 
@@ -204,6 +206,7 @@ attribute syn_keep of state, mult : signal is true;
 attribute syn_preserve of state, mult : signal is true;
 
 signal my_ip : std_logic_vector(31 downto 0); 
+signal select_state : std_logic_vector(3 downto 0);
 
 
 begin
@@ -662,10 +665,12 @@ end process SELECT_MACHINE_PROC;
 
 SELECT_MACHINE : process(select_current_state, MC_BUSY_IN, resp_ready, index, zeros, busy)
 begin
+	select_state <= x"0";
 	
 	case (select_current_state) is
 	
-		when IDLE =>
+	when IDLE =>
+		select_state <= x"1";
 			if (MC_BUSY_IN = '0') then
 				select_next_state <= LOOP_OVER;
 			else
@@ -673,6 +678,7 @@ begin
 			end if;
 		
 		when LOOP_OVER =>
+			select_state <= x"2";
 			if (resp_ready /= zeros) then
 				if (resp_ready(index) = '1') then
 					select_next_state <= SELECT_ONE;
@@ -686,6 +692,7 @@ begin
 			end if;
 			
 		when SELECT_ONE =>
+			select_state <= x"3";
 			if (MC_BUSY_IN = '1') then
 				select_next_state <= PROCESS_REQUEST;
 			else
@@ -693,6 +700,7 @@ begin
 			end if;
 			
 		when PROCESS_REQUEST =>
+			select_state <= x"4";
 			if (busy(index) = '0') then --if (MC_BUSY_IN = '0') then
 				select_next_state <= CLEANUP;
 			else
@@ -700,7 +708,10 @@ begin
 			end if;
 		
 		when CLEANUP =>
+			select_state <= x"5";
 			select_next_state <= IDLE;
+			
+		when others => select_next_state <= IDLE;
 	
 	end case;
 	
@@ -758,6 +769,17 @@ begin
 		end if;
 	end if;
 end process SELECTOR_PROC;
+
+process(CLK)
+begin
+	if rising_edge(CLK) then
+		DEBUG_OUT(3 downto 0) <= select_state;
+		DEBUG_OUT(11 downto 4) <= std_logic_vector(to_unsigned(index, 8));
+		DEBUG_OUT(19 downto 12) <= "000" & resp_ready; -- 4:0
+		DEBUG_OUT(27 downto 20) <= "000" & busy; -- 4:0
+		DEBUG_OUT(63 downto 28) <= (others => '0');
+	end if;
+end process;
 
 end trb_net16_gbe_protocol_selector;
 

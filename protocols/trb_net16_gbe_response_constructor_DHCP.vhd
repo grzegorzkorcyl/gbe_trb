@@ -200,6 +200,7 @@ wait_value <= x"2000_0000" when DO_SIMULATION = 0 else x"0000_0010";
 
 MAIN_MACHINE : process(main_current_state, DHCP_START_IN, construct_current_state, wait_ctr, receive_current_state, PS_DATA_IN, wait_value)
 begin
+	state2 <= x"0";
 
 	case (main_current_state) is
 	
@@ -212,6 +213,7 @@ begin
 			end if;
 			
 		when DELAY =>
+			state2 <= x"2";
 			if (wait_ctr = wait_value) then
 				main_next_state <= SENDING_DISCOVER;
 			else
@@ -219,7 +221,7 @@ begin
 			end if;
 		
 		when SENDING_DISCOVER =>
-			state2 <= x"2";
+			state2 <= x"3";
 			if (construct_current_state = CLEANUP) then
 				main_next_state <= WAITING_FOR_OFFER;
 			else
@@ -227,7 +229,7 @@ begin
 			end if;
 		
 		when WAITING_FOR_OFFER =>
-			state2 <= x"3"; 
+			state2 <= x"4"; 
 			if (receive_current_state = SAVE_VALUES) and (PS_DATA_IN(8) = '1') then
 				main_next_state <= SENDING_REQUEST;
 			elsif (wait_ctr = x"2000_0000") then
@@ -237,7 +239,7 @@ begin
 			end if;
 		
 		when SENDING_REQUEST =>
-			state2 <= x"4";
+			state2 <= x"5";
 			if (construct_current_state = CLEANUP) then
 				main_next_state <= WAITING_FOR_ACK;
 			else
@@ -245,7 +247,7 @@ begin
 			end if;
 		
 		when WAITING_FOR_ACK =>
-			state2 <= x"5";
+			state2 <= x"6";
 			if (receive_current_state = SAVE_VALUES) and (PS_DATA_IN(8) = '1') then
 				main_next_state <= ESTABLISHED;
 			elsif (wait_ctr = x"2000_0000") then
@@ -255,12 +257,14 @@ begin
 			end if;
 		
 		when ESTABLISHED =>
-			state2 <= x"6";
+			state2 <= x"7";
 --			if (wait_ctr = x"2000_0000") then
 --				main_next_state <= SENDING_DISCOVER;
 --			else
 				main_next_state <= ESTABLISHED;
 --			end if;
+
+		when others => main_next_state <= BOOTING;
 	
 	end case;
 
@@ -297,6 +301,8 @@ end process RECEIVE_MACHINE_PROC;
 
 RECEIVE_MACHINE : process(receive_current_state, main_current_state, bootp_hdr, saved_dhcp_type, saved_transaction_id, PS_DATA_IN, PS_DEST_MAC_ADDRESS_IN, MY_MAC_IN, PS_ACTIVATE_IN, PS_WR_EN_IN, save_ctr)
 begin
+	state3 <= x"0";
+	
 	case receive_current_state is
 	
 		when IDLE =>
@@ -343,6 +349,8 @@ begin
 		when CLEANUP =>
 			state3 <= x"4";
 			receive_next_state <= IDLE;
+			
+		when others => receive_next_state <= IDLE;
 	
 	end case;
 
@@ -486,6 +494,8 @@ end process CONSTRUCT_MACHINE_PROC;
 
 CONSTRUCT_MACHINE : process(construct_current_state, main_current_state, load_ctr, PS_SELECTED_IN)
 begin
+	state <= x"0";
+	
 	case construct_current_state is
 	
 		when IDLE =>
@@ -514,7 +524,7 @@ begin
 			end if;
 			
 		when CLIENT_IP =>
-			state <= x"5";
+			state <= x"4";
 			if (load_ctr = 15) then
 				construct_next_state <= YOUR_IP;
 			else
@@ -522,7 +532,7 @@ begin
 			end if;
 			
 		when YOUR_IP => 
-			state <= x"b";
+			state <= x"5";
 			if (load_ctr = 19) then
 				construct_next_state <= ZEROS1;
 			else
@@ -530,7 +540,7 @@ begin
 			end if;
 			
 		when ZEROS1 =>
-			state <= x"c";
+			state <= x"6";
 			if (load_ctr = 27) then
 				construct_next_state <= MY_MAC;
 			else
@@ -538,7 +548,7 @@ begin
 			end if;
 		
 		when MY_MAC =>
-			state <= x"6";
+			state <= x"7";
 			if (load_ctr = 33) then
 				construct_next_state <= ZEROS2;
 			else
@@ -546,7 +556,7 @@ begin
 			end if;
 		
 		when ZEROS2 =>
-			state <= x"7";
+			state <= x"8";
 			if (load_ctr = 235) then
 				construct_next_state <= VENDOR_VALS;
 			else
@@ -554,7 +564,7 @@ begin
 			end if;
 			
 		when VENDOR_VALS =>
-			state <= x"8";
+			state <= x"9";
 			if (load_ctr = 257) then
 				-- for discover it's enough of values
 				if (main_current_state = SENDING_DISCOVER) then
@@ -568,7 +578,7 @@ begin
 			end if;
 			
 		when VENDOR_VALS2 =>
-			state <= x"d";
+			state <= x"a";
 			if (load_ctr = 263) then
 				construct_next_state <= TERMINATION;
 			else
@@ -576,12 +586,14 @@ begin
 			end if;
 			
 		when TERMINATION =>
-			state <= x"e";
+			state <= x"b";
 			construct_next_state <= CLEANUP;
 		
 		when CLEANUP =>
-			state <= x"9";
+			state <= x"c";
 			construct_next_state <= IDLE;
+			
+		when others => construct_next_state <= IDLE;
 	
 	end case;
 end process CONSTRUCT_MACHINE;
@@ -814,9 +826,15 @@ end process SENT_FRAMES_PROC;
 
 
 -- **** debug
---DEBUG_OUT(3 downto 0)   <= state;
---DEBUG_OUT(7 downto 4)   <= state2;
---DEBUG_OUT(11 downto 8)  <= state3;
+process(CLK)
+begin
+	if rising_edge(CLK) then
+		DEBUG_OUT(3 downto 0)   <= state;
+		DEBUG_OUT(7 downto 4)   <= state2;
+		DEBUG_OUT(11 downto 8)  <= state3;
+	end if;
+end process;
+
 --DEBUG_OUT(15 downto 12) <= (others => '0');
 --DEBUG_OUT(31 downto 16) <= discarded_ctr;
 --
