@@ -202,6 +202,7 @@ architecture RTL of gbe_wrapper is
 	signal dummy_event : std_logic_vector(15 downto 0);
 	signal dummy_mode  : std_logic;
 	signal make_reset0, make_reset1, make_reset2, make_reset3 : std_logic := '0';
+	signal monitor_gen_dbg : std_logic_vector(c_MAX_PROTOCOLS * 64 - 1 downto 0);
 
 begin
 	
@@ -375,6 +376,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(4 * 32 - 1 downto 3 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(4 * 32 - 1 downto 3 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(4 * 32 - 1 downto 3 * 32),
+				MONITOR_GEN_DBG_OUT => open,
 				MAKE_RESET_OUT           => make_reset3
 			);
 	end generate GEN_LINK_3;
@@ -500,6 +502,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(3 * 32 - 1 downto 2 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(3 * 32 - 1 downto 2 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(3 * 32 - 1 downto 2 * 32),
+				MONITOR_GEN_DBG_OUT => open,
 				MAKE_RESET_OUT           => make_reset2
 			);
 	end generate GEN_LINK_2;
@@ -625,6 +628,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(2 * 32 - 1 downto 1 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(2 * 32 - 1 downto 1 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(2 * 32 - 1 downto 1 * 32),
+				MONITOR_GEN_DBG_OUT => open,
 				MAKE_RESET_OUT           => make_reset1
 			);
 	end generate GEN_LINK_1;
@@ -750,6 +754,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(1 * 32 - 1 downto 0 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(1 * 32 - 1 downto 0 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(1 * 32 - 1 downto 0 * 32),
+				MONITOR_GEN_DBG_OUT => monitor_gen_dbg,
 				MAKE_RESET_OUT           => make_reset0
 			);
 	end generate GEN_LINK_0;
@@ -988,7 +993,7 @@ begin
 				MONITOR_SELECT_SENT_IN       => (others => '0'), --dbg_select_sent,
 				MONITOR_SELECT_DROP_IN_IN    => (others => '0'), --dbg_select_drop_in,
 				MONITOR_SELECT_DROP_OUT_IN   => (others => '0'), --dbg_select_drop_out,
-				MONITOR_SELECT_GEN_DBG_IN    => (others => '0'), --dbg_select_gen,
+				MONITOR_SELECT_GEN_DBG_IN    => monitor_gen_dbg, --dbg_select_gen,
 
 				DUMMY_EVENT_SIZE_OUT         => dummy_event,
 				DUMMY_TRIGGERED_MODE_OUT     => dummy_mode,

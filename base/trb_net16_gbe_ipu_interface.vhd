@@ -131,6 +131,7 @@ begin
 
 	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
 	begin
+		rec_state <= x"0";
 		case (save_current_state) is
 			when IDLE =>
 				rec_state <= x"1";
@@ -203,6 +204,8 @@ begin
 			when CLEANUP =>
 				rec_state       <= x"c";
 				save_next_state <= IDLE;
+				
+			when others => save_next_state <= IDLE;
 
 		end case;
 	end process SAVE_MACHINE;
@@ -516,6 +519,7 @@ begin
 
 	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, PC_READY_IN, sf_eos, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
 	begin
+		load_state <= x"0";
 		case (load_current_state) is
 			when IDLE =>
 				load_state      <= x"1";
@@ -542,12 +546,12 @@ begin
 				load_next_state <= WAIT_TWO;
 
 			when WAIT_TWO =>
-				load_state      <= x"4";
+				load_state      <= x"5";
 				load_next_state <= DECIDE;
 
 			--TODO: all queue split conditions here and also in the size process
 			when DECIDE =>
-				load_state <= x"5";
+				load_state <= x"6";
 				if (queue_size > ("00" & MAX_QUEUE_SIZE_IN)) then -- max udp packet exceeded
 					load_next_state <= CLOSE_QUEUE;
 				elsif (MULT_EVT_ENABLE_IN = '1' and number_of_subs = MAX_SUBS_IN_QUEUE_IN) then
@@ -563,11 +567,11 @@ begin
 				end if;
 
 			when PREPARE_TO_LOAD_SUB =>
-				load_state      <= x"6";
+				load_state      <= x"7";
 				load_next_state <= WAIT_FOR_LOAD;
 
 			when WAIT_FOR_LOAD =>
-				load_state <= x"7";
+				load_state <= x"8";
 				if (PC_READY_IN = '1') then
 					load_next_state <= LOAD;
 				else
@@ -575,7 +579,7 @@ begin
 				end if;
 
 			when LOAD =>
-				load_state <= x"8";
+				load_state <= x"9";
 				if (sf_eos = '1') then
 					load_next_state <= CLOSE_SUB;
 				else
@@ -583,7 +587,7 @@ begin
 				end if;
 
 			when CLOSE_SUB =>
-				load_state <= x"9";
+				load_state <= x"a";
 				if (subevent_size > ("00" & MAX_SINGLE_SUB_SIZE_IN) and queue_size = (subevent_size + x"10" + x"8" + x"4")) then
 					load_next_state <= CLOSE_QUEUE_IMMEDIATELY;
 				else
@@ -591,11 +595,11 @@ begin
 				end if;
 
 			when CLOSE_QUEUE =>
-				load_state      <= x"a";
+				load_state      <= x"b";
 				load_next_state <= PREPARE_TO_LOAD_SUB;
 
 			when CLOSE_QUEUE_IMMEDIATELY =>
-				load_state      <= x"b";
+				load_state      <= x"c";
 				load_next_state <= WAIT_FOR_SUBS;
 
 			when others => load_next_state <= IDLE;
@@ -897,19 +901,20 @@ begin
 
 	PC_TRIGGER_TYPE_OUT <= trigger_type;
 
-	process(CLK_GBE)
+	process(CLK_IPU)
 	begin
-		if rising_edge(CLK_GBE) then
+		if rising_edge(CLK_IPU) then
 			DEBUG_OUT(3 downto 0) <= rec_state;
 			DEBUG_OUT(7 downto 4) <= load_state;
 			DEBUG_OUT(8)          <= sf_empty;
 			DEBUG_OUT(9)          <= sf_aempty;
 			DEBUG_OUT(10)         <= sf_full;
 			DEBUG_OUT(11)         <= sf_afull;
+			DEBUG_OUT(27 downto 12) <= sf_cnt;
 		end if;
 	end process;
 
-	DEBUG_OUT(383 downto 12)   <= (others => '0');
+	DEBUG_OUT(383 downto 28)   <= (others => '0');
 	MONITOR_OUT(31 downto 0)   <= too_large_dropped;
 	MONITOR_OUT(223 downto 32) <= (others => '0');
 

@@ -87,13 +87,13 @@ architecture RTL of trb_net16_gbe_event_constr is
 	signal shf_padding                            : std_logic;
 	signal block_shf_after_divide, previous_tc_rd : std_logic;
 	signal block_term_after_divide                : std_logic;
-	signal df_full_real, df_afull : std_logic;
-	signal df_wcnt : std_logic_vector(16 downto 0);
-	
+	signal df_full_real, df_afull                 : std_logic;
+	signal df_wcnt                                : std_logic_vector(16 downto 0);
+
 	attribute syn_keep : string;
 	attribute syn_keep of df_wcnt : signal is "true";
-	
-	
+	signal load_state : std_logic_vector(3 downto 0);
+
 begin
 
 	--*******
@@ -204,29 +204,28 @@ begin
 				end if;
 			end if;
 		end process READY_PROC;
-		
-		df_full <= df_afull; --df_full_real;
+
+		df_full <= df_afull;            --df_full_real;
 	end generate ready_impl_gen;
 
 	ready_sim_gen : if DO_SIMULATION = 1 generate
-		
-		
---		FULL_PROC : process
---		begin
---			df_full <= '0';
---
---			wait for 22000 ns;
---			wait until rising_edge(CLK);
---			df_full <= '1';
---			wait until rising_edge(CLK);
---			wait until rising_edge(CLK);
---			wait until rising_edge(CLK);
---			df_full <= '0';
---
---			wait;
---		end process FULL_PROC;
 
-			df_full <= df_afull;
+		--		FULL_PROC : process
+		--		begin
+		--			df_full <= '0';
+		--
+		--			wait for 22000 ns;
+		--			wait until rising_edge(CLK);
+		--			df_full <= '1';
+		--			wait until rising_edge(CLK);
+		--			wait until rising_edge(CLK);
+		--			wait until rising_edge(CLK);
+		--			df_full <= '0';
+		--
+		--			wait;
+		--		end process FULL_PROC;
+
+		df_full <= df_afull;
 
 		READY_PROC : process(CLK)
 		begin
@@ -480,15 +479,15 @@ begin
 	-- LOADING PART
 	--*******
 
---	size_check_debug : if DO_SIMULATION = 1 generate
---		process(df_q, loaded_queue_bytes, load_current_state)
---		begin
---			if (loaded_queue_bytes > x"0021" and load_current_state = LOAD_DATA and loaded_queue_bytes(0) = '0') then
---				assert (df_q - x"0020" = loaded_queue_bytes(15 downto 1)) report "EVT_CONSTR: Mismatch between data and internal counters" severity warning;
---			end if;
---		end process;
---
---	end generate size_check_debug;
+	--	size_check_debug : if DO_SIMULATION = 1 generate
+	--		process(df_q, loaded_queue_bytes, load_current_state)
+	--		begin
+	--			if (loaded_queue_bytes > x"0021" and load_current_state = LOAD_DATA and loaded_queue_bytes(0) = '0') then
+	--				assert (df_q - x"0020" = loaded_queue_bytes(15 downto 1)) report "EVT_CONSTR: Mismatch between data and internal counters" severity warning;
+	--			end if;
+	--		end process;
+	--
+	--	end generate size_check_debug;
 
 	LOAD_MACHINE_PROC : process(RESET, CLK) is
 	begin
@@ -501,8 +500,11 @@ begin
 
 	LOAD_MACHINE : process(load_current_state, qsf_empty, header_ctr, load_eod_q, term_ctr, insert_padding, loaded_queue_bytes, actual_q_size)
 	begin
+		load_state <= x"0";
+
 		case (load_current_state) is
 			when IDLE =>
+				load_state <= x"1";
 				if (qsf_empty = '0') then -- something in queue sizes fifo means entire queue is waiting
 					load_next_state <= GET_Q_SIZE;
 				else
@@ -510,6 +512,7 @@ begin
 				end if;
 
 			when GET_Q_SIZE =>
+				load_state <= x"2";
 				if (header_ctr = 0) then
 					load_next_state <= START_TRANSFER;
 				else
@@ -517,9 +520,11 @@ begin
 				end if;
 
 			when START_TRANSFER =>
+				load_state      <= x"3";
 				load_next_state <= LOAD_Q_HEADERS;
 
 			when LOAD_Q_HEADERS =>
+				load_state <= x"4";
 				if (header_ctr = 0) then
 					load_next_state <= LOAD_SUB;
 				else
@@ -527,6 +532,7 @@ begin
 				end if;
 
 			when LOAD_SUB =>
+				load_state <= x"5";
 				if (header_ctr = 0) then
 					load_next_state <= LOAD_DATA;
 				else
@@ -534,6 +540,7 @@ begin
 				end if;
 
 			when LOAD_DATA =>
+				load_state <= x"5";
 				if (load_eod_q = '1' and term_ctr = 33) then
 					if (insert_padding = '1') then
 						load_next_state <= LOAD_PADDING;
@@ -549,6 +556,7 @@ begin
 				end if;
 
 			when LOAD_PADDING =>
+				load_state <= x"6";
 				if (header_ctr = 0) then
 					if (loaded_queue_bytes = actual_q_size) then
 						load_next_state <= LOAD_TERM;
@@ -560,6 +568,7 @@ begin
 				end if;
 
 			when LOAD_TERM =>
+				load_state <= x"7";
 				if (header_ctr = 0) then
 					load_next_state <= CLEANUP;
 				else
@@ -567,7 +576,10 @@ begin
 				end if;
 
 			when CLEANUP =>
+				load_state      <= x"8";
 				load_next_state <= IDLE;
+
+			when others => load_next_state <= IDLE;
 
 		end case;
 	end process LOAD_MACHINE;
@@ -789,6 +801,15 @@ begin
 	-- outputs
 
 
-	DEBUG_OUT <= (others => '0');
+	DEBUG_OUT(3 downto 0) <= load_state;
+	DEBUG_OUT(20 downto 4) <= df_wcnt;
+	DEBUG_OUT(23 downto 21) <= "000";
+	DEBUG_OUT(24) <= df_afull;
+	DEBUG_OUT(25) <= df_full;
+	DEBUG_OUT(26) <= df_empty;
+	DEBUG_OUT(27) <= qsf_full;
+	DEBUG_OUT(28) <= shf_full;
+
+	DEBUG_OUT(63 downto 29) <= (others => '0');
 
 end architecture RTL;
