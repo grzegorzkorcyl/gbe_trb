@@ -279,7 +279,7 @@ begin
 
 
 	main_gen : if USE_INTERNAL_TRBNET_DUMMY = 0 generate
-		MAIN_CONTROL : trb_net16_gbe_main_control
+		MAIN_CONTROL : entity work.trb_net16_gbe_main_control
 			generic map(
 				RX_PATH_ENABLE => RX_PATH_ENABLE,
 				DO_SIMULATION  => DO_SIMULATION,
@@ -355,6 +355,9 @@ begin
 		
 			MAKE_RESET_OUT           => make_reset, --MAKE_RESET_OUT,
 			
+			RESET_TRBNET_IN => '0',
+			RESET_SCTRL_IN => '0',
+			
 				-- CTS interface
 			CTS_NUMBER_IN				=> CTS_NUMBER_IN,
 			CTS_CODE_IN					=> CTS_CODE_IN,
@@ -425,7 +428,7 @@ begin
 	end generate main_gen;
 	
 	main_with_dummy_gen : if USE_INTERNAL_TRBNET_DUMMY = 1 generate
-		MAIN_CONTROL : trb_net16_gbe_main_control
+		MAIN_CONTROL : entity work.trb_net16_gbe_main_control
 		generic map(
 			RX_PATH_ENABLE => RX_PATH_ENABLE,
 			DO_SIMULATION  => DO_SIMULATION,
@@ -502,6 +505,8 @@ begin
 	
 		MAKE_RESET_OUT           => make_reset,
 		
+		RESET_TRBNET_IN => '0',
+		RESET_SCTRL_IN => '0',
 			-- CTS interface
 		CTS_NUMBER_IN               => gbe_cts_number,           
 		CTS_CODE_IN                 => gbe_cts_code,             
