@@ -93,6 +93,8 @@ port (
 	GSC_REPLY_READ_OUT       : out std_logic;
 	GSC_BUSY_IN              : in std_logic;
 	
+	RESET_TRBNET_IN : in std_logic;
+	RESET_SCTRL_IN : in std_logic;
 	-- signal for data readout
 	-- CTS interface
 	CTS_NUMBER_IN				: in	std_logic_vector (15 downto 0);
