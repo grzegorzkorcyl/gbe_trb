@@ -228,12 +228,16 @@ begin
 
 			df_full <= df_afull;
 
-			READY_PROC : process(CLK)
-			begin
-				if rising_edge(CLK) then
+		READY_PROC : process(CLK)
+		begin
+			if rising_edge(CLK) then
+				if (load_current_state = IDLE) then
 					PC_READY_OUT <= not df_full;
-				end if;	
-			end process READY_PROC;
+				else
+					PC_READY_OUT <= '0';
+				end if;
+			end if;
+		end process READY_PROC;
 
 	end generate ready_sim_gen;
 
