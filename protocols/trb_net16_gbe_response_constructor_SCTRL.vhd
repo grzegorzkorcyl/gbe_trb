@@ -156,11 +156,13 @@ attribute syn_preserve of rx_fifo_wr, rx_fifo_rd, gsc_init_dataready, tx_fifo_wr
 signal hist_inst : hist_array;
 signal reset_all_hist : std_logic_vector(31 downto 0);
 
+signal rx_cnt, tx_cnt : std_logic_vector(15 downto 0);
+
 begin
 
 MAKE_RESET_OUT <= make_reset;
 
-receive_fifo : fifo_2048x8x16
+receive_fifo : entity work.fifo_2048x8x16_wcnt
   PORT map(
     Reset            => RESET,
 	RPReset          => RESET,
@@ -171,7 +173,8 @@ receive_fifo : fifo_2048x8x16
     RdEn             => rx_fifo_rd,
     Q                => rx_fifo_q,
     Full             => rx_full,
-    Empty            => rx_empty
+    Empty            => rx_empty,
+    WCNT => rx_cnt(11 downto 0)
   );
 
 --TODO: change to synchronous
@@ -326,7 +329,7 @@ begin
 end process PACKET_NUM_PROC;
 
 tf_4k_gen : if SLOWCTRL_BUFFER_SIZE = 1 generate
-	transmit_fifo : fifo_4kx18x9
+	transmit_fifo : entity work.fifo_4kx18x9_wcnt
 	  PORT map(
 	    Reset             => tx_fifo_reset,
 		RPReset           => tx_fifo_reset,
@@ -337,12 +340,13 @@ tf_4k_gen : if SLOWCTRL_BUFFER_SIZE = 1 generate
 	    RdEn              => tx_fifo_rd,
 	    Q                 => tx_fifo_q,
 	    Full              => tx_full,
-	    Empty             => tx_empty
+	    Empty             => tx_empty,
+	    WCNT => tx_cnt(11 downto 0)
 	  );
 end generate tf_4k_gen;
 
 tf_65k_gen : if SLOWCTRL_BUFFER_SIZE = 2 generate
-	transmit_fifo : fifo_65536x18x9
+	transmit_fifo : entity work.fifo_64kx18x9_wcnt
 	  PORT map(
 	    Reset             => tx_fifo_reset,
 		RPReset           => tx_fifo_reset,
@@ -353,7 +357,8 @@ tf_65k_gen : if SLOWCTRL_BUFFER_SIZE = 2 generate
 	    RdEn              => tx_fifo_rd,
 	    Q                 => tx_fifo_q,
 	    Full              => tx_full,
-	    Empty             => tx_empty
+	    Empty             => tx_empty,
+	    WCNT => tx_cnt
 	  );
 end generate tf_65k_gen;
 
@@ -675,6 +680,9 @@ begin
 		DEBUG_OUT(2) <= tx_full;
 		DEBUG_OUT(3) <= tx_empty;
 		DEBUG_OUT(7 downto 4) <= state;
+		DEBUG_OUT(23 downto 8) <= rx_cnt;
+		DEBUG_OUT(39 downto 24) <= tx_cnt;
+		DEBUG_OUT(63 downto 40) <= (others => '0');
 	end if;
 end process;
 

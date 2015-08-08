@@ -197,7 +197,11 @@ begin
 		READY_PROC : process(CLK)
 		begin
 			if rising_edge(CLK) then
-				PC_READY_OUT <= not df_full;
+				if (load_current_state = IDLE) then
+					PC_READY_OUT <= not df_full;
+				else
+					PC_READY_OUT <= '0';
+				end if;
 			end if;
 		end process READY_PROC;
 		
@@ -472,15 +476,15 @@ begin
 	-- LOADING PART
 	--*******
 
-	size_check_debug : if DO_SIMULATION = 1 generate
-		process(df_q, loaded_queue_bytes, load_current_state)
-		begin
-			if (loaded_queue_bytes > x"0021" and load_current_state = LOAD_DATA and loaded_queue_bytes(0) = '0') then
-				assert (df_q - x"0020" = loaded_queue_bytes(15 downto 1)) report "EVT_CONSTR: Mismatch between data and internal counters" severity warning;
-			end if;
-		end process;
-
-	end generate size_check_debug;
+--	size_check_debug : if DO_SIMULATION = 1 generate
+--		process(df_q, loaded_queue_bytes, load_current_state)
+--		begin
+--			if (loaded_queue_bytes > x"0021" and load_current_state = LOAD_DATA and loaded_queue_bytes(0) = '0') then
+--				assert (df_q - x"0020" = loaded_queue_bytes(15 downto 1)) report "EVT_CONSTR: Mismatch between data and internal counters" severity warning;
+--			end if;
+--		end process;
+--
+--	end generate size_check_debug;
 
 	LOAD_MACHINE_PROC : process(RESET, CLK) is
 	begin
