@@ -109,6 +109,10 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal too_large_dropped                                                    : std_logic_vector(31 downto 0);
 	signal previous_ttype, previous_bank                                        : std_logic_vector(3 downto 0);
 	signal sf_afull_real : std_logic;
+	signal sf_cnt : std_logic_vector(15 downto 0);
+	
+	attribute syn_keep : string;
+	attribute syn_keep of sf_cnt : signal is "true";
 
 begin
 
@@ -480,7 +484,7 @@ begin
 			AmFullThresh      => b"111_1111_1110_1111", -- 0x7fef = 32751 -- b"001_0011_1000_1000"
 			Q(7 downto 0)     => sf_q,
 			Q(8)              => sf_eos,
-			--WCNT              => open,
+			WCNT              => sf_cnt,
 			--RCNT              => open,
 			Empty             => sf_empty,
 			AlmostEmpty       => sf_aempty,

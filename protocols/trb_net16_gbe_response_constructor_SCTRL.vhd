@@ -686,8 +686,6 @@ begin
 	end if;
 end process;
 
-DEBUG_OUT(63 downto 8) <= (others => '0');
-
 process(CLK)
 begin
 	if rising_edge(CLK) then
