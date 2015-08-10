@@ -471,7 +471,7 @@ begin
 		if rising_edge(CLK) then
 			if (current_state = IDLE) then
 				cts_start_readout <= '0';
-			elsif (current_state = CTS_START and ctr = 0) then
+			elsif (current_state = CTS_START and ctr = 1) then
 				cts_start_readout <= '1';
 			elsif (current_state = CLOSE) then
 				cts_start_readout <= '0';
