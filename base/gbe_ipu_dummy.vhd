@@ -81,6 +81,7 @@ architecture RTL of gbe_ipu_dummy is
 	signal trigger_type, bank_select : std_logic_vector(3 downto 0) := x"0";
 	signal constructed_events : std_logic_vector(15 downto 0) := x"0000";
 	signal increment_flag : std_logic;
+	signal local_trigger : std_logic;
 	
 	
 begin
@@ -166,6 +167,21 @@ begin
 	FEE_DATAREADY_OUT <= fee_dready;
 	FEE_DATA_OUT <= fee_data;
 	
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if (CFG_TRIGGERED_MODE_IN = '0') then
+				if (ctr = timeout_stop) then
+					local_trigger <= '1';
+				else
+					local_trigger <= '0';
+				end if;
+			else
+				local_trigger <= TRIGGER_IN;
+			end if;
+		end if;
+	end process;
+	
 	state_machine_proc : process (clk, rst) is
 	begin
 		if rst = '1' then
@@ -176,7 +192,7 @@ begin
 	end process state_machine_proc;
 	
 	state_machine : process (current_state, GBE_READY_IN, ctr, timeout_stop, pause_dready, pause_cts_fee, FEE_READ_IN, pause_wait_6, pause_wait_5, 
-								pause_wait_4, pause_wait_3, pause_wait_2, pause_wait_1, send_word_pause, TRIGGER_IN, data_ctr, test_data_len, pause_wait_7, pause_wait_8, pause_wait_9
+								pause_wait_4, pause_wait_3, pause_wait_2, pause_wait_1, send_word_pause, local_trigger, data_ctr, test_data_len, pause_wait_7, pause_wait_8, pause_wait_9
 	) is
 	begin
 		case current_state is 
@@ -189,7 +205,8 @@ begin
 			
 		when TIMEOUT =>
 			--if (ctr = timeout_stop) then
-			if (TRIGGER_IN = '1') then
+			--if (TRIGGER_IN = '1') then
+			if (local_trigger = '1') then
 				next_state <= CTS_START;
 			else
 				next_state <= TIMEOUT;

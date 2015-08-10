@@ -870,10 +870,10 @@ begin
 			port map(
 				clk                     => CLK_SYS_IN,
 				rst                     => RESET,
-				GBE_READY_IN            => '1', --all_links_ready,
+				GBE_READY_IN            => all_links_ready,
 
 				CFG_EVENT_SIZE_IN       => dummy_event,
-				CFG_TRIGGERED_MODE_IN   => dummy_mode,
+				CFG_TRIGGERED_MODE_IN   => '0',
 				TRIGGER_IN              => TRIGGER_IN,
 				CTS_NUMBER_OUT          => local_cts_number,
 				CTS_CODE_OUT            => local_cts_code,
