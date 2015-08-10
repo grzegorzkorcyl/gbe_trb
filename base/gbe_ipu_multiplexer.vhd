@@ -10,18 +10,6 @@ use work.trb_net_components.all;
 use work.trb_net_gbe_components.all;
 use work.trb_net_gbe_protocols.all;
 
---package vector_func is
---function find_next_active_link(v : std_logic_vector; s : integer) return integer is
---	variable next_one : integer range 0 to v'length - 1;
---begin
---		if (s)
---		for i in s + 1 to v'length - 1 loop
---			if (v(i) = '1') then next_one := i; end if;
---		end loop;
---		return next_one;
---	end function find_next_active_link;
---end package;
-
 entity gbe_ipu_multiplexer is
 	generic(
 		DO_SIMULATION          : integer range 0 to 1 := 0;
