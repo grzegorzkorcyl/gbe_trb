@@ -70,7 +70,7 @@ end entity trb_net16_gbe_ipu_interface;
 architecture RTL of trb_net16_gbe_ipu_interface is
 	attribute syn_encoding : string;
 
-	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, TERMINATE, CLOSE, FINISH_4_WORDS, CLEANUP);
+	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, TERMINATE, SEND_TERM_PULSE, CLOSE, FINISH_4_WORDS, CLEANUP);
 	signal save_current_state, save_next_state : saveStates;
 	attribute syn_encoding of save_current_state : signal is "onehot";
 
@@ -164,10 +164,14 @@ begin
 			when TERMINATE =>
 				rec_state <= x"5";
 				if (CTS_READ_IN = '1') then
-					save_next_state <= CLOSE;
+					save_next_state <= SEND_TERM_PULSE; --CLOSE;
 				else
 					save_next_state <= TERMINATE;
 				end if;
+				
+			when SEND_TERM_PULSE =>
+				rec_state <= x"6";
+				save_next_state <= CLOSE;
 
 			when CLOSE =>
 				rec_state <= x"6";
@@ -375,7 +379,8 @@ begin
 	CTS_READOUT_FINISHED_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			if (save_current_state = CLOSE) then
+			--if (save_current_state = CLOSE) then
+			if (save_current_state = SEND_TERM_PULSE) then
 				CTS_READOUT_FINISHED_OUT <= '1';
 			else
 				CTS_READOUT_FINISHED_OUT <= '0';
