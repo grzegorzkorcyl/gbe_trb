@@ -369,7 +369,7 @@ begin
 				data_ctr <= data_ctr;
 			end if;
 		end if;
-	end process;			
+	end process;
 	
 	ctr_proc : process(clk)
 	begin
