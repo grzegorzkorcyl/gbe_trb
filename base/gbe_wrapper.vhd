@@ -376,7 +376,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(4 * 32 - 1 downto 3 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(4 * 32 - 1 downto 3 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(4 * 32 - 1 downto 3 * 32),
-				MONITOR_GEN_DBG_OUT => open,
+				MONITOR_GEN_DBG_OUT => monitor_gen_dbg,
 				MAKE_RESET_OUT           => make_reset3
 			);
 	end generate GEN_LINK_3;
@@ -754,7 +754,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(1 * 32 - 1 downto 0 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(1 * 32 - 1 downto 0 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(1 * 32 - 1 downto 0 * 32),
-				MONITOR_GEN_DBG_OUT => monitor_gen_dbg,
+				MONITOR_GEN_DBG_OUT => open,
 				MAKE_RESET_OUT           => make_reset0
 			);
 	end generate GEN_LINK_0;
@@ -1059,12 +1059,15 @@ begin
 	sum_dropped    <= monitor_dropped(4 * 32 - 1 downto 3 * 32) + monitor_dropped(3 * 32 - 1 downto 2 * 32) + monitor_dropped(2 * 32 - 1 downto 1 * 32) + monitor_dropped(1 * 32 - 1 downto 0 * 32);
 
 	include_debug_gen : if (INCLUDE_DEBUG = 1) generate
-		DEBUG_OUT(0) <= mac_an_ready(3);
-		DEBUG_OUT(1) <= clk_125_rx_from_pcs(3);
-		DEBUG_OUT(2) <= RESET;
-		DEBUG_OUT(3) <= CLK_125_IN;
+--		DEBUG_OUT(0) <= mac_an_ready(3);
+--		DEBUG_OUT(1) <= clk_125_rx_from_pcs(3);
+--		DEBUG_OUT(2) <= RESET;
+--		DEBUG_OUT(3) <= CLK_125_IN;
+--
+--		DEBUG_OUT(127 downto 4) <= (others => '0');
 
-		DEBUG_OUT(127 downto 4) <= (others => '0');
+		DEBUG_OUT(63 downto 0) <= monitor_gen_dbg(4 * 64 - 1 downto 3 * 64);
+		DEBUG_OUT(127 downto 65) <= (others => '0');
 	end generate;
 	
 	
