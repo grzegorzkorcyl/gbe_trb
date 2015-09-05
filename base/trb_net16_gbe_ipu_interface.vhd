@@ -111,6 +111,8 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal sf_afull_real                                                        : std_logic;
 	signal sf_cnt                                                               : std_logic_vector(15 downto 0);
 
+	signal local_fee_busy, local_fee_busy_q, local_fee_busy_qq, local_fee_busy_qqq, local_fee_busy_qqqq, local_fee_busy_qqqqq : std_logic;
+
 	attribute syn_keep : string;
 	attribute syn_keep of sf_cnt : signal is "true";
 	signal saved_bytes_ctr : std_logic_vector(31 downto 0);
@@ -130,7 +132,7 @@ begin
 		end if;
 	end process SAVE_MACHINE_PROC;
 
-	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
+	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, local_fee_busy, CTS_READ_IN, size_check_ctr)
 	begin
 		rec_state <= x"0";
 		case (save_current_state) is
@@ -156,7 +158,8 @@ begin
 
 			when SAVE_DATA =>
 				rec_state <= x"4";
-				if (FEE_BUSY_IN = '0') then
+				--if (FEE_BUSY_IN = '0') then
+				if (local_fee_busy = '0') then
 					save_next_state <= TERMINATE;
 				else
 					save_next_state <= SAVE_DATA;
@@ -225,7 +228,8 @@ begin
 			sf_afull_qqqqq <= sf_afull_qqqq;
 
 			--if (sf_afull_q = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
-			if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
+			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
+			if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and local_fee_busy = '1') then
 				sf_wr_en <= '1';
 			elsif (save_current_state = SAVE_EVT_ADDR) then
 				sf_wr_en <= '1';
@@ -238,6 +242,19 @@ begin
 			end if;
 		end if;
 	end process SF_WR_EN_PROC;
+
+	LOCAL_BUSY_PROC : process(CLK_IPU)
+	begin
+		if rising_edge(CLK_IPU) then
+			local_fee_busy_q <= FEE_BUSY_IN;
+			local_fee_busy_qq <= local_fee_busy_q;
+			local_fee_busy_qqq <= local_fee_busy_qq;
+			local_fee_busy_qqqq <= local_fee_busy_qqq;
+			local_fee_busy_qqqqq <= local_fee_busy_qqqq;
+			
+			local_fee_busy <= FEE_BUSY_IN or local_fee_busy_q or local_fee_busy_qq or local_fee_busy_qqq or local_fee_busy_qqqq or local_fee_busy_qqqqq;
+		end if;
+	end process LOCAL_BUSY_PROC;
 
 	SF_DATA_EOD_PROC : process(CLK_IPU)
 	begin
@@ -367,7 +384,8 @@ begin
 	CTS_DATAREADY_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			if (save_current_state = SAVE_DATA and FEE_BUSY_IN = '0') then
+			--if (save_current_state = SAVE_DATA and FEE_BUSY_IN = '0') then
+			if (save_current_state = SAVE_DATA and local_fee_busy = '0') then
 				CTS_DATAREADY_OUT <= '1';
 			elsif (save_current_state = TERMINATE) then
 				CTS_DATAREADY_OUT <= '1';
@@ -509,7 +527,7 @@ begin
 				if (RESET = '1') then
 					saved_bytes_ctr <= (others => '0');
 				elsif (save_current_state = SAVE_DATA and sf_wr_q = '1') then
-					saved_bytes_ctr <= saved_bytes_ctr + x"1";
+					saved_bytes_ctr <= saved_bytes_ctr + x"2";
 				elsif (save_current_state = CLEANUP) then
 					saved_bytes_ctr <= (others => '0');
 				else
