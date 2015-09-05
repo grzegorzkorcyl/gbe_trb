@@ -510,6 +510,8 @@ begin
 					saved_bytes_ctr <= (others => '0');
 				elsif (save_current_state = SAVE_DATA and sf_wr_q = '1') then
 					saved_bytes_ctr <= saved_bytes_ctr + x"1";
+				elsif (save_current_state = CLEANUP) then
+					saved_bytes_ctr <= (others => '0');
 				else
 					saved_bytes_ctr <= saved_bytes_ctr;
 				end if;
