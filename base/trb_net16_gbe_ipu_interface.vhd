@@ -371,10 +371,10 @@ begin
 
 			if (save_current_state = IDLE) then
 				sf_wr_lock <= '1';	
-				saved_size <= x"0000" & "1";
+				saved_size <= (others => '0');
 			elsif (save_current_state = SAVE_DATA and size_check_ctr = 2 and sf_wr_en = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
 				sf_wr_lock <= '0';
-				saved_size <= sf_data & "0";
+				saved_size <= (sf_data & "0") + x"1";
 			elsif (save_current_state = SAVE_DATA and sf_wr_q = '1') then
 				saved_size <= saved_size - x"1";
 			elsif (save_current_state = ADD_MISSING and sf_wr_q = '1') then
