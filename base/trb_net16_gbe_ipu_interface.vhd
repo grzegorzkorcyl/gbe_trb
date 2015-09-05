@@ -96,7 +96,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal bank_select                                                          : std_logic_vector(3 downto 0);
 	signal readout_ctr                                                          : std_logic_vector(23 downto 0) := x"000000";
 	signal pc_ready_q                                                           : std_logic;
-	signal sf_afull_q,sf_afull_qq, sf_afull_qqq, sf_afull_qqqq, sf_afull_qqqqq  : std_logic;
+	signal sf_afull_q, sf_afull_qq, sf_afull_qqq, sf_afull_qqqq, sf_afull_qqqqq : std_logic;
 	signal sf_aempty                                                            : std_logic;
 	signal rec_state, load_state                                                : std_logic_vector(3 downto 0);
 	signal queue_size                                                           : std_logic_vector(17 downto 0);
@@ -108,11 +108,12 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal sf_wr_qq, sf_wr_qqq, sf_wr_qqqq, sf_wr_qqqqq                         : std_logic;
 	signal too_large_dropped                                                    : std_logic_vector(31 downto 0);
 	signal previous_ttype, previous_bank                                        : std_logic_vector(3 downto 0);
-	signal sf_afull_real : std_logic;
-	signal sf_cnt : std_logic_vector(15 downto 0);
-	
+	signal sf_afull_real                                                        : std_logic;
+	signal sf_cnt                                                               : std_logic_vector(15 downto 0);
+
 	attribute syn_keep : string;
 	attribute syn_keep of sf_cnt : signal is "true";
+	signal saved_bytes_ctr : std_logic_vector(31 downto 0);
 
 begin
 
@@ -168,9 +169,9 @@ begin
 				else
 					save_next_state <= TERMINATE;
 				end if;
-				
+
 			when SEND_TERM_PULSE =>
-				rec_state <= x"6";
+				rec_state       <= x"6";
 				save_next_state <= CLOSE;
 
 			when CLOSE =>
@@ -208,7 +209,7 @@ begin
 			when CLEANUP =>
 				rec_state       <= x"c";
 				save_next_state <= IDLE;
-				
+
 			when others => save_next_state <= IDLE;
 
 		end case;
@@ -217,10 +218,10 @@ begin
 	SF_WR_EN_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			sf_afull_q <= sf_afull;
-			sf_afull_qq <= sf_afull_q;
-			sf_afull_qqq <= sf_afull_qq;
-			sf_afull_qqqq <= sf_afull_qqq;
+			sf_afull_q     <= sf_afull;
+			sf_afull_qq    <= sf_afull_q;
+			sf_afull_qqq   <= sf_afull_qq;
+			sf_afull_qqqq  <= sf_afull_qqq;
 			sf_afull_qqqqq <= sf_afull_qqqq;
 
 			--if (sf_afull_q = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
@@ -304,10 +305,10 @@ begin
 				save_eod_qqqqq <= save_eod_qqqq;
 			end if;
 
-			sf_wr_q <= sf_wr_en and (not sf_wr_lock) and DATA_GBE_ENABLE_IN;
-			sf_wr_qq <= sf_wr_q;
-			sf_wr_qqq <= sf_wr_qq;
-			sf_wr_qqqq <= sf_wr_qqq;
+			sf_wr_q     <= sf_wr_en and (not sf_wr_lock) and DATA_GBE_ENABLE_IN;
+			sf_wr_qq    <= sf_wr_q;
+			sf_wr_qqq   <= sf_wr_qq;
+			sf_wr_qqqq  <= sf_wr_qqq;
 			sf_wr_qqqqq <= sf_wr_qqqq;
 
 		end if;
@@ -428,38 +429,37 @@ begin
 	end process SAVE_CTR_PROC;
 
 	sf_afull_sim_gen : if DO_SIMULATION = 1 generate
-		
---		process
---		begin
---			sf_afull <= '0';
---			wait for 20850 ns;
---			sf_afull <= '1';
---			wait for 20 ns;
---			sf_afull <= '0';			
---			wait;
---		end process;
-		
-		sf_afull <= sf_afull_real;
-	
-	end generate sf_afull_sim_gen;
-	
-	sf_afull_impl_gen : if DO_SIMULATION = 0 generate 
+
+		--		process
+		--		begin
+		--			sf_afull <= '0';
+		--			wait for 20850 ns;
+		--			sf_afull <= '1';
+		--			wait for 20 ns;
+		--			sf_afull <= '0';			
+		--			wait;
+		--		end process;
 
 		sf_afull <= sf_afull_real;
-		
+
+	end generate sf_afull_sim_gen;
+
+	sf_afull_impl_gen : if DO_SIMULATION = 0 generate
+		sf_afull <= sf_afull_real;
+
 	end generate sf_afull_impl_gen;
-	
---	size_check_debug : if DO_SIMULATION = 1 generate
---		
---		process(save_ctr, sf_data_qqqqq, save_current_state)
---		begin
---			if (save_ctr > x"000c" and save_current_state = SAVE_DATA) then
---				assert (save_ctr - x"000c" = sf_data_qqqqq) report "IPU_INTERFACE: Mismatch between data and internal counters" severity warning;
---			end if;
---		end process;
---		
---	end generate size_check_debug;
-	
+
+	--	size_check_debug : if DO_SIMULATION = 1 generate
+	--		
+	--		process(save_ctr, sf_data_qqqqq, save_current_state)
+	--		begin
+	--			if (save_ctr > x"000c" and save_current_state = SAVE_DATA) then
+	--				assert (save_ctr - x"000c" = sf_data_qqqqq) report "IPU_INTERFACE: Mismatch between data and internal counters" severity warning;
+	--			end if;
+	--		end process;
+	--		
+	--	end generate size_check_debug;
+
 	FEE_READ_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
@@ -501,6 +501,21 @@ begin
 		);
 
 	sf_reset <= RESET;
+
+	bytes_ctr_gen : if DO_SIMULATION = 1 generate
+		process(CLK_IPU)
+		begin
+			if rising_edge(CLK_IPU) then
+				if (RESET = '1') then
+					saved_bytes_ctr <= (others => '0');
+				elsif (save_current_state = SAVE_DATA and sf_wr_q = '1') then
+					saved_bytes_ctr <= saved_bytes_ctr + x"1";
+				else
+					saved_bytes_ctr <= saved_bytes_ctr;
+				end if;
+			end if;
+		end process;
+	end generate bytes_ctr_gen;
 
 	--*********
 	-- LOADING PART
@@ -909,12 +924,12 @@ begin
 	process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			DEBUG_OUT(3 downto 0) <= rec_state;
-			DEBUG_OUT(7 downto 4) <= load_state;
-			DEBUG_OUT(8)          <= sf_empty;
-			DEBUG_OUT(9)          <= sf_aempty;
-			DEBUG_OUT(10)         <= sf_full;
-			DEBUG_OUT(11)         <= sf_afull;
+			DEBUG_OUT(3 downto 0)   <= rec_state;
+			DEBUG_OUT(7 downto 4)   <= load_state;
+			DEBUG_OUT(8)            <= sf_empty;
+			DEBUG_OUT(9)            <= sf_aempty;
+			DEBUG_OUT(10)           <= sf_full;
+			DEBUG_OUT(11)           <= sf_afull;
 			DEBUG_OUT(27 downto 12) <= sf_cnt;
 		end if;
 	end process;
