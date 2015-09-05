@@ -249,7 +249,7 @@ begin
 		if rising_edge(CLK_IPU) then
 			if (save_current_state = IDLE) then
 				longer_busy_ctr <= x"14";
-			elsif (save_current_state = SAVE_DATA and FEE_BUSY_IN = '0') then
+			elsif (save_current_state = SAVE_DATA and FEE_BUSY_IN = '0' and sf_afull_qqqqq = '0') then
 				longer_busy_ctr <= longer_busy_ctr - x"1";
 			else
 				longer_busy_ctr <= longer_busy_ctr;
