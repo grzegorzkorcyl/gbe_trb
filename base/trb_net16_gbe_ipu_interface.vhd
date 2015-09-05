@@ -118,6 +118,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal saved_bytes_ctr : std_logic_vector(31 downto 0);
 	signal longer_busy_ctr : std_logic_vector(7 downto 0);
 	signal uneven_ctr : std_logic_vector(3 downto 0);
+	signal saved_size : std_logic_vector(17 downto 0);
 
 begin
 
@@ -134,7 +135,7 @@ begin
 		end if;
 	end process SAVE_MACHINE_PROC;
 
-	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, local_fee_busy, uneven_ctr, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
+	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, local_fee_busy, saved_size, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
 	begin
 		rec_state <= x"0";
 		case (save_current_state) is
@@ -182,13 +183,20 @@ begin
 			when CLOSE =>
 				rec_state <= x"6";
 				if (CTS_START_READOUT_IN = '0') then
-					if (uneven_ctr = x"0") then
+					if (saved_size = x"0000" & "00") then
 						save_next_state <= ADD_SUBSUB1;
 					else
 						save_next_state <= ADD_MISSING;
 					end if;
 				else
 					save_next_state <= CLOSE;
+				end if;
+				
+			when ADD_MISSING =>
+				if (saved_size = x"0000" & "00") then
+					save_next_state <= ADD_SUBSUB1;
+				else
+					save_next_state <= ADD_MISSING;
 				end if;
 
 			when ADD_SUBSUB1 =>
@@ -251,23 +259,6 @@ begin
 			end if;
 		end if;
 	end process SF_WR_EN_PROC;
-
-	process(CLK_IPU)
-	begin
-		if rising_edge(CLK_IPU) then
-			if (save_current_state = SAVE_DATA and sf_afull = '1' and sf_afull_q = '0') then
-				uneven_ctr <= x"0";
-			elsif (save_current_state /= SAVE_DATA) then
-				uneven_ctr <= x"0";
-			elsif (save_current_state = SAVE_DATA and sf_afull_qqqqq = '1' and FEE_DATAREADY_IN = '1') then
-				uneven_ctr <= uneven_ctr + x"1";
-			elsif (save_current_state = ADD_MISSING) then
-				uneven_ctr <= uneven_ctr - x"1";
-			else
-				uneven_ctr <= uneven_ctr;
-			end if;
-		end if;
-	end process;
 
 	LOCAL_BUSY_PROC : process(CLK_IPU)
 	begin
@@ -379,11 +370,18 @@ begin
 			end if;
 
 			if (save_current_state = IDLE) then
-				sf_wr_lock <= '1';
+				sf_wr_lock <= '1';	
+				saved_size <= (others => '0');
 			elsif (save_current_state = SAVE_DATA and size_check_ctr = 2 and sf_wr_en = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
 				sf_wr_lock <= '0';
+				saved_size <= sf_data & "00";
+			elsif (save_current_state = SAVE_DATA and sf_wr_q = '1') then
+				saved_size <= saved_size - x"1";
+			elsif (save_current_state = ADD_MISSING and sf_wr_q = '1') then
+				saved_size <= saved_size - x"1";
 			else
 				sf_wr_lock <= sf_wr_lock;
+				saved_size <= saved_size;
 			end if;
 
 		end if;
