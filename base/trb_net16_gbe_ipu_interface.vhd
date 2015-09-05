@@ -111,7 +111,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal sf_afull_real                                                        : std_logic;
 	signal sf_cnt                                                               : std_logic_vector(15 downto 0);
 
-	signal local_fee_busy, local_fee_busy_q, local_fee_busy_qq, local_fee_busy_qqq, local_fee_busy_qqqq, local_fee_busy_qqqqq, local_fee_busy_qqqqqq, local_fee_busy_qqqqqqq : std_logic;
+	signal local_fee_busy, local_fee_busy_q, local_fee_busy_qq, local_fee_busy_qqq, local_fee_busy_qqqq, local_fee_busy_qqqqq, local_fee_busy_qqqqqq, local_fee_busy_qqqqqqq, local_fee_busy_qqqqqqqq : std_logic;
 
 	attribute syn_keep : string;
 	attribute syn_keep of sf_cnt : signal is "true";
@@ -132,7 +132,7 @@ begin
 		end if;
 	end process SAVE_MACHINE_PROC;
 
-	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, local_fee_busy, CTS_READ_IN, size_check_ctr)
+	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, local_fee_busy, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
 	begin
 		rec_state <= x"0";
 		case (save_current_state) is
@@ -253,8 +253,9 @@ begin
 			local_fee_busy_qqqqq <= local_fee_busy_qqqq;
 			local_fee_busy_qqqqqq <= local_fee_busy_qqqqq;
 			local_fee_busy_qqqqqqq <= local_fee_busy_qqqqqq;
+			local_fee_busy_qqqqqqqq <= local_fee_busy_qqqqqqq;
 			
-			local_fee_busy <= FEE_BUSY_IN or local_fee_busy_q or local_fee_busy_qq or local_fee_busy_qqq or local_fee_busy_qqqq or local_fee_busy_qqqqq or local_fee_busy_qqqqqq or local_fee_busy_qqqqqqq;
+			local_fee_busy <= FEE_BUSY_IN or local_fee_busy_q or local_fee_busy_qq or local_fee_busy_qqq or local_fee_busy_qqqq or local_fee_busy_qqqqq or local_fee_busy_qqqqqq or local_fee_busy_qqqqqqq or local_fee_busy_qqqqqqqq;
 		end if;
 	end process LOCAL_BUSY_PROC;
 
