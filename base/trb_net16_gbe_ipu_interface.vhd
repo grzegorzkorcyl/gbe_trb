@@ -311,7 +311,7 @@ begin
 					sf_data  <= FEE_STATUS_BITS_IN(15 downto 0);
 					save_eod <= '0';
 
-				when others => sf_data <= (others => '0');
+				when others => sf_data <= sf_data;
 					save_eod <= '0';
 
 			end case;
@@ -377,7 +377,7 @@ begin
 				saved_size <= (sf_data & "0") + x"1";
 			elsif (save_current_state = SAVE_DATA and sf_wr_q = '1') then
 				saved_size <= saved_size - x"1";
-			elsif (save_current_state = ADD_MISSING and sf_wr_q = '1') then
+			elsif (save_current_state = ADD_MISSING) then
 				saved_size <= saved_size - x"1";
 			else
 				sf_wr_lock <= sf_wr_lock;
