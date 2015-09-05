@@ -70,7 +70,7 @@ end entity trb_net16_gbe_ipu_interface;
 architecture RTL of trb_net16_gbe_ipu_interface is
 	attribute syn_encoding : string;
 
-	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, ADD_MISSING, TERMINATE, SEND_TERM_PULSE, CLOSE, FINISH_4_WORDS, CLEANUP);
+	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, TERMINATE, SEND_TERM_PULSE, CLOSE, FINISH_4_WORDS, CLEANUP);
 	signal save_current_state, save_next_state : saveStates;
 	attribute syn_encoding of save_current_state : signal is "onehot";
 
@@ -117,7 +117,6 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	attribute syn_keep of sf_cnt : signal is "true";
 	signal saved_bytes_ctr : std_logic_vector(31 downto 0);
 	signal longer_busy_ctr : std_logic_vector(7 downto 0);
-	signal uneven_ctr : std_logic_vector(7 downto 0);
 
 begin
 
@@ -182,21 +181,9 @@ begin
 			when CLOSE =>
 				rec_state <= x"6";
 				if (CTS_START_READOUT_IN = '0') then
-					if (uneven_ctr = x"00") then
-						save_next_state <= ADD_SUBSUB1;
-					else
-						save_next_state <= ADD_MISSING;
-					end if;
-				else
-					save_next_state <= CLOSE;
-				end if;
-				
-			when ADD_MISSING =>
-				rec_state <= x"d";
-				if (uneven_ctr = x"00") then
 					save_next_state <= ADD_SUBSUB1;
 				else
-					save_next_state <= ADD_MISSING;
+					save_next_state <= CLOSE;
 				end if;
 
 			when ADD_SUBSUB1 =>
@@ -252,32 +239,11 @@ begin
 				sf_wr_en <= '1';
 			elsif (save_current_state = FINISH_4_WORDS) then
 				sf_wr_en <= '1';
-			elsif (save_current_state = ADD_MISSING) then
-				sf_wr_en <= '1';
 			else
 				sf_wr_en <= '0';
 			end if;
 		end if;
 	end process SF_WR_EN_PROC;
-	
-	process(CLK_IPU)
-	begin
-		if rising_edge(CLK_IPU) then
-			if (save_current_state = IDLE) then
-				uneven_ctr <= x"00";
-			elsif (save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and sf_wr_en = '0') then
-				uneven_ctr <= uneven_ctr + x"1";
-			elsif (save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and sf_wr_en = '1') then 
-				uneven_ctr <= uneven_ctr;
-			elsif (save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '0' and sf_wr_en = '1') then 
-				uneven_ctr <= uneven_ctr - x"1";
-			elsif (save_current_state = ADD_MISSING and sf_wr_en = '1') then
-				uneven_ctr <= uneven_ctr - x"1";
-			else
-				uneven_ctr <= uneven_ctr;
-			end if;
-		end if;
-	end process;			
 
 	LOCAL_BUSY_PROC : process(CLK_IPU)
 	begin
