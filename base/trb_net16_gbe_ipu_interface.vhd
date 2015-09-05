@@ -85,7 +85,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal cts_rnd, cts_trg : std_logic_vector(15 downto 0);
 	signal save_ctr         : std_logic_vector(15 downto 0);
 
-	signal saved_events_ctr, loaded_events_ctr, saved_events_ctr_gbe : std_logic_vector(7 downto 0);
+	signal saved_events_ctr, loaded_events_ctr, saved_events_ctr_gbe : std_logic_vector(31 downto 0);
 	signal loaded_bytes_ctr                                          : std_Logic_vector(15 downto 0);
 
 	signal trigger_random : std_logic_vector(7 downto 0);
@@ -614,7 +614,7 @@ begin
 
 	saved_ctr_sync : signal_sync
 		generic map(
-			WIDTH => 8,
+			WIDTH => 32,
 			DEPTH => 2
 		)
 		port map(
