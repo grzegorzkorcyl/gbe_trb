@@ -56,7 +56,9 @@ port (
 	SRC_IP_ADDRESS_OUT   : out    std_logic_vector(31 downto 0);
 	SRC_UDP_PORT_OUT     : out    std_logic_vector(15 downto 0);
 
-	MONITOR_TX_PACKETS_OUT : out std_logic_vector(31 downto 0)
+	MONITOR_TX_PACKETS_OUT : out std_logic_vector(31 downto 0);
+	
+	DEBUG_OUT : out std_logic_vector(63 downto 0)
 );
 end trb_net16_gbe_transmit_control2;
 
@@ -76,6 +78,7 @@ signal actual_frame_bytes, full_packet_size, ip_size, packet_loaded_bytes : std_
 signal go_to_divide, more_fragments : std_logic;
 signal first_frame : std_logic;
 signal mon_packets_sent_ctr : std_logic_vector(31 downto 0); 
+signal state : std_logic_vector(3 downto 0);
 
 begin
 
@@ -90,9 +93,11 @@ end process TRANSMIT_MACHINE_PROC;
 
 TRANSMIT_MACHINE : process(transmit_current_state, FC_H_READY_IN, TC_DATAREADY_IN, FC_READY_IN, local_end, TC_MAX_FRAME_IN, actual_frame_bytes, go_to_divide)
 begin
+	state <= x"0";
 	case transmit_current_state is
 	
-		when IDLE =>
+	when IDLE =>
+			state <= x"1";
 			if (TC_DATAREADY_IN = '1') then
 				transmit_next_state <= PREPARE_HEADERS;
 			else
@@ -100,9 +105,11 @@ begin
 			end if;
 			
 		when PREPARE_HEADERS =>
+			state <= x"2";
 			transmit_next_state<= WAIT_FOR_H;
 		
 		when WAIT_FOR_H =>
+			state <= x"3";
 			if (FC_H_READY_IN = '1') then
 				transmit_next_state <= TRANSMIT;
 			else
@@ -110,6 +117,7 @@ begin
 			end if;
 		
 		when TRANSMIT =>
+			state <= x"4";
 			if (local_end = x"0000") then
 				transmit_next_state <= SEND_ONE;
 			else
@@ -121,15 +129,19 @@ begin
 			end if;
 			
 		when SEND_ONE =>
+			state <= x"5";
 			transmit_next_state <= SEND_TWO;
 			
 		when SEND_TWO =>
+			state <= x"6";
 			transmit_next_state <= CLOSE;
 			
 		when CLOSE =>
+			state <= x"7";
 			transmit_next_state <= WAIT_FOR_TRANS;
 			
 		when WAIT_FOR_TRANS =>
+			state <= x"8";
 			if (FC_READY_IN = '1') then
 				if (go_to_divide = '1') then
 					transmit_next_state <= DIVIDE;
@@ -141,9 +153,11 @@ begin
 			end if;
 		
 		when DIVIDE =>
+			state <= x"9";
 			transmit_next_state <= PREPARE_HEADERS;
 			
 		when CLEANUP =>
+			state <= x"a";
 			transmit_next_state <= IDLE;
 	
 	end case;
@@ -313,6 +327,10 @@ begin
 end process;
 
 MONITOR_TX_PACKETS_OUT <= mon_packets_sent_ctr;
+
+DEBUG_OUT(3 downto 0) <= state;
+DEBUG_OUT(4) <= FC_READY_IN;
+
 
 end trb_net16_gbe_transmit_control2;
 
