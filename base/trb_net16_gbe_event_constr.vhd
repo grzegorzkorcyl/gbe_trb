@@ -93,6 +93,7 @@ architecture RTL of trb_net16_gbe_event_constr is
 	attribute syn_keep : string;
 	attribute syn_keep of df_wcnt : signal is "true";
 	signal load_state : std_logic_vector(3 downto 0);
+	signal evt_ctr : std_logic_vector(31 downto 0);
 
 begin
 
@@ -583,6 +584,22 @@ begin
 
 		end case;
 	end process LOAD_MACHINE;
+	
+	evt_ctr_gen : if DO_SIMULATION = 1 generate
+		process(CLK)
+		begin
+			if rising_edge(CLK) then
+				if (RESET = '1') then
+					evt_ctr <= (others => '0');
+				elsif (load_current_state =  LOAD_SUB and header_ctr = 0) then
+					evt_ctr <= evt_ctr + x"1";
+				else
+					evt_ctr <= evt_ctr;
+				end if;
+			end if;
+		end process;
+	end generate evt_ctr_gen;
+					
 
 	process(CLK)
 	begin
