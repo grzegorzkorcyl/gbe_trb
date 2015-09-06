@@ -119,6 +119,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal longer_busy_ctr : std_logic_vector(7 downto 0);
 	signal uneven_ctr : std_logic_vector(3 downto 0);
 	signal saved_size : std_logic_vector(16 downto 0);
+	signal proceed_to_finish : std_logic;
 
 begin
 
@@ -135,7 +136,7 @@ begin
 		end if;
 	end process SAVE_MACHINE_PROC;
 
-	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, local_fee_busy, saved_size, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
+	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, proceed_to_finish, local_fee_busy, saved_size, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
 	begin
 		rec_state <= x"0";
 		case (save_current_state) is
