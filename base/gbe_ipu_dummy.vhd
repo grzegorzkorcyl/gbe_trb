@@ -344,7 +344,11 @@ begin
 				end if;
 
 			when CLOSE =>
-				next_state <= IDLE;
+				if (CTS_READOUT_FINISHED_IN = '1') then
+					next_state <= IDLE;
+				else
+					next_state <= CLOSE;
+				end if;
 
 		end case;
 	end process state_machine;

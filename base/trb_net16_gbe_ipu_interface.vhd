@@ -280,6 +280,20 @@ begin
 			end if;
 		end if;
 	end process LOCAL_BUSY_PROC;
+	
+	process(CLK_IPU)
+	begin
+		if rising_edge(CLK_IPU) then
+			if (save_current_state = IDLE) then
+				proceed_to_finish <= '0';
+			elsif (save_current_state = SAVE_DATA and sf_afull = '1' and saved_size = x"0000" & '0') then
+				proceed_to_finish <= '1';
+			else
+				proceed_to_finish <= proceed_to_finish;
+			end if;
+		end if;
+	end process;
+			
 
 	SF_DATA_EOD_PROC : process(CLK_IPU)
 	begin
