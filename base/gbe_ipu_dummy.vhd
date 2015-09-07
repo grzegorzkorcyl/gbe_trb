@@ -183,7 +183,7 @@ begin
 		end if;
 	end process state_machine_proc;
 
-	state_machine : process(current_state, GBE_READY_IN, ctr, timeout_stop, pause_dready, pause_cts_fee, FEE_READ_IN, pause_wait_6, pause_wait_5, pause_wait_4, pause_wait_3, pause_wait_2, pause_wait_1, send_word_pause, local_trigger, data_ctr, test_data_len, pause_wait_7, pause_wait_8, pause_wait_9)
+	state_machine : process(current_state, GBE_READY_IN, ctr, timeout_stop, CTS_READOUT_FINISHED_IN, pause_dready, pause_cts_fee, FEE_READ_IN, pause_wait_6, pause_wait_5, pause_wait_4, pause_wait_3, pause_wait_2, pause_wait_1, send_word_pause, local_trigger, data_ctr, test_data_len, pause_wait_7, pause_wait_8, pause_wait_9)
 	is
 	begin
 		case current_state is
