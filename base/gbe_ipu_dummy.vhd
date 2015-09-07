@@ -587,7 +587,7 @@ begin
 		process(CLK)
 		begin
 			if rising_edge(CLK) then
-				if (current_state = CLOSE) then
+				if (current_state = CLOSE and CTS_READOUT_FINISHED_IN = '1') then
 					constructed_events <= constructed_events + x"1";
 				else
 					constructed_events <= constructed_events;
@@ -601,7 +601,7 @@ begin
 		process(CLK)
 		begin
 			if rising_edge(CLK) then
-				if (current_state = CLOSE) then
+				if (current_state = CLOSE and CTS_READOUT_FINISHED_IN = '1') then
 					if (increment_flag = '1') then
 						constructed_events <= constructed_events + x"1";
 					else
