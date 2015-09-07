@@ -232,7 +232,7 @@ begin
 		begin
 			if rising_edge(CLK) then
 				--if (load_current_state = IDLE) then
-					PC_READY_OUT <= not df_full;
+					PC_READY_OUT <= not df_full and not qsf_full and not shf_full;
 				--else
 				--	PC_READY_OUT <= '0';
 				--end if;
