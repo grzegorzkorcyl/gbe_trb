@@ -616,9 +616,9 @@ begin
 		process(CLK)
 		begin
 			if rising_edge(CLK) then
-				if (current_state = CLOSE and test_data_len = UP_DOWN_LIMIT) then
+				if (current_state = CLOSE and CTS_READOUT_FINISHED_IN = '1' and test_data_len = UP_DOWN_LIMIT) then
 					increment_flag <= '0';
-				elsif (current_state = CLOSE and test_data_len = FIXED_SIZE) then
+				elsif (current_state = CLOSE and CTS_READOUT_FINISHED_IN = '1' and test_data_len = FIXED_SIZE) then
 					increment_flag <= '1';
 				else
 					increment_flag <= increment_flag;
@@ -633,7 +633,7 @@ begin
 		if rising_edge(CLK) then
 			if rst = '1' then
 				evt_ctr <= (others => '0');
-			elsif current_state = CLOSE then
+			elsif current_state = CLOSE and CTS_READOUT_FINISHED_IN = '1' then
 				evt_ctr <= evt_ctr + x"1";
 			else
 				evt_ctr <= evt_ctr;
