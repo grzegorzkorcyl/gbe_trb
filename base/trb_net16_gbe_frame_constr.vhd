@@ -488,7 +488,7 @@ end process readyFramesCtrProc;
 fpfResetProc : process(CLK)
 begin
 	if rising_edge(CLK) then
-		if (LINK_OK_IN = '0') then
+		if (LINK_OK_IN = '0' or RESET = '1') then
 			fpf_reset <= '1';
 		else
 			fpf_reset <= '0';
