@@ -167,8 +167,9 @@ begin
 				Empty            => df_empty,
 				Full             => df_full_real,
 				AlmostFull       => df_afull,
-				WCNT             => df_wcnt
+				WCNT             => df_wcnt(13 downto 0)
 			);
+			df_wcnt(16 downto 14) <= (others => '0');
 	end generate df_8k_gen;
 
 	df_4k_gen : if READOUT_BUFFER_SIZE = 1 generate
