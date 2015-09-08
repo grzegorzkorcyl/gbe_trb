@@ -124,7 +124,7 @@ begin
 	end if;
 end process TransmitStatemachineProc;
 
-TransmitStateMachine : process (transmitCurrentState, START_OF_PACKET_IN, DATA_ENDFLAG_IN, TX_DONE_IN)
+TransmitStateMachine : process (transmitCurrentState, START_OF_PACKET_IN, DATA_ENDFLAG_IN, TX_DONE_IN, TX_DISCFRM_IN)
 begin
 	case transmitCurrentState is
 		when T_IDLE =>
@@ -143,7 +143,7 @@ begin
 			end if;
 		when T_WAITFORFIFO =>
 			bsm_trans <= x"2";
-			if (TX_DONE_IN = '1') then
+			if (TX_DONE_IN = '1' or TX_DISCFRM_IN = '1') then
 				transmitNextState <= T_IDLE;
 			else
 				transmitNextState <= T_WAITFORFIFO;
