@@ -1094,14 +1094,13 @@ begin
 			end process;
 		end generate done_generate;
 		
-		process(clk_125_rx_from_pcs(0))
+		process
 		begin
-			if rising_edge(clk_125_rx_from_pcs(0)) then
+				wait until rising_edge(clk_125_rx_from_pcs(0));
 				mac_tx_read(0) <= mac_fifoavail(0);
 				mac_tx_read(1) <= mac_fifoavail(1);
 				mac_tx_read(2) <= mac_fifoavail(2);
 				mac_tx_read(3) <= mac_fifoavail(3);
-			end if;
 		end process;
 		
 		mac_rx_eof(1) <= mac_rx_eof(0);
