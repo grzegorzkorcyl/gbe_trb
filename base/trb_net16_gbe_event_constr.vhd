@@ -152,7 +152,7 @@ begin
 	end generate df_64k_gen;
 
 	df_8k_gen : if READOUT_BUFFER_SIZE = 2 generate
-		DATA_FIFO : entity work.fifo_8kx9
+		DATA_FIFO : entity work.fifo_8kx9_af_cnt
 			port map(
 				Data(7 downto 0) => df_data,
 				Data(8)          => df_eos_q,
@@ -165,7 +165,9 @@ begin
 				Q(7 downto 0)    => df_q,
 				Q(8)             => load_eod,
 				Empty            => df_empty,
-				Full             => df_full_real
+				Full             => df_full_real,
+				AlmostFull       => df_afull,
+				WCNT             => df_wcnt
 			);
 	end generate df_8k_gen;
 
