@@ -162,12 +162,8 @@ begin
 		end if;
 	end if;
 end process;
---ready         <= '1' when (constructCurrentState = IDLE)
---					 else '0';
---headers_ready <= '1' when (constructCurrentState = SAVE_DATA)
---					 else '0';
 					 
-sizeProc: process(CLK) -- put_udp_headers, IP_F_SIZE_IN, UDP_P_SIZE_IN, DEST_UDP_PORT_IN)
+sizeProc: process(CLK)
 begin
 	if rising_edge(CLK) then
 		if( put_udp_headers = '1' ) and (DEST_UDP_PORT_IN /= x"0000") then
@@ -532,7 +528,6 @@ fpf_8k_gen : if FRAME_BUFFER_SIZE = 2 generate
 	);
 end generate fpf_8k_gen;
 
---fpf_rd_en <= FT_TX_RD_EN_IN;
 fpf_rd_en <= '1' when ((link_ok_125 = '1') and (FT_TX_RD_EN_IN = '1'))
 		    or (link_ok_125 = '0')  -- clear the fifo if link is down
 		    else '0';
