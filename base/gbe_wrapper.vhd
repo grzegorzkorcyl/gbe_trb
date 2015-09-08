@@ -1078,33 +1078,31 @@ begin
 		clk_125_rx_from_pcs(2) <= CLK_125_IN;
 		clk_125_rx_from_pcs(3) <= CLK_125_IN;
 		
---		process
---		begin
---			mac_tx_done(0) <= '0';
---			wait until rising_edge(mac_fifoeof(0));
---			wait until rising_edge(clk_125_rx_from_pcs(0));
---			mac_tx_done(0) <= '1';
---			wait until rising_edge(clk_125_rx_from_pcs(0));
---		end process;
---		
---		process
---		begin
---			mac_tx_done(1) <= '0';
---			wait until rising_edge(mac_fifoeof(1));
---			wait until rising_edge(clk_125_rx_from_pcs(0));
---			mac_tx_done(1) <= '1';
---			wait until rising_edge(clk_125_rx_from_pcs(0));
---		end process;
---		
---		process(clk_125_rx_from_pcs(0))
---		begin
---			if rising_edge(clk_125_rx_from_pcs(0)) then
---				mac_tx_read(0) <= mac_fifoavail(0);
---				mac_tx_read(1) <= mac_fifoavail(1);
---				mac_tx_read(2) <= mac_fifoavail(2);
---				mac_tx_read(3) <= mac_fifoavail(3);
---			end if;
---		end process;
+		done_generate : for i in 0 to 3 generate
+			process
+			begin
+				mac_tx_done(i) <= '0';
+				wait until rising_edge(mac_fifoeof(i));
+				wait until rising_edge(clk_125_rx_from_pcs(i));
+				wait until rising_edge(clk_125_rx_from_pcs(i));				
+				wait until rising_edge(clk_125_rx_from_pcs(i));
+				wait until rising_edge(clk_125_rx_from_pcs(i));				
+				wait until rising_edge(clk_125_rx_from_pcs(i));
+				wait until rising_edge(clk_125_rx_from_pcs(i));
+				mac_tx_done(i) <= '1';
+				wait until rising_edge(clk_125_rx_from_pcs(i));
+			end process;
+		end generate done_generate;
+		
+		process(clk_125_rx_from_pcs(0))
+		begin
+			if rising_edge(clk_125_rx_from_pcs(0)) then
+				mac_tx_read(0) <= mac_fifoavail(0);
+				mac_tx_read(1) <= mac_fifoavail(1);
+				mac_tx_read(2) <= mac_fifoavail(2);
+				mac_tx_read(3) <= mac_fifoavail(3);
+			end if;
+		end process;
 		
 		mac_rx_eof(1) <= mac_rx_eof(0);
 		mac_rx_eof(2) <= mac_rx_eof(0);
