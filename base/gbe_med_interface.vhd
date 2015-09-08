@@ -269,6 +269,8 @@ end component;
 	
 	signal synced_rst, ff : std_logic;
 	
+	signal fifo_eof_q, fifo_eof_qq, fifo_eof_qqq, fifo_eof_qqqq : std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0);
+	
 begin
 	
 	rx_power <= "1111";
@@ -694,7 +696,12 @@ begin
 			if rising_edge(CLK_125_IN) then
 				MAC_TX_READ_OUT <= MAC_FIFOAVAIL_IN;
 				
-				MAC_TX_DONE_OUT <= MAC_FIFOEOF_IN;
+				fifo_eof_q <= MAC_FIFOEOF_IN;
+				fifo_eof_qq <= fifo_eof_q;
+				fifo_eof_qqq <= fifo_eof_qq;
+				fifo_eof_qqqq <= fifo_eof_qqq;
+				
+				MAC_TX_DONE_OUT <= fifo_eof_qqqq; -- MAC_FIFOEOF_IN;
 			end if;
 		end process;
 		
