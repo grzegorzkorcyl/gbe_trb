@@ -34,7 +34,7 @@ begin
 			FIXED_DELAY_MODE          => 1,
 			UP_DOWN_MODE              => 1,
 			UP_DOWN_LIMIT             => 1000,
-			FIXED_DELAY               => 200,
+			FIXED_DELAY               => 10,
 			NUMBER_OF_GBE_LINKS       => 4,
 			LINKS_ACTIVE              => "1111",
 			LINK_HAS_PING             => "1111",
