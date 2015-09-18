@@ -513,15 +513,26 @@ begin
 	FEE_READ_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			if (sf_afull = '0') then
-				--if (save_current_state = IDLE or save_current_state = SAVE_EVT_ADDR or save_current_state = WAIT_FOR_DATA or save_current_state = SAVE_DATA) then
+			
+			if (save_current_state = SAVE_DATA) then
+				if (sf_afull = '0') then
 					FEE_READ_OUT <= '1';
-				--else
-				--	FEE_READ_OUT <= '0';
-				--end if;
+				else
+					FEE_READ_OUT <= '0';
+				end if;
 			else
-				FEE_READ_OUT <= '0';
+				FEE_READ_OUT <= '1';
 			end if;
+			
+--			if (sf_afull = '0') then
+--				--if (save_current_state = IDLE or save_current_state = SAVE_EVT_ADDR or save_current_state = WAIT_FOR_DATA or save_current_state = SAVE_DATA) then
+--					FEE_READ_OUT <= '1';
+--				--else
+--				--	FEE_READ_OUT <= '0';
+--				--end if;
+--			else
+--				FEE_READ_OUT <= '0';
+--			end if;
 		end if;
 	end process FEE_READ_PROC;
 
