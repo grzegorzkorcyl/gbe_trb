@@ -305,7 +305,7 @@ begin
 				if (to_integer(unsigned(data_ctr)) = (2 * (to_integer(unsigned(test_data_len)) - 1)) and FEE_READ_IN = '1') then
 					next_state <= WAIT_A_SEC_7;
 				else
-					next_state <= LOOP_OVER_DATA; --SEND_ONE_WORD;
+					next_state <= SEND_ONE_WORD;  --LOOP_OVER_DATA;
 				end if;
 
 			when SEND_ONE_WORD =>
