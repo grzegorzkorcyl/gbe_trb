@@ -119,6 +119,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal longer_busy_ctr : std_logic_vector(7 downto 0);
 	signal uneven_ctr : std_logic_vector(3 downto 0);
 	signal saved_size : std_logic_vector(16 downto 0);
+	signal overwrite_afull : std_logic;
 
 begin
 
@@ -509,13 +510,29 @@ begin
 	--		end process;
 	--		
 	--	end generate size_check_debug;
+	
+	process(CLK_IPU)
+	begin
+		if rising_edge(CLK_IPU) then
+			if (save_current_state = IDLE) then
+				overwrite_afull <= '0';
+			elsif (sf_wr_q = '1' and save_current_state /= SAVE_DATA) then
+				overwrite_afull <= '1';
+			elsif (save_current_state = SAVE_DATA) then
+				overwrite_afull <= '0';
+			else
+				overwrite_afull <= overwrite_afull;
+			end if;
+		end if;
+	end process;
+		
 
 	FEE_READ_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
 			
 			if (save_current_state = SAVE_DATA) then
-				if (sf_afull = '0') then
+				if (sf_afull = '0' or overwrite_afull = '1') then
 					FEE_READ_OUT <= '1';
 				else
 					FEE_READ_OUT <= '0';
