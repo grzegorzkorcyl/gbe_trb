@@ -280,7 +280,7 @@ begin
 				        INCLUDE_ARP               => LINK_HAS_ARP(3),
 				        INCLUDE_PING              => LINK_HAS_PING(3),
 				        FRAME_BUFFER_SIZE         => 1,
-				        READOUT_BUFFER_SIZE       => 2,
+				        READOUT_BUFFER_SIZE       => 4,
 				        SLOWCTRL_BUFFER_SIZE      => 2,
 				        FIXED_SIZE_MODE           => FIXED_SIZE_MODE,
 				        INCREMENTAL_MODE          => INCREMENTAL_MODE,
