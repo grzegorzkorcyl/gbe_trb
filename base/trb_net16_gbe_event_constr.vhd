@@ -249,7 +249,7 @@ begin
 				df_afull_q <= df_afull;
 				
 				--if (load_current_state = IDLE) then
-					PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not (df_afull_q = '1' and df_afull = '0' and s(0) = '1');
+					PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not (df_afull_q and not df_afull and s(0));
 				--else
 				--	PC_READY_OUT <= '0';
 				--end if;
