@@ -96,6 +96,7 @@ architecture RTL of trb_net16_gbe_event_constr is
 	signal evt_ctr : std_logic_vector(31 downto 0);
 	
 	signal s : std_logic_vector(31 downto 0);
+	signal df_afull_q : std_logic;
 
 begin
 
@@ -239,13 +240,16 @@ begin
 			);	
 		
 
-		df_full <= df_afull or s(0);
+		df_full <= df_afull;
 
 		READY_PROC : process(CLK)
 		begin
 			if rising_edge(CLK) then
+				
+				df_afull_q <= df_afull;
+				
 				--if (load_current_state = IDLE) then
-					PC_READY_OUT <= not df_full and not qsf_full and not shf_full;
+					PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not (df_afull_q = '1' and df_afull = '0' and s(0) = '1');
 				--else
 				--	PC_READY_OUT <= '0';
 				--end if;
