@@ -94,6 +94,8 @@ architecture RTL of trb_net16_gbe_event_constr is
 	attribute syn_keep of df_wcnt : signal is "true";
 	signal load_state : std_logic_vector(3 downto 0);
 	signal evt_ctr : std_logic_vector(31 downto 0);
+	
+	signal s : std_logic_vector(31 downto 0);
 
 begin
 
@@ -228,8 +230,16 @@ begin
 		--
 		--			wait;
 		--		end process FULL_PROC;
+		
+		afull_rand_inst : entity work.random_size
+			port map(Clk  => CLK,
+				     Enb  => df_afull,
+				     Rst  => RESET,
+				     Dout => s
+			);	
+		
 
-		df_full <= df_afull;
+		df_full <= df_afull or s(0);
 
 		READY_PROC : process(CLK)
 		begin
