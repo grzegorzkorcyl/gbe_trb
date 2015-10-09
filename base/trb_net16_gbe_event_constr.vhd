@@ -45,6 +45,15 @@ entity trb_net16_gbe_event_constr is
 end entity trb_net16_gbe_event_constr;
 
 architecture RTL of trb_net16_gbe_event_constr is
+	
+	component random_size is
+		port(
+			Clk  : in  std_logic;
+			Enb  : in  std_logic;
+			Rst  : in  std_logic;
+			Dout : out std_logic_vector(31 downto 0));
+	end component;
+	
 	attribute syn_encoding : string;
 
 	type loadStates is (IDLE, GET_Q_SIZE, START_TRANSFER, LOAD_Q_HEADERS, LOAD_DATA, LOAD_SUB, LOAD_PADDING, LOAD_TERM, CLEANUP);
@@ -232,7 +241,7 @@ begin
 		--			wait;
 		--		end process FULL_PROC;
 		
-		afull_rand_inst : entity work.random_size
+		afull_rand_inst : random_size
 			port map(Clk  => CLK,
 				     Enb  => '1',
 				     Rst  => RESET,
