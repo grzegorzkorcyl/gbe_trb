@@ -234,7 +234,7 @@ begin
 		
 		afull_rand_inst : entity work.random_size
 			port map(Clk  => CLK,
-				     Enb  => df_afull,
+				     Enb  => '1',
 				     Rst  => RESET,
 				     Dout => s
 			);	
@@ -249,7 +249,7 @@ begin
 				df_afull_q <= df_afull;
 				
 				--if (load_current_state = IDLE) then
-					PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not (df_afull_q and not df_afull and s(0));
+					PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not s(0);
 				--else
 				--	PC_READY_OUT <= '0';
 				--end if;
