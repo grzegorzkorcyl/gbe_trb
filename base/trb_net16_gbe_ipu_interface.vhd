@@ -690,15 +690,15 @@ begin
 
 			when CLOSE_SUB =>
 				load_state <= x"a";
-				--if (last_three_bytes = x"0") then
+				if (last_three_bytes = x"0") then
 					if (subevent_size > ("00" & MAX_SINGLE_SUB_SIZE_IN) and queue_size = (subevent_size + x"10" + x"8" + x"4")) then
 						load_next_state <= CLOSE_QUEUE_IMMEDIATELY;
 					else
 						load_next_state <= WAIT_FOR_SUBS;
 					end if;
-				--else
-				--	load_next_state <= CLOSE_SUB;
-				--end if;
+				else
+					load_next_state <= CLOSE_SUB;
+				end if;
 
 			when CLOSE_QUEUE =>
 				load_state      <= x"b";
