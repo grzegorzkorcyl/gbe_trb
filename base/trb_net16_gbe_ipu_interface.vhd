@@ -120,6 +120,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal uneven_ctr : std_logic_vector(3 downto 0);
 	signal saved_size : std_logic_vector(16 downto 0);
 	signal overwrite_afull : std_logic;
+	signal last_three_bytes : std_logic_vector(3 downto 0);
 
 begin
 
@@ -618,7 +619,7 @@ begin
 		end if;
 	end process LOAD_MACHINE_PROC;
 
-	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, PC_READY_IN, sf_eos, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
+	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, last_three_bytes, PC_READY_IN, sf_eos, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
 	begin
 		load_state <= x"0";
 		case (load_current_state) is
@@ -689,7 +690,7 @@ begin
 
 			when CLOSE_SUB =>
 				load_state <= x"a";
-				if (PC_READY_IN = '1') then
+				if (last_three_bytes = x"0") then
 					if (subevent_size > ("00" & MAX_SINGLE_SUB_SIZE_IN) and queue_size = (subevent_size + x"10" + x"8" + x"4")) then
 						load_next_state <= CLOSE_QUEUE_IMMEDIATELY;
 					else
@@ -711,6 +712,20 @@ begin
 
 		end case;
 	end process LOAD_MACHINE;
+	
+	process(CLK_GBE)
+	begin
+		if rising_edge(CLK_GBE) then
+			if (load_current_state = LOAD) then
+				last_three_bytes <= x"3";
+			elsif (load_current_state = CLOSE_SUB and PC_READY_IN = '1') then
+				last_three_bytes <= last_three_bytes - x"1";
+			else
+				last_three_bytes <= last_three_bytes;
+			end if;
+		end if;
+	end process;
+	
 
 	saved_ctr_sync : signal_sync
 		generic map(
