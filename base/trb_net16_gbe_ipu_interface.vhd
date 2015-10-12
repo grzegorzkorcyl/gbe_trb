@@ -690,15 +690,15 @@ begin
 
 			when CLOSE_SUB =>
 				load_state <= x"a";
-				if (last_three_bytes = x"0") then
+				--if (last_three_bytes = x"0") then
 					if (subevent_size > ("00" & MAX_SINGLE_SUB_SIZE_IN) and queue_size = (subevent_size + x"10" + x"8" + x"4")) then
 						load_next_state <= CLOSE_QUEUE_IMMEDIATELY;
 					else
 						load_next_state <= WAIT_FOR_SUBS;
 					end if;
-				else
-					load_next_state <= CLOSE_SUB;
-				end if;
+				--else
+				--	load_next_state <= CLOSE_SUB;
+				--end if;
 
 			when CLOSE_QUEUE =>
 				load_state      <= x"b";
@@ -788,21 +788,35 @@ begin
 	SF_RD_EN_PROC : process(CLK_GBE)
 	begin
 		if rising_edge(CLK_GBE) then
-			if (load_current_state = REMOVE or load_current_state = WAIT_ONE or load_current_state = WAIT_TWO) then
-				sf_rd_en <= '1';
-			else
-				if (PC_READY_IN = '1') then
-					if (load_current_state = LOAD) then
-						sf_rd_en <= '1';
-					--elsif (load_current_state = CLOSE_SUB and last_three_bytes /= x"0") then
-					--	sf_rd_en <= '1';
-					else
-						sf_rd_en <= '0';
-					end if;
+			
+			if (PC_READY_IN = '1') then
+				if (load_current_state = REMOVE) then
+					sf_rd_en <= '1';
+				elsif (load_current_state = LOAD and PC_READY_IN = '1') then --pc_ready_q = '1') then
+					sf_rd_en <= '1';
 				else
 					sf_rd_en <= '0';
 				end if;
+			else
+				sf_rd_en <= '0';
 			end if;
+			
+			
+--			if (load_current_state = REMOVE or load_current_state = WAIT_ONE or load_current_state = WAIT_TWO) then
+--				sf_rd_en <= '1';
+--			else
+--				if (PC_READY_IN = '1') then
+--					if (load_current_state = LOAD) then
+--						sf_rd_en <= '1';
+--					--elsif (load_current_state = CLOSE_SUB and last_three_bytes /= x"0") then
+--					--	sf_rd_en <= '1';
+--					else
+--						sf_rd_en <= '0';
+--					end if;
+--				else
+--					sf_rd_en <= '0';
+--				end if;
+--			end if;
 		end if;
 	end process SF_RD_EN_PROC;
 
@@ -892,7 +906,7 @@ begin
 		if (RESET = '1') then
 			loaded_events_ctr <= (others => '0');
 		elsif rising_edge(CLK_GBE) then
-			if (load_current_state = CLOSE_SUB and PC_READY_IN = '1' and last_three_bytes = x"0") then
+			if (load_current_state = CLOSE_SUB and PC_READY_IN = '1') then -- and last_three_bytes = x"0") then
 				loaded_events_ctr <= loaded_events_ctr + x"1";
 			else
 				loaded_events_ctr <= loaded_events_ctr;
