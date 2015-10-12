@@ -792,7 +792,9 @@ begin
 				sf_rd_en <= '1';
 			else
 				if (PC_READY_IN = '1') then
-					if (load_current_state = LOAD and PC_READY_IN = '1') then --pc_ready_q = '1') then
+					if (load_current_state = LOAD) then
+						sf_rd_en <= '1';
+					elsif (load_current_state = CLOSE_SUB) then
 						sf_rd_en <= '1';
 					else
 						sf_rd_en <= '0';
