@@ -892,7 +892,7 @@ begin
 		if (RESET = '1') then
 			loaded_events_ctr <= (others => '0');
 		elsif rising_edge(CLK_GBE) then
-			if (load_current_state = CLOSE_SUB and PC_READY_IN = '1') then
+			if (load_current_state = CLOSE_SUB and PC_READY_IN = '1' and last_three_bytes = x"0") then
 				loaded_events_ctr <= loaded_events_ctr + x"1";
 			else
 				loaded_events_ctr <= loaded_events_ctr;
