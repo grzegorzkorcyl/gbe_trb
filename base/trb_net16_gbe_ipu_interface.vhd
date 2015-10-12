@@ -644,19 +644,11 @@ begin
 
 			when WAIT_ONE =>
 				load_state      <= x"4";
-				if (PC_READY_IN = '1') then
-					load_next_state <= WAIT_TWO;
-				else
-					load_next_state <= WAIT_ONE;
-				end if;
+				load_next_state <= WAIT_TWO;
 
 			when WAIT_TWO =>
 				load_state      <= x"5";
-				if (PC_READY_IN = '1') then
-					load_next_state <= DECIDE;
-				else
-					load_next_state <= WAIT_TWO;
-				end if;
+				load_next_state <= DECIDE;
 
 			--TODO: all queue split conditions here and also in the size process
 			when DECIDE =>
@@ -777,10 +769,9 @@ begin
 	SF_RD_EN_PROC : process(CLK_GBE)
 	begin
 		if rising_edge(CLK_GBE) then
-			if (load_current_state = REMOVE) then
+			if (load_current_state = REMOVE or load_current_state = WAIT_ONE or load_current_state = WAIT_TWO) then
 				sf_rd_en <= '1';
 			else
-				
 				if (PC_READY_IN = '1') then
 					if (load_current_state = LOAD and PC_READY_IN = '1') then --pc_ready_q = '1') then
 						sf_rd_en <= '1';
