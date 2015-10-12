@@ -802,7 +802,7 @@ begin
 --			end if;
 			
 			
-			if (load_current_state = REMOVE or load_current_state = WAIT_ONE) then
+			if (load_current_state = REMOVE) then
 				sf_rd_en <= '1';
 			else
 				if (PC_READY_IN = '1') then
