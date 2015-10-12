@@ -644,11 +644,19 @@ begin
 
 			when WAIT_ONE =>
 				load_state      <= x"4";
-				load_next_state <= WAIT_TWO;
+				if (PC_READY_IN = '1') then
+					load_next_state <= WAIT_TWO;
+				else
+					load_next_state <= WAIT_ONE;
+				end if;
 
 			when WAIT_TWO =>
 				load_state      <= x"5";
-				load_next_state <= DECIDE;
+				if (PC_READY_IN = '1') then
+					load_next_state <= DECIDE;
+				else
+					load_next_state <= WAIT_TWO;
+				end if;
 
 			--TODO: all queue split conditions here and also in the size process
 			when DECIDE =>
