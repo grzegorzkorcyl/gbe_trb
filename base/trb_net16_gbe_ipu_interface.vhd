@@ -683,8 +683,9 @@ begin
 
 			when LOAD =>
 				load_state <= x"9";
-				--if (sf_eos = '1' and PC_READY_IN = '1') then
-				if (sf_eos_flag = '1' and PC_READY_IN = '1') then
+				if (sf_eos = '1' and PC_READY_IN = '1') then
+					load_next_state <= CLOSE_SUB;
+				elsif (sf_eos_flag = '1' and PC_READY_IN = '1') then
 					load_next_state <= CLOSE_SUB;
 				else
 					load_next_state <= LOAD;
