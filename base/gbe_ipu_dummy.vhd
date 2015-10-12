@@ -83,6 +83,9 @@ architecture RTL of gbe_ipu_dummy is
 	signal evt_ctr : std_logic_vector(31 downto 0);
 
 begin
+	
+	FEE_STATUS_BITS_OUT <= x"11223344";
+	
 	send_word_pause <= 1;
 
 	fixed_size_gen : if FIXED_SIZE_MODE = 1 generate
