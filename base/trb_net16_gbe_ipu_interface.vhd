@@ -717,7 +717,7 @@ begin
 	begin
 		if rising_edge(CLK_GBE) then
 			if (load_current_state = LOAD) then
-				last_three_bytes <= x"2";
+				last_three_bytes <= x"1";
 			elsif (load_current_state = CLOSE_SUB and PC_READY_IN = '1') then
 				last_three_bytes <= last_three_bytes - x"1";
 			else
