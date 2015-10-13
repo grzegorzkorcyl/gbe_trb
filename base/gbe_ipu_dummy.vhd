@@ -123,7 +123,7 @@ begin
 		begin
 			if rising_edge(clk) then
 				if (current_state = IDLE) then
-					test_data_len <= "0000" & rand_size; --(x"00" & "00" & s(4 downto 0)) + x"0001";
+					test_data_len <= "00000" & rand_size(10 downto 0); --(x"00" & "00" & s(4 downto 0)) + x"0001";
 				else
 					test_data_len <= test_data_len;
 				end if;
