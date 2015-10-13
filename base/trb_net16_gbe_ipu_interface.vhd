@@ -74,7 +74,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal save_current_state, save_next_state : saveStates;
 	attribute syn_encoding of save_current_state : signal is "onehot";
 
-	type loadStates is (IDLE, WAIT_FOR_SUBS, REMOVE, WAIT_ONE, WAIT_TWO, DECIDE, PREPARE_TO_LOAD_SUB, WAIT_FOR_LOAD, LOAD, ADD_LAST_TWO, CLOSE_SUB, CLOSE_QUEUE, CLOSE_QUEUE_IMMEDIATELY);
+	type loadStates is (IDLE, WAIT_FOR_SUBS, REMOVE, WAIT_ONE, WAIT_TWO, DECIDE, PREPARE_TO_LOAD_SUB, WAIT_FOR_LOAD, LOAD, FINISH_ONE, FINISH_TWO, CLOSE_SUB, CLOSE_QUEUE, CLOSE_QUEUE_IMMEDIATELY);
 	signal load_current_state, load_next_state : loadStates;
 	attribute syn_encoding of load_current_state : signal is "onehot";
 
@@ -685,12 +685,23 @@ begin
 			when LOAD =>
 				load_state <= x"9";
 				--if (sf_eos = '1') then
-				if (eos_ctr = x"0") then
+				--if (eos_ctr = x"0") then
 				--if (sf_eos_q = '1') then
-					load_next_state <= CLOSE_SUB;
+				if (sf_eos = '1' and sf_rd_en = '1') then
+					load_next_state <= FINISH_ONE;
+				elsif (sf_eos = '1' and sf_rd_en = '0') then
+					load_next_state <= FINISH_TWO;
 				else
 					load_next_state <= LOAD;
 				end if;
+				
+			when FINISH_ONE =>
+				load_state <= x"d";
+				load_next_state <= CLOSE_SUB;
+				
+			when FINISH_TWO =>
+				load_state <= x"e";
+				load_next_state <= FINISH_ONE;
 
 			when CLOSE_SUB =>
 				load_state <= x"a";
@@ -866,7 +877,8 @@ begin
 
 			if (load_current_state = REMOVE) then
 				sf_rd_en <= '1';
-			elsif (eos_ctr /= x"f" and eos_ctr /= x"0") then
+			--elsif (eos_ctr /= x"f" and eos_ctr /= x"0") then
+			elsif (load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
 				sf_rd_en <= '1';
 			else
 				if (PC_READY_IN = '1') then
