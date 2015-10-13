@@ -620,7 +620,7 @@ begin
 		end if;
 	end process LOAD_MACHINE_PROC;
 
-	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, last_three_bytes, PC_READY_IN, sf_eos, sf_eos_qq, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
+	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, last_three_bytes, PC_READY_IN, sf_eos, sf_eos_q, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
 	begin
 		load_state <= x"0";
 		case (load_current_state) is
@@ -690,7 +690,7 @@ begin
 --				else
 --					load_next_state <= LOAD;
 --				end if;
-				if (sf_eos_qq = '1') then
+				if (sf_eos_q = '1' and sf_rd_en = '1') then
 					load_next_state <= CLOSE_SUB;
 				else
 					load_next_state <= LOAD;
