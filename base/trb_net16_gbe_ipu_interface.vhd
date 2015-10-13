@@ -846,40 +846,42 @@ begin
 --				sf_rd_en <= '0';
 --			end if;
 
-			if (load_current_state = REMOVE) then
-				sf_rd_en <= '1';
-			elsif (load_current_state = LOAD) then
-				if (sf_eos_q = '0') then
-					if (PC_READY_IN = '1') then
-						sf_rd_en <= '1';
-					else
-						sf_rd_en <= '0';
-					end if;
-				elsif (sf_eos_q = '1' or sf_eos_qq = '1') then
-					sf_rd_en <= '1';
-				else
-					sf_rd_en <= '0';
-				end if;
-			else
-				sf_rd_en <= '0';
-			end if;
-
 --			if (load_current_state = REMOVE) then
 --				sf_rd_en <= '1';
---			else
---				if (PC_READY_IN = '1') then
---					if (load_current_state = LOAD) then
+--			elsif (load_current_state = LOAD) then
+--				if (sf_eos_q = '0') then
+--					if (PC_READY_IN = '1') then
 --						sf_rd_en <= '1';
---					--elsif (load_current_state = CLOSE_SUB and last_three_bytes /= x"0") then
---					--	sf_rd_en <= '1';
 --					else
 --						sf_rd_en <= '0';
 --					end if;
---				elsif (load_current_state = LOAD)
+--				elsif (sf_eos_q = '1' or sf_eos_qq = '1') then
+--					sf_rd_en <= '1';
 --				else
 --					sf_rd_en <= '0';
 --				end if;
+--			else
+--				sf_rd_en <= '0';
 --			end if;
+
+			if (load_current_state = REMOVE) then
+				sf_rd_en <= '1';
+			elsif (eos_ctr /= x"f" and eos_ctr /= x"0") then
+				sf_rd_en <= '1';
+			else
+				if (PC_READY_IN = '1') then
+					if (load_current_state = LOAD) then
+						sf_rd_en <= '1';
+					--elsif (load_current_state = CLOSE_SUB and last_three_bytes /= x"0") then
+					--	sf_rd_en <= '1';
+					else
+						sf_rd_en <= '0';
+					end if;
+				elsif (load_current_state = LOAD)
+				else
+					sf_rd_en <= '0';
+				end if;
+			end if;
 
 
 		end if;
