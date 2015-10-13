@@ -697,11 +697,19 @@ begin
 				
 			when FINISH_ONE =>
 				load_state <= x"d";
-				load_next_state <= CLOSE_SUB;
+				if (PC_READY_IN = '1') then
+					load_next_state <= CLOSE_SUB;
+				else
+					load_next_state <= FINISH_ONE;
+				end if;
 				
 			when FINISH_TWO =>
 				load_state <= x"e";
-				load_next_state <= FINISH_ONE;
+				if (PC_READY_IN = '1') then
+					load_next_state <= FINISH_ONE;
+				else
+					load_next_state <= FINISH_TWO;
+				end if;
 
 			when CLOSE_SUB =>
 				load_state <= x"a";
@@ -878,11 +886,11 @@ begin
 			if (load_current_state = REMOVE) then
 				sf_rd_en <= '1';
 			--elsif (eos_ctr /= x"f" and eos_ctr /= x"0") then
-			elsif (load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
-				sf_rd_en <= '1';
 			else
 				if (PC_READY_IN = '1') then
 					if (load_current_state = LOAD and sf_eos = '0') then
+						sf_rd_en <= '1';
+					elsif (load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
 						sf_rd_en <= '1';
 					--elsif (load_current_state = CLOSE_SUB and last_three_bytes /= x"0") then
 					--	sf_rd_en <= '1';
@@ -1066,13 +1074,11 @@ begin
 		if rising_edge(CLK_GBE) then
 			--pc_ready_q <= PC_READY_IN;
 			if (PC_READY_IN = '1') then
-				if (load_current_state = LOAD) then
+				if (load_current_state = LOAD or load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
 					PC_WR_EN_OUT <= '1';
 				else
 					PC_WR_EN_OUT <= '0';
 				end if;
-			elsif (load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
-				PC_WR_EN_OUT <= '1';
 			else
 				PC_WR_EN_OUT <= '0';
 			end if;
