@@ -742,7 +742,7 @@ begin
 			if (load_current_state = REMOVE) then
 				sf_eos_q <= '0';
 				sf_eos_qq <= '0';
-			elsif (PC_READY_IN = '1') then 
+			elsif (sf_rd_en = '1') then 
 				if (load_current_state = LOAD and sf_eos = '1') then
 					sf_eos_q <= '1';
 				else
