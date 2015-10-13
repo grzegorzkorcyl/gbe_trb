@@ -621,7 +621,7 @@ begin
 		end if;
 	end process LOAD_MACHINE_PROC;
 
-	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, last_three_bytes, PC_READY_IN, sf_eos, sf_eos_qq, sf_rd_en, eos_ctr, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
+	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, last_three_bytes, PC_READY_IN, sf_eos, sf_eos_q, sf_rd_en, eos_ctr, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
 	begin
 		load_state <= x"0";
 		case (load_current_state) is
@@ -685,7 +685,8 @@ begin
 			when LOAD =>
 				load_state <= x"9";
 				--if (sf_eos = '1') then
-				if (eos_ctr = x"2") then
+				--if (eos_ctr = x"2") then
+				if (sf_eos_q = '1') then
 					load_next_state <= CLOSE_SUB;
 				else
 					load_next_state <= LOAD;
@@ -741,18 +742,19 @@ begin
 				sf_eos_q <= sf_eos_q;
 			end if;
 			
+			sf_eos_qq <= sf_eos_q;
 			
-			if (load_current_state = REMOVE) then
-				sf_eos_qq <= '0';
-			elsif (PC_READY_IN = '1') then 
-				if (load_current_state = LOAD and sf_eos_q = '1') then
-					sf_eos_qq <= '1';
-				else
-					sf_eos_qq <= sf_eos_qq;
-				end if;
-			else
-				sf_eos_qq <= sf_eos_qq;
-			end if;
+--			if (load_current_state = REMOVE) then
+--				sf_eos_qq <= '0';
+--			elsif (PC_READY_IN = '1') then 
+--				if (load_current_state = LOAD and sf_eos_q = '1') then
+--					sf_eos_qq <= '1';
+--				else
+--					sf_eos_qq <= sf_eos_qq;
+--				end if;
+--			else
+--				sf_eos_qq <= sf_eos_qq;
+--			end if;
 			
 			if (load_current_state = REMOVE) then
 				eos_ctr <= x"0";
@@ -841,23 +843,43 @@ begin
 --			else
 --				sf_rd_en <= '0';
 --			end if;
-			
-			
+
 			if (load_current_state = REMOVE) then
 				sf_rd_en <= '1';
-			else
-				if (PC_READY_IN = '1') then
-					if (load_current_state = LOAD and eos_ctr /= x"2") then
+			elsif (load_current_state = LOAD) then
+				if (sf_eos_q = '0') then
+					if (PC_READY_IN = '1') then
 						sf_rd_en <= '1';
-					--elsif (load_current_state = CLOSE_SUB and last_three_bytes /= x"0") then
-					--	sf_rd_en <= '1';
 					else
 						sf_rd_en <= '0';
 					end if;
+				elsif (sf_eos_q = '1' or sf_eos_qq = '1') then
+					sf_rd_en <= '1';
 				else
 					sf_rd_en <= '0';
 				end if;
+			else
+				sf_rd_en <= '0';
 			end if;
+
+--			if (load_current_state = REMOVE) then
+--				sf_rd_en <= '1';
+--			else
+--				if (PC_READY_IN = '1') then
+--					if (load_current_state = LOAD) then
+--						sf_rd_en <= '1';
+--					--elsif (load_current_state = CLOSE_SUB and last_three_bytes /= x"0") then
+--					--	sf_rd_en <= '1';
+--					else
+--						sf_rd_en <= '0';
+--					end if;
+--				elsif (load_current_state = LOAD)
+--				else
+--					sf_rd_en <= '0';
+--				end if;
+--			end if;
+
+
 		end if;
 	end process SF_RD_EN_PROC;
 
