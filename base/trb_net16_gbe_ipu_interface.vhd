@@ -1074,7 +1074,7 @@ begin
 		if rising_edge(CLK_GBE) then
 			--pc_ready_q <= PC_READY_IN;
 			if (PC_READY_IN = '1') then
-				if (load_current_state = LOAD or load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
+				if ( (load_current_state = LOAD and sf_eos = '0') or load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
 					PC_WR_EN_OUT <= '1';
 				else
 					PC_WR_EN_OUT <= '0';
