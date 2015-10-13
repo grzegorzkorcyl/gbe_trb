@@ -877,7 +877,6 @@ begin
 					else
 						sf_rd_en <= '0';
 					end if;
-				elsif (load_current_state = LOAD)
 				else
 					sf_rd_en <= '0';
 				end if;
