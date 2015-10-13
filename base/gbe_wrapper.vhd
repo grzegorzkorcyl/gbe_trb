@@ -34,7 +34,7 @@ entity gbe_wrapper is
 		LINK_HAS_PING             : std_logic_vector(3 downto 0) := "1111";
 		LINK_HAS_ARP              : std_logic_vector(3 downto 0) := "1111";
 		LINK_HAS_DHCP             : std_logic_vector(3 downto 0) := "1111";
-		LINK_HAS_READOUT          : std_logic_vector(3 downto 0) := "1111"; -- only one can be active
+		LINK_HAS_READOUT          : std_logic_vector(3 downto 0) := "1111";
 		LINK_HAS_SLOWCTRL         : std_logic_vector(3 downto 0) := "1111";
 
 		NUMBER_OF_OUTPUT_LINKS    : integer range 0 to 4         := 0

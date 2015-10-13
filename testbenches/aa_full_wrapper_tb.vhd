@@ -29,7 +29,7 @@ begin
 			USE_EXTERNAL_TRBNET_DUMMY => 1,
 			RX_PATH_ENABLE            => 1,
 			FIXED_SIZE_MODE           => 0,
-			INCREMENTAL_MODE          => 1,
+			INCREMENTAL_MODE          => 0,
 			FIXED_SIZE                => 100, --13750,
 			FIXED_DELAY_MODE          => 1,
 			UP_DOWN_MODE              => 1,

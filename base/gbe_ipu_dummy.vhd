@@ -9,6 +9,8 @@ use work.trb_net_std.all;
 use work.trb_net_components.all;
 use work.trb_net16_hub_func.all;
 
+use ieee.math_real.all;
+
 use work.trb_net_gbe_components.all;
 use work.trb_net_gbe_protocols.all;
 
@@ -81,6 +83,7 @@ architecture RTL of gbe_ipu_dummy is
 	signal increment_flag                                                                                                                                : std_logic;
 	signal local_trigger                                                                                                                                 : std_logic;
 	signal evt_ctr : std_logic_vector(31 downto 0);
+	signal rand_size : std_logic_vector(11 downto 0);
 
 begin
 	
@@ -93,14 +96,29 @@ begin
 	end generate fixed_size_gen;
 
 	random_size_gen : if FIXED_SIZE_MODE = 0 and INCREMENTAL_MODE = 0 generate
-		size_rand_inst : random_size
-			port map(Clk  => clk,
-				     Enb  => size_rand_en,
-				     Rst  => rst,
-				     Dout => s
-			);
+--		size_rand_inst : random_size
+--			port map(Clk  => clk,
+--				     Enb  => size_rand_en,
+--				     Rst  => rst,
+--				     Dout => s
+--			);
+			
+		process(clk)
+			variable seed1, seed2 : positive;
+			variable rand : real;
+			variable int_rand : integer;
+			variable stim : std_logic_vector(11 downto 0);
+		begin
+			if rising_edge(CLK) then
+				uniform(seed1, seed2, rand);
+				int_rand := integer(trunc(rand*4096.0));
+				stim := std_logic_vector(to_unsigned(int_rand, stim'length));
+				
+				rand_size <= stim;
+			end if;
+		end process;	
 
-		test_data_len <= (x"00" & "00" & s(4 downto 0)) + x"0001";
+		test_data_len <= "0000" & rand_size; --(x"00" & "00" & s(4 downto 0)) + x"0001";
 
 		process(clk)
 		begin
