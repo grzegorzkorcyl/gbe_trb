@@ -121,7 +121,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal saved_size : std_logic_vector(16 downto 0);
 	signal overwrite_afull : std_logic;
 	signal last_three_bytes : std_logic_vector(3 downto 0);
-	signal sf_eos_flag : std_logic;
+	signal sf_eos_q, sf_eos_qq : std_logic;
 
 begin
 
@@ -620,7 +620,7 @@ begin
 		end if;
 	end process LOAD_MACHINE_PROC;
 
-	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, last_three_bytes, PC_READY_IN, sf_eos, sf_eos_flag, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
+	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, last_three_bytes, PC_READY_IN, sf_eos, sf_eos_qq, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
 	begin
 		load_state <= x"0";
 		case (load_current_state) is
@@ -683,13 +683,19 @@ begin
 
 			when LOAD =>
 				load_state <= x"9";
-				if (sf_eos = '1' and PC_READY_IN = '1') then
-					load_next_state <= CLOSE_SUB;
-				elsif (sf_eos_flag = '1' and PC_READY_IN = '1') then
+--				if (sf_eos = '1' and PC_READY_IN = '1') then
+--					load_next_state <= CLOSE_SUB;
+--				elsif (sf_eos_flag = '1' and PC_READY_IN = '1') then
+--					load_next_state <= CLOSE_SUB;
+--				else
+--					load_next_state <= LOAD;
+--				end if;
+				if (sf_eos_qq = '1') then
 					load_next_state <= CLOSE_SUB;
 				else
 					load_next_state <= LOAD;
 				end if;
+	
 
 			when CLOSE_SUB =>
 				load_state <= x"a";
@@ -734,11 +740,18 @@ begin
 	begin
 		if rising_edge(CLK_GBE) then
 			if (load_current_state = REMOVE) then
-				sf_eos_flag <= '0';
-			elsif (load_current_state = LOAD and sf_eos = '1') then
-				sf_eos_flag <= '1';
+				sf_eos_q <= '0';
+				sf_eos_qq <= '0';
+			elsif (PC_READY_IN = '1') then 
+				if (load_current_state = LOAD and sf_eos = '1') then
+					sf_eos_q <= '1';
+				else
+					sf_eos_q <= sf_eos_q;
+				end if;
+				sf_eos_qq <= sf_eos_q;
 			else
-				sf_eos_flag <= sf_eos_flag;
+				sf_eos_q <= sf_eos_q;
+				sf_eos_qq <= sf_eos_qq;
 			end if;
 		end if;
 	end process;
