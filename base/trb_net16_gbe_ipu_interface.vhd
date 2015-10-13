@@ -836,7 +836,7 @@ begin
 				sf_rd_en <= '1';
 			else
 				if (PC_READY_IN = '1') then
-					if (load_current_state = LOAD) then
+					if (load_current_state = LOAD and not (sf_eos_q = '1' and sf_eos_qq = '1')) then
 						sf_rd_en <= '1';
 					--elsif (load_current_state = CLOSE_SUB and last_three_bytes /= x"0") then
 					--	sf_rd_en <= '1';
