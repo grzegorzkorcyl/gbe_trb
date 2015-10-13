@@ -685,8 +685,8 @@ begin
 			when LOAD =>
 				load_state <= x"9";
 				--if (sf_eos = '1') then
-				--if (eos_ctr = x"2") then
-				if (sf_eos_q = '1') then
+				if (eos_ctr = x"0") then
+				--if (sf_eos_q = '1') then
 					load_next_state <= CLOSE_SUB;
 				else
 					load_next_state <= LOAD;
@@ -760,8 +760,10 @@ begin
 				eos_ctr <= x"0";
 			elsif (eos_ctr = x"0" and load_current_state = LOAD and sf_eos = '1' and sf_rd_en = '1') then
 				eos_ctr <= x"1";
-			elsif (eos_ctr /= x"0" and load_current_state = LOAD and sf_rd_en = '1') then
+			elsif (eos_ctr = x"0" and load_current_state = LOAD and sf_eos = '1' and sf_rd_en = '0') then
 				eos_ctr <= x"2";
+			elsif (eos_ctr /= x"0" and load_current_state = LOAD and sf_rd_en = '1') then
+				eos_ctr <= eos_ctr - x"1";
 			else
 				eos_ctr <= eos_ctr;
 			end if;
