@@ -118,7 +118,18 @@ begin
 			end if;
 		end process;	
 
-		test_data_len <= "0000" & rand_size; --(x"00" & "00" & s(4 downto 0)) + x"0001";
+
+		process(clk)
+		begin
+			if rising_edge(clk) then
+				if (current_state = IDLE) then
+					test_data_len <= "0000" & rand_size; --(x"00" & "00" & s(4 downto 0)) + x"0001";
+				else
+					test_data_len <= test_data_len;
+				end if;
+			end if;
+		end process;
+				
 
 		process(clk)
 		begin
