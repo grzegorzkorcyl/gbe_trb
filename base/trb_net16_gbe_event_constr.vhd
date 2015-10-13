@@ -9,6 +9,8 @@ use work.trb_net_std.all;
 use work.trb_net_components.all;
 use work.trb_net16_hub_func.all;
 
+use ieee.math_real.all;
+
 use work.trb_net_gbe_components.all;
 use work.trb_net_gbe_protocols.all;
 
@@ -106,6 +108,7 @@ architecture RTL of trb_net16_gbe_event_constr is
 	
 	signal s : std_logic_vector(31 downto 0);
 	signal df_afull_q : std_logic;
+	signal rand_vec : std_logic_vector(11 downto 0);
 
 begin
 
@@ -248,6 +251,21 @@ begin
 				     Dout => s
 			);	
 		
+		process(clk)
+			variable seed1, seed2 : positive;
+			variable rand : real;
+			variable int_rand : integer;
+			variable stim : std_logic_vector(11 downto 0);
+		begin
+			if rising_edge(CLK) then
+				uniform(seed1, seed2, rand);
+				int_rand := integer(trunc(rand*4096.0));
+				stim := std_logic_vector(to_unsigned(int_rand, stim'length));
+				
+				rand_vec <= stim;
+			end if;
+		end process;
+		
 
 		df_full <= df_afull;
 
@@ -258,7 +276,7 @@ begin
 				df_afull_q <= df_afull;
 				
 				--if (load_current_state = IDLE) then
-					PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not s(0); -- COMMENTED SIMULATED FIFO AFULL
+					PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not rand_vec(0); -- and not s(0); -- COMMENTED SIMULATED FIFO AFULL
 				--else
 				--	PC_READY_OUT <= '0';
 				--end if;
