@@ -74,7 +74,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal save_current_state, save_next_state : saveStates;
 	attribute syn_encoding of save_current_state : signal is "onehot";
 
-	type loadStates is (IDLE, WAIT_FOR_SUBS, REMOVE, WAIT_ONE, WAIT_TWO, DECIDE, PREPARE_TO_LOAD_SUB, WAIT_FOR_LOAD, LOAD, CLOSE_PACKET, CLOSE_SUB, CLOSE_QUEUE, CLOSE_QUEUE_IMMEDIATELY);
+	type loadStates is (IDLE, WAIT_FOR_SUBS, REMOVE, WAIT_ONE, WAIT_TWO, DECIDE, PREPARE_TO_LOAD_SUB, WAIT_FOR_LOAD, LOAD, ADD_LAST_TWO, CLOSE_SUB, CLOSE_QUEUE, CLOSE_QUEUE_IMMEDIATELY);
 	signal load_current_state, load_next_state : loadStates;
 	attribute syn_encoding of load_current_state : signal is "onehot";
 
@@ -122,6 +122,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal overwrite_afull : std_logic;
 	signal last_three_bytes : std_logic_vector(3 downto 0);
 	signal sf_eos_q, sf_eos_qq : std_logic;
+	signal eos_ctr : std_logic_vector(3 downto 0);
 
 begin
 
@@ -620,7 +621,7 @@ begin
 		end if;
 	end process LOAD_MACHINE_PROC;
 
-	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, last_three_bytes, PC_READY_IN, sf_eos, sf_eos_qq, sf_rd_en, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
+	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, last_three_bytes, PC_READY_IN, sf_eos, sf_eos_qq, sf_rd_en, eos_ctr, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
 	begin
 		load_state <= x"0";
 		case (load_current_state) is
@@ -683,19 +684,12 @@ begin
 
 			when LOAD =>
 				load_state <= x"9";
---				if (sf_eos = '1' and PC_READY_IN = '1') then
---					load_next_state <= CLOSE_SUB;
---				elsif (sf_eos_flag = '1' and PC_READY_IN = '1') then
---					load_next_state <= CLOSE_SUB;
---				else
---					load_next_state <= LOAD;
---				end if;
-				if (sf_eos_qq = '1' and sf_rd_en = '1') then
+				--if (sf_eos = '1') then
+				if (eos_ctr = x"2") then
 					load_next_state <= CLOSE_SUB;
 				else
 					load_next_state <= LOAD;
 				end if;
-	
 
 			when CLOSE_SUB =>
 				load_state <= x"a";
@@ -759,6 +753,17 @@ begin
 			else
 				sf_eos_qq <= sf_eos_qq;
 			end if;
+			
+			if (load_current_state = REMOVE) then
+				eos_ctr <= x"0";
+			elsif (eos_ctr = x"0" and load_current_state = LOAD and sf_eos = '1' and sf_rd_en = '1') then
+				eos_ctr <= x"1";
+			elsif (eos_ctr /= x"0" and load_current_state = LOAD and sf_rd_en = '1') then
+				eos_ctr <= x"2";
+			else
+				eos_ctr <= eos_ctr;
+			end if;
+			
 		end if;
 	end process;
 	
