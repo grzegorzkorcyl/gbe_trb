@@ -742,7 +742,7 @@ begin
 			if (load_current_state = REMOVE) then
 				sf_eos_q <= '0';
 				sf_eos_qq <= '0';
-			elsif (sf_rd_en = '1') then 
+			elsif (PC_READY_IN = '1') then 
 				if (load_current_state = LOAD and sf_eos = '1') then
 					sf_eos_q <= '1';
 				else
@@ -836,7 +836,7 @@ begin
 				sf_rd_en <= '1';
 			else
 				if (PC_READY_IN = '1') then
-					if (load_current_state = LOAD and sf_eos_qq = '0') then
+					if (load_current_state = LOAD) then
 						sf_rd_en <= '1';
 					--elsif (load_current_state = CLOSE_SUB and last_three_bytes /= x"0") then
 					--	sf_rd_en <= '1';
