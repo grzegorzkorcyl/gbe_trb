@@ -757,12 +757,12 @@ begin
 --			end if;
 			
 			if (load_current_state = REMOVE) then
-				eos_ctr <= x"0";
-			elsif (eos_ctr = x"0" and load_current_state = LOAD and sf_eos = '1' and sf_rd_en = '1') then
+				eos_ctr <= x"f";
+			elsif (eos_ctr = x"f" and load_current_state = LOAD and sf_eos = '1' and sf_rd_en = '1') then
 				eos_ctr <= x"1";
-			elsif (eos_ctr = x"0" and load_current_state = LOAD and sf_eos = '1' and sf_rd_en = '0') then
+			elsif (eos_ctr = x"f" and load_current_state = LOAD and sf_eos = '1' and sf_rd_en = '0') then
 				eos_ctr <= x"2";
-			elsif (eos_ctr /= x"0" and load_current_state = LOAD and sf_rd_en = '1') then
+			elsif (eos_ctr /= x"f" and load_current_state = LOAD and sf_rd_en = '1') then
 				eos_ctr <= eos_ctr - x"1";
 			else
 				eos_ctr <= eos_ctr;
