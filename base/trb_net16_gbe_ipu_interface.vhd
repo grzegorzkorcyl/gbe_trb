@@ -1071,6 +1071,8 @@ begin
 				else
 					PC_WR_EN_OUT <= '0';
 				end if;
+			elsif (load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
+				PC_WR_EN_OUT <= '1';
 			else
 				PC_WR_EN_OUT <= '0';
 			end if;
