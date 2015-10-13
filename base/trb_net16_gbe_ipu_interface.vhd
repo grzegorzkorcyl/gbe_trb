@@ -741,12 +741,8 @@ begin
 		if rising_edge(CLK_GBE) then
 			if (load_current_state = REMOVE) then
 				sf_eos_q <= '0';
-			elsif (sf_rd_en = '1') then 
-				if (load_current_state = LOAD and sf_eos = '1') then
-					sf_eos_q <= '1';
-				else
-					sf_eos_q <= sf_eos_q;
-				end if;
+			elsif (load_current_state = LOAD and sf_eos = '1') then
+				sf_eos_q <= '1';
 			else
 				sf_eos_q <= sf_eos_q;
 			end if;
