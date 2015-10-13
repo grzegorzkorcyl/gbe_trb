@@ -864,7 +864,7 @@ begin
 --				sf_rd_en <= '0';
 --			end if;
 
-			if (load_current_state = REMOVE) then
+			if (load_current_state = REMOVE or load_current_state = IDLE) then
 				sf_rd_en <= '1';
 			elsif (eos_ctr /= x"f" and eos_ctr /= x"0") then
 				sf_rd_en <= '1';
