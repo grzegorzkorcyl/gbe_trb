@@ -756,7 +756,7 @@ begin
 --				sf_eos_qq <= sf_eos_qq;
 --			end if;
 			
-			if (load_current_state = REMOVE) then
+			if (load_current_state = REMOVE or load_current_state = IDLE) then
 				eos_ctr <= x"f";
 			elsif (eos_ctr = x"f" and load_current_state = LOAD and sf_eos = '1' and sf_rd_en = '1') then
 				eos_ctr <= x"1";
@@ -864,7 +864,7 @@ begin
 --				sf_rd_en <= '0';
 --			end if;
 
-			if (load_current_state = REMOVE or load_current_state = IDLE) then
+			if (load_current_state = REMOVE) then
 				sf_rd_en <= '1';
 			elsif (eos_ctr /= x"f" and eos_ctr /= x"0") then
 				sf_rd_en <= '1';
