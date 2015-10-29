@@ -578,6 +578,12 @@ end generate trbnet_gen;
 no_readout_gen : if INCLUDE_READOUT = '0' generate
 	resp_ready(3) <= '0';
 	busy(3) <= '0';
+	CTS_DATA_OUT <= (others => '0');
+	CTS_DATAREADY_OUT <= '0';
+	CTS_READOUT_FINISHED_OUT <= '0';
+	CTS_LENGTH_OUT <= (others => '0');
+	CTS_ERROR_PATTERN_OUT <= (others => '0');
+	FEE_READ_OUT <= '0';
 end generate no_readout_gen;
 
 --stat_gen : if g_SIMULATE = 0 generate

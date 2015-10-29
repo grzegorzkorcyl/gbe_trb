@@ -383,12 +383,6 @@ begin
 	
 	NO_LINK3_GEN : if (LINKS_ACTIVE(3) = '0') generate
 		make_reset3 <= '0';	
-		mlt_cts_data(4 * 32 - 1 downto 3 * 32) <= (others => '0');
-		mlt_cts_dataready(3) <= '0';
-		mlt_cts_readout_finished(3) <= '0';
-		mlt_cts_length(4 * 16 - 1 downto 3 * 16) <= (others => '0');
-		mlt_cts_error_pattern(4 * 32 - 1 downto 3 * 32) <= (others => '0');
-		mlt_fee_read(3) <= '0';
 	end generate NO_LINK3_GEN;		
 
 	-- sfp7
@@ -515,12 +509,6 @@ begin
 	
 	NO_LINK2_GEN : if (LINKS_ACTIVE(2) = '0') generate
 		make_reset2 <= '0';	
-		mlt_cts_data(3 * 32 - 1 downto 2 * 32) <= (others => '0');
-		mlt_cts_dataready(2) <= '0';
-		mlt_cts_readout_finished(2) <= '0';
-		mlt_cts_length(3 * 16 - 1 downto 2 * 16) <= (others => '0');
-		mlt_cts_error_pattern(3 * 32 - 1 downto 2 * 32) <= (others => '0');
-		mlt_fee_read(2) <= '0';
 	end generate NO_LINK2_GEN;	
 
 	-- sfp6
@@ -647,12 +635,6 @@ begin
 	
 	NO_LINK1_GEN : if (LINKS_ACTIVE(1) = '0') generate
 		make_reset1 <= '0';	
-		mlt_cts_data(2 * 32 - 1 downto 1 * 32) <= (others => '0');
-		mlt_cts_dataready(1) <= '0';
-		mlt_cts_readout_finished(1) <= '0';
-		mlt_cts_length(2 * 16 - 1 downto 1 * 16) <= (others => '0');
-		mlt_cts_error_pattern(2 * 32 - 1 downto 1 * 32) <= (others => '0');
-		mlt_fee_read(1) <= '0';
 	end generate NO_LINK1_GEN;	
 
 	-- sfp5
@@ -774,17 +756,11 @@ begin
 				MONITOR_DROPPED_OUT      => monitor_dropped(1 * 32 - 1 downto 0 * 32),
 				MONITOR_GEN_DBG_OUT => open,
 				MAKE_RESET_OUT           => make_reset0
-			);
+			);			
 	end generate GEN_LINK_0;
 	
 	NO_LINK0_GEN : if (LINKS_ACTIVE(0) = '0') generate
-		make_reset0 <= '0';	
-		mlt_cts_data(1 * 32 - 1 downto 0 * 32) <= (others => '0');
-		mlt_cts_dataready(0) <= '0';
-		mlt_cts_readout_finished(0) <= '0';
-		mlt_cts_length(1 * 16 - 1 downto 0 * 16) <= (others => '0');
-		mlt_cts_error_pattern(1 * 32 - 1 downto 0 * 32) <= (others => '0');
-		mlt_fee_read(0) <= '0';
+		make_reset0 <= '0';
 	end generate NO_LINK0_GEN;	
 
 	real_ipu_gen : if USE_EXTERNAL_TRBNET_DUMMY = 0 generate
