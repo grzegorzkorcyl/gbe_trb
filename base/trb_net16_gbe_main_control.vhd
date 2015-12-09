@@ -41,7 +41,6 @@ entity trb_net16_gbe_main_control is
 		MC_RESET_LINK_IN              : in  std_logic;
 		MC_IDLE_TOO_LONG_OUT          : out std_logic;
 		MC_DHCP_DONE_OUT              : out std_logic;
-		MC_MY_MAC_OUT                 : out std_logic_vector(47 downto 0);
 		MC_MY_MAC_IN                  : in  std_logic_vector(47 downto 0);
 
 		-- signals to/from receive controller
@@ -80,8 +79,6 @@ entity trb_net16_gbe_main_control is
 		PCS_AN_COMPLETE_IN            : in  std_logic;
 
 		-- signals to/from hub
-		MC_UNIQUE_ID_IN               : in  std_logic_vector(63 downto 0);
-
 		GSC_CLK_IN                    : in  std_logic;
 		GSC_INIT_DATAREADY_OUT        : out std_logic;
 		GSC_INIT_DATA_OUT             : out std_logic_vector(15 downto 0);
@@ -245,8 +242,6 @@ architecture trb_net16_gbe_main_control of trb_net16_gbe_main_control is
 	signal stat_data : std_logic_vector(31 downto 0);
 	signal stat_addr : std_logic_vector(7 downto 0);
 
-	signal unique_id : std_logic_vector(63 downto 0);
-
 	signal nothing_sent     : std_logic;
 	signal nothing_sent_ctr : std_logic_vector(31 downto 0);
 
@@ -256,8 +251,8 @@ architecture trb_net16_gbe_main_control of trb_net16_gbe_main_control is
 
 	attribute syn_preserve : boolean;
 	attribute syn_keep : boolean;
-	attribute syn_keep of unique_id, nothing_sent, link_state, state, redirect_state, dhcp_done : signal is true;
-	attribute syn_preserve of unique_id, nothing_sent, link_state, state, redirect_state, dhcp_done : signal is true;
+	attribute syn_keep of nothing_sent, link_state, state, redirect_state, dhcp_done : signal is true;
+	attribute syn_preserve of  nothing_sent, link_state, state, redirect_state, dhcp_done : signal is true;
 
 	signal mc_busy    : std_logic;
 	signal incl_dhcp  : std_logic;
@@ -265,7 +260,6 @@ architecture trb_net16_gbe_main_control of trb_net16_gbe_main_control is
 	signal selector_debug : std_logic_vector(63 downto 0);
 
 begin
-	unique_id <= MC_UNIQUE_ID_IN;
 
 	protocol_selector : entity work.trb_net16_gbe_protocol_selector
 		generic map(
@@ -308,7 +302,6 @@ begin
 			TC_SRC_IP_OUT                 => TC_SRC_IP_OUT,
 			TC_SRC_UDP_OUT                => TC_SRC_UDP_OUT,
 			MC_BUSY_IN                    => mc_busy,
-			MY_MAC_IN                     => MC_MY_MAC_IN,
 			MY_IP_OUT                     => open,
 			DHCP_START_IN                 => dhcp_start,
 			DHCP_DONE_OUT                 => dhcp_done,
@@ -806,42 +799,6 @@ begin
 	-- END OF LINK STATE CONTROL
 	--*************
 
-	--*************
-	-- GENERATE MAC_ADDRESS
-	--g_MY_MAC <= unique_id(31 downto 8) & x"be0002";
-	MC_MY_MAC_OUT <= unique_id(31 downto 8) & x"be0002";
-
-	--*************
-
-	--****************
-	-- TRI SPEED MAC CONTROLLER
-
-	--TSMAC_CONTROLLER : trb_net16_gbe_mac_control
-	--port map(
-	--	CLK				=> CLK,
-	--	RESET			=> MC_RESET_LINK_IN, 
-	--	
-	---- signals to/from main controller
-	--	MC_TSMAC_READY_OUT	=> tsm_ready,
-	--	MC_RECONF_IN		=> tsm_reconf,
-	--	MC_GBE_EN_IN		=> '1',
-	--	MC_RX_DISCARD_FCS	=> '0',
-	--	MC_PROMISC_IN		=> '1',
-	--	MC_MAC_ADDR_IN		=> g_MY_MAC, --x"001122334455",
-	--
-	---- signal to/from Host interface of TriSpeed MAC
-	--	TSM_HADDR_OUT		=> tsm_haddr,
-	--	TSM_HDATA_OUT		=> tsm_hdata,
-	--	TSM_HCS_N_OUT		=> tsm_hcs_n,
-	--	TSM_HWRITE_N_OUT	=> tsm_hwrite_n,
-	--	TSM_HREAD_N_OUT		=> tsm_hread_n,
-	--	TSM_HREADY_N_IN		=> TSM_HREADY_N_IN,
-	--	TSM_HDATA_EN_N_IN	=> TSM_HDATA_EN_N_IN,
-	--
-	--	DEBUG_OUT		=> open
-	--);
-
-	--DEBUG_OUT <= mac_control_debug;
 	process(CLK)
 	begin
 		if rising_edge(CLK) then

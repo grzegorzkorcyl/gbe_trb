@@ -74,7 +74,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal save_current_state, save_next_state : saveStates;
 	attribute syn_encoding of save_current_state : signal is "onehot";
 
-	type loadStates is (IDLE, WAIT_FOR_SUBS, REMOVE, WAIT_ONE, WAIT_TWO, DECIDE, PREPARE_TO_LOAD_SUB, WAIT_FOR_LOAD, LOAD, CLOSE_PACKET, CLOSE_SUB, CLOSE_QUEUE, CLOSE_QUEUE_IMMEDIATELY);
+	type loadStates is (IDLE, WAIT_FOR_SUBS, REMOVE, WAIT_ONE, WAIT_TWO, DECIDE, PREPARE_TO_LOAD_SUB, WAIT_FOR_LOAD, LOAD, FINISH_ONE, FINISH_TWO, CLOSE_SUB, CLOSE_QUEUE, CLOSE_QUEUE_IMMEDIATELY);
 	signal load_current_state, load_next_state : loadStates;
 	attribute syn_encoding of load_current_state : signal is "onehot";
 
@@ -117,9 +117,13 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	attribute syn_keep of sf_cnt : signal is "true";
 	signal saved_bytes_ctr : std_logic_vector(31 downto 0);
 	signal longer_busy_ctr : std_logic_vector(7 downto 0);
-	signal uneven_ctr : std_logic_vector(3 downto 0);
-	signal saved_size : std_logic_vector(16 downto 0);
+	signal uneven_ctr      : std_logic_vector(3 downto 0);
+	signal saved_size      : std_logic_vector(16 downto 0);
 	signal overwrite_afull : std_logic;
+
+	signal last_three_bytes    : std_logic_vector(3 downto 0);
+	signal sf_eos_q, sf_eos_qq : std_logic;
+	signal eos_ctr             : std_logic_vector(3 downto 0);
 
 begin
 
@@ -192,7 +196,7 @@ begin
 				else
 					save_next_state <= CLOSE;
 				end if;
-				
+
 			when ADD_MISSING =>
 				if (saved_size = x"0000" & "1") then
 					save_next_state <= ADD_SUBSUB1;
@@ -371,7 +375,7 @@ begin
 			end if;
 
 			if (save_current_state = IDLE) then
-				sf_wr_lock <= '1';	
+				sf_wr_lock <= '1';
 				saved_size <= (others => '0');
 			elsif (save_current_state = SAVE_DATA and size_check_ctr = 2 and sf_wr_en = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
 				sf_wr_lock <= '0';
@@ -482,15 +486,15 @@ begin
 
 	sf_afull_sim_gen : if DO_SIMULATION = 1 generate
 
---				process
---				begin
---					sf_afull <= '0';
---					wait for 21310 ns;
---					sf_afull <= '1';
---					wait for 10 ns;
---					sf_afull <= sf_afull_real;			
---					wait;
---				end process;
+		--				process
+		--				begin
+		--					sf_afull <= '0';
+		--					wait for 21310 ns;
+		--					sf_afull <= '1';
+		--					wait for 10 ns;
+		--					sf_afull <= sf_afull_real;			
+		--					wait;
+		--				end process;
 
 		sf_afull <= sf_afull_real;
 
@@ -511,7 +515,7 @@ begin
 	--		end process;
 	--		
 	--	end generate size_check_debug;
-	
+
 	process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
@@ -526,12 +530,10 @@ begin
 			end if;
 		end if;
 	end process;
-		
 
 	FEE_READ_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			
 			if (save_current_state = SAVE_DATA) then
 				if (sf_afull = '0' or overwrite_afull = '1') then
 					FEE_READ_OUT <= '1';
@@ -541,16 +543,16 @@ begin
 			else
 				FEE_READ_OUT <= '1';
 			end if;
-			
---			if (sf_afull = '0') then
---				--if (save_current_state = IDLE or save_current_state = SAVE_EVT_ADDR or save_current_state = WAIT_FOR_DATA or save_current_state = SAVE_DATA) then
---					FEE_READ_OUT <= '1';
---				--else
---				--	FEE_READ_OUT <= '0';
---				--end if;
---			else
---				FEE_READ_OUT <= '0';
---			end if;
+
+		--			if (sf_afull = '0') then
+		--				--if (save_current_state = IDLE or save_current_state = SAVE_EVT_ADDR or save_current_state = WAIT_FOR_DATA or save_current_state = SAVE_DATA) then
+		--					FEE_READ_OUT <= '1';
+		--				--else
+		--				--	FEE_READ_OUT <= '0';
+		--				--end if;
+		--			else
+		--				FEE_READ_OUT <= '0';
+		--			end if;
 		end if;
 	end process FEE_READ_PROC;
 
@@ -618,7 +620,7 @@ begin
 		end if;
 	end process LOAD_MACHINE_PROC;
 
-	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, PC_READY_IN, sf_eos, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
+	LOAD_MACHINE : process(load_current_state, saved_events_ctr_gbe, loaded_events_ctr, loaded_bytes_ctr, last_three_bytes, sf_eos_q, sf_rd_en, eos_ctr, PC_READY_IN, sf_eos, queue_size, number_of_subs, subevent_size, MAX_QUEUE_SIZE_IN, MAX_SUBS_IN_QUEUE_IN, MAX_SINGLE_SUB_SIZE_IN, previous_bank, previous_ttype, trigger_type, bank_select, MULT_EVT_ENABLE_IN)
 	begin
 		load_state <= x"0";
 		case (load_current_state) is
@@ -681,10 +683,28 @@ begin
 
 			when LOAD =>
 				load_state <= x"9";
-				if (sf_eos = '1') then
-					load_next_state <= CLOSE_SUB;
+				if (sf_eos = '1' and sf_rd_en = '1') then
+					load_next_state <= FINISH_ONE;
+				elsif (sf_eos = '1' and sf_rd_en = '0') then
+					load_next_state <= FINISH_TWO;
 				else
 					load_next_state <= LOAD;
+				end if;
+
+			when FINISH_ONE =>
+				load_state <= x"d";
+				if (PC_READY_IN = '1') then
+					load_next_state <= CLOSE_SUB;
+				else
+					load_next_state <= FINISH_ONE;
+				end if;
+
+			when FINISH_TWO =>
+				load_state <= x"e";
+				if (PC_READY_IN = '1') then
+					load_next_state <= FINISH_ONE;
+				else
+					load_next_state <= FINISH_TWO;
 				end if;
 
 			when CLOSE_SUB =>
@@ -720,6 +740,47 @@ begin
 			D_IN  => saved_events_ctr,
 			D_OUT => saved_events_ctr_gbe
 		);
+
+	process(CLK_GBE)
+	begin
+		if rising_edge(CLK_GBE) then
+			if (load_current_state = LOAD) then
+				last_three_bytes <= x"1";
+			elsif (load_current_state = CLOSE_SUB and PC_READY_IN = '1') then
+				last_three_bytes <= last_three_bytes - x"1";
+			else
+				last_three_bytes <= last_three_bytes;
+			end if;
+		end if;
+	end process;
+
+	process(CLK_GBE)
+	begin
+		if rising_edge(CLK_GBE) then
+			if (load_current_state = REMOVE) then
+				sf_eos_q <= '0';
+			elsif (load_current_state = LOAD and sf_eos = '1') then
+				sf_eos_q <= '1';
+			else
+				sf_eos_q <= sf_eos_q;
+			end if;
+
+			sf_eos_qq <= sf_eos_q;
+
+			if (load_current_state = REMOVE or load_current_state = IDLE) then
+				eos_ctr <= x"f";
+			elsif (eos_ctr = x"f" and load_current_state = LOAD and sf_eos = '1' and sf_rd_en = '1') then
+				eos_ctr <= x"1";
+			elsif (eos_ctr = x"f" and load_current_state = LOAD and sf_eos = '1' and sf_rd_en = '0') then
+				eos_ctr <= x"2";
+			elsif (eos_ctr /= x"f" and load_current_state = LOAD and sf_rd_en = '1') then
+				eos_ctr <= eos_ctr - x"1";
+			else
+				eos_ctr <= eos_ctr;
+			end if;
+
+		end if;
+	end process;
 
 	--TODO: all queue split conditions here 
 	-- the queue size counter used only for closing current queue
@@ -769,17 +830,23 @@ begin
 	SF_RD_EN_PROC : process(CLK_GBE)
 	begin
 		if rising_edge(CLK_GBE) then
-			if (PC_READY_IN = '1') then
-				if (load_current_state = REMOVE) then
-					sf_rd_en <= '1';
-				elsif (load_current_state = LOAD and PC_READY_IN = '1') then --pc_ready_q = '1') then
-					sf_rd_en <= '1';
+			if (load_current_state = REMOVE) then
+				sf_rd_en <= '1';
+			else
+				if (PC_READY_IN = '1') then
+					if (load_current_state = LOAD and sf_eos = '0') then
+						sf_rd_en <= '1';
+					elsif (load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
+						sf_rd_en <= '1';
+					else
+						sf_rd_en <= '0';
+					end if;
 				else
 					sf_rd_en <= '0';
 				end if;
-			else
-				sf_rd_en <= '0';
 			end if;
+
+
 		end if;
 	end process SF_RD_EN_PROC;
 
@@ -949,9 +1016,8 @@ begin
 	PC_WR_EN_PROC : process(CLK_GBE)
 	begin
 		if rising_edge(CLK_GBE) then
-			--pc_ready_q <= PC_READY_IN;
 			if (PC_READY_IN = '1') then
-				if (load_current_state = LOAD) then
+				if ( (load_current_state = LOAD and sf_eos = '0') or load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
 					PC_WR_EN_OUT <= '1';
 				else
 					PC_WR_EN_OUT <= '0';
@@ -1020,11 +1086,6 @@ begin
 	MONITOR_OUT(223 downto 32) <= (others => '0');
 
 end architecture RTL;
-
-
-
-
-
 
 --library ieee;
 --

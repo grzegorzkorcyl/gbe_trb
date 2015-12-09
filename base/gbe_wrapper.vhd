@@ -35,9 +35,7 @@ entity gbe_wrapper is
 		LINK_HAS_ARP              : std_logic_vector(3 downto 0) := "1111";
 		LINK_HAS_DHCP             : std_logic_vector(3 downto 0) := "1111";
 		LINK_HAS_READOUT          : std_logic_vector(3 downto 0) := "1111";
-		LINK_HAS_SLOWCTRL         : std_logic_vector(3 downto 0) := "1111";
-
-		NUMBER_OF_OUTPUT_LINKS    : integer range 0 to 4         := 0
+		LINK_HAS_SLOWCTRL         : std_logic_vector(3 downto 0) := "1111"
 	);
 	port(
 		CLK_SYS_IN               : in  std_logic;
@@ -45,10 +43,6 @@ entity gbe_wrapper is
 		RESET                    : in  std_logic;
 		GSR_N                    : in  std_logic;
 
-		SD_RXD_P_IN              : in  std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0);
-		SD_RXD_N_IN              : in  std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0);
-		SD_TXD_P_OUT             : out std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0);
-		SD_TXD_N_OUT             : out std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0);
 		SD_PRSNT_N_IN            : in  std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0);
 		SD_LOS_IN                : in  std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0); -- SFP Loss Of Signal ('0' = OK, '1' = no signal)
 		SD_TXDIS_OUT             : out std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0); -- SFP disable
@@ -85,20 +79,11 @@ entity gbe_wrapper is
 		GSC_REPLY_READ_OUT       : out std_logic;
 		GSC_BUSY_IN              : in  std_logic;
 		-- IP configuration
-		SLV_ADDR_IN              : in  std_logic_vector(7 downto 0);
-		SLV_READ_IN              : in  std_logic;
-		SLV_WRITE_IN             : in  std_logic;
-		SLV_BUSY_OUT             : out std_logic;
-		SLV_ACK_OUT              : out std_logic;
-		SLV_DATA_IN              : in  std_logic_vector(31 downto 0);
-		SLV_DATA_OUT             : out std_logic_vector(31 downto 0);
+		BUS_IP_RX                : in  CTRLBUS_RX;
+		BUS_IP_TX                : out CTRLBUS_TX;
 		-- Registers config
-		BUS_ADDR_IN              : in  std_logic_vector(7 downto 0);
-		BUS_DATA_IN              : in  std_logic_vector(31 downto 0);
-		BUS_DATA_OUT             : out std_logic_vector(31 downto 0);
-		BUS_WRITE_EN_IN          : in  std_logic;
-		BUS_READ_EN_IN           : in  std_logic;
-		BUS_ACK_OUT              : out std_logic;
+		BUS_REG_RX               : in  CTRLBUS_RX;
+		BUS_REG_TX               : out CTRLBUS_TX;
 
 		MAKE_RESET_OUT           : out std_logic;
 
@@ -151,8 +136,8 @@ architecture RTL of gbe_wrapper is
 
 	signal dbg_hist, dbg_hist2 : hist_array;
 
-	signal master_mac, mac_0, mac_1, mac_2, mac_3 : std_logic_vector(47 downto 0);
-	signal cfg_max_reply                          : std_logic_vector(31 downto 0);
+	signal mac_0, mac_1, mac_2, mac_3 : std_logic_vector(47 downto 0);
+	signal cfg_max_reply              : std_logic_vector(31 downto 0);
 
 	signal mlt_cts_number           : std_logic_vector(16 * NUMBER_OF_GBE_LINKS - 1 downto 0);
 	signal mlt_cts_code             : std_logic_vector(8 * NUMBER_OF_GBE_LINKS - 1 downto 0);
@@ -199,20 +184,24 @@ architecture RTL of gbe_wrapper is
 	signal monitor_rx_frames, monitor_rx_bytes, monitor_tx_frames, monitor_tx_bytes, monitor_tx_packets, monitor_dropped : std_logic_vector(4 * 32 - 1 downto 0);
 	signal sum_rx_frames, sum_rx_bytes, sum_tx_frames, sum_tx_bytes, sum_tx_packets, sum_dropped                         : std_logic_vector(31 downto 0);
 
-	signal dummy_event : std_logic_vector(15 downto 0);
-	signal dummy_mode  : std_logic;
+	signal busip0, busip1, busip2, busip3                       : CTRLBUS_TX;
+	signal SD_RXD_P_IN, SD_RXD_N_IN, SD_TXD_P_OUT, SD_TXD_N_OUT : std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0);
+	attribute nopad : string;
+	attribute nopad of SD_RXD_P_IN, SD_RXD_N_IN, SD_TXD_P_OUT, SD_TXD_N_OUT : signal is "true";
+
+	signal dummy_event                                        : std_logic_vector(15 downto 0);
+	signal dummy_mode                                         : std_logic;
 	signal make_reset0, make_reset1, make_reset2, make_reset3 : std_logic := '0';
-	signal monitor_gen_dbg : std_logic_vector(c_MAX_PROTOCOLS * 64 - 1 downto 0);
+	signal monitor_gen_dbg                                    : std_logic_vector(c_MAX_PROTOCOLS * 64 - 1 downto 0);
 
 begin
-	
 	mac_impl_gen : if DO_SIMULATION = 0 generate
-		mac_0 <= master_mac(31 downto 8) & x"f50002";
-		mac_1 <= master_mac(31 downto 8) & x"f60002";
-		mac_2 <= master_mac(31 downto 8) & x"f70002";
-		mac_3 <= master_mac(31 downto 8) & x"f80002";
+		mac_0 <= MC_UNIQUE_ID_IN(15 downto 8) & MC_UNIQUE_ID_IN(23 downto 16) & MC_UNIQUE_ID_IN(31 downto 24) & x"0" & MC_UNIQUE_ID_IN(35 downto 32) & x"7ada";
+		mac_1 <= MC_UNIQUE_ID_IN(15 downto 8) & MC_UNIQUE_ID_IN(23 downto 16) & MC_UNIQUE_ID_IN(31 downto 24) & x"1" & MC_UNIQUE_ID_IN(35 downto 32) & x"7ada";
+		mac_2 <= MC_UNIQUE_ID_IN(15 downto 8) & MC_UNIQUE_ID_IN(23 downto 16) & MC_UNIQUE_ID_IN(31 downto 24) & x"2" & MC_UNIQUE_ID_IN(35 downto 32) & x"7ada";
+		mac_3 <= MC_UNIQUE_ID_IN(15 downto 8) & MC_UNIQUE_ID_IN(23 downto 16) & MC_UNIQUE_ID_IN(31 downto 24) & x"3" & MC_UNIQUE_ID_IN(35 downto 32) & x"7ada";
 	end generate mac_impl_gen;
-	
+
 	mac_sim_gen : if DO_SIMULATION = 1 generate
 		mac_0 <= x"ffffffffffff";
 		mac_1 <= x"ffffffffffff";
@@ -221,7 +210,7 @@ begin
 	end generate mac_sim_gen;
 
 	all_links_ready <= '1' when dhcp_done = x"f" else '0';
-	
+
 	MAKE_RESET_OUT <= '1' when make_reset3 = '1' or make_reset2 = '1' or make_reset1 = '1' or make_reset0 = '1' else '0';
 
 	physical_impl_gen : if DO_SIMULATION = 0 generate
@@ -295,7 +284,6 @@ begin
 				CLK_RX_125_IN            => clk_125_rx_from_pcs(3),
 				RESET                    => RESET,
 				GSR_N                    => GSR_N,
-				MY_MAC_OUT               => master_mac,
 				MY_MAC_IN                => mac_3,
 				DHCP_DONE_OUT            => dhcp_done(3),
 				MAC_READY_CONF_IN        => mac_ready_conf(3),
@@ -329,12 +317,11 @@ begin
 				CTS_READ_IN              => mlt_cts_read(3),
 				CTS_LENGTH_OUT           => mlt_cts_length(4 * 16 - 1 downto 3 * 16),
 				CTS_ERROR_PATTERN_OUT    => mlt_cts_error_pattern(4 * 32 - 1 downto 3 * 32),
-				FEE_DATA_IN              => mlt_fee_data(4 * 16 - 1 downto 3 * 16),
+				FEE_DATA_IN              => mlt_fee_data(4 * 16 - 1 downto 3 * 16), 
 				FEE_DATAREADY_IN         => mlt_fee_dataready(3),
 				FEE_READ_OUT             => mlt_fee_read(3),
 				FEE_STATUS_BITS_IN       => mlt_fee_status(4 * 32 - 1 downto 3 * 32),
 				FEE_BUSY_IN              => mlt_fee_busy(3),
-				MC_UNIQUE_ID_IN          => MC_UNIQUE_ID_IN,
 				GSC_CLK_IN               => mlt_gsc_clk(3),
 				GSC_INIT_DATAREADY_OUT   => mlt_gsc_init_dataready(3),
 				GSC_INIT_DATA_OUT        => mlt_gsc_init_data(4 * 16 - 1 downto 3 * 16),
@@ -345,13 +332,13 @@ begin
 				GSC_REPLY_PACKET_NUM_IN  => mlt_gsc_reply_packet(4 * 3 - 1 downto 3 * 3),
 				GSC_REPLY_READ_OUT       => mlt_gsc_reply_read(3),
 				GSC_BUSY_IN              => mlt_gsc_busy(3),
-				SLV_ADDR_IN              => SLV_ADDR_IN,
-				SLV_READ_IN              => SLV_READ_IN,
-				SLV_WRITE_IN             => SLV_WRITE_IN,
-				SLV_BUSY_OUT             => SLV_BUSY_OUT,
-				SLV_ACK_OUT              => SLV_ACK_OUT,
-				SLV_DATA_IN              => SLV_DATA_IN,
-				SLV_DATA_OUT             => SLV_DATA_OUT,
+				SLV_ADDR_IN              => BUS_IP_RX.addr(7 downto 0),
+				SLV_READ_IN              => BUS_IP_RX.read,
+				SLV_WRITE_IN             => BUS_IP_RX.write,
+				SLV_BUSY_OUT             => busip3.nack,
+				SLV_ACK_OUT              => busip3.ack,
+				SLV_DATA_IN              => BUS_IP_RX.data,
+				SLV_DATA_OUT             => busip3.data,
 				CFG_GBE_ENABLE_IN        => cfg_gbe_enable,
 				CFG_IPU_ENABLE_IN        => cfg_ipu_enable,
 				CFG_MULT_ENABLE_IN       => cfg_mult_enable,
@@ -376,14 +363,17 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(4 * 32 - 1 downto 3 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(4 * 32 - 1 downto 3 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(4 * 32 - 1 downto 3 * 32),
-				MONITOR_GEN_DBG_OUT => monitor_gen_dbg,
+				MONITOR_GEN_DBG_OUT      => monitor_gen_dbg,
 				MAKE_RESET_OUT           => make_reset3
 			);
 	end generate GEN_LINK_3;
-	
+
 	NO_LINK3_GEN : if (LINKS_ACTIVE(3) = '0') generate
-		make_reset3 <= '0';	
-	end generate NO_LINK3_GEN;		
+		make_reset3 <= '0';
+		busip3.data <= (others => '0');
+		busip3.ack  <= '0';
+		busip3.nack <= '0';
+	end generate NO_LINK3_GEN;
 
 	-- sfp7
 	GEN_LINK_2 : if (LINKS_ACTIVE(2) = '1') generate
@@ -413,7 +403,6 @@ begin
 				CLK_RX_125_IN            => clk_125_rx_from_pcs(2),
 				RESET                    => RESET,
 				GSR_N                    => GSR_N,
-				MY_MAC_OUT               => open,
 				MY_MAC_IN                => mac_2,
 				DHCP_DONE_OUT            => dhcp_done(2),
 				MAC_READY_CONF_IN        => mac_ready_conf(2),
@@ -452,7 +441,6 @@ begin
 				FEE_READ_OUT             => mlt_fee_read(2),
 				FEE_STATUS_BITS_IN       => mlt_fee_status(3 * 32 - 1 downto 2 * 32),
 				FEE_BUSY_IN              => mlt_fee_busy(2),
-				MC_UNIQUE_ID_IN          => MC_UNIQUE_ID_IN,
 				GSC_CLK_IN               => mlt_gsc_clk(2),
 				GSC_INIT_DATAREADY_OUT   => mlt_gsc_init_dataready(2),
 				GSC_INIT_DATA_OUT        => mlt_gsc_init_data(3 * 16 - 1 downto 2 * 16),
@@ -463,21 +451,13 @@ begin
 				GSC_REPLY_PACKET_NUM_IN  => mlt_gsc_reply_packet(3 * 3 - 1 downto 2 * 3),
 				GSC_REPLY_READ_OUT       => mlt_gsc_reply_read(2),
 				GSC_BUSY_IN              => mlt_gsc_busy(2),
-
-				--		     SLV_ADDR_IN              => (others => '0'), --SLV_ADDR_IN,
-				--		     SLV_READ_IN              => '0', --SLV_READ_IN,
-				--		     SLV_WRITE_IN             => '0', --SLV_WRITE_IN,
-				--		     SLV_BUSY_OUT             => open, --SLV_BUSY_OUT,
-				--		     SLV_ACK_OUT              => open, --SLV_ACK_OUT,
-				--		     SLV_DATA_IN              => (others => '0'), --SLV_DATA_IN,
-				--		     SLV_DATA_OUT             => open, --SLV_DATA_OUT,
-				SLV_ADDR_IN              => SLV_ADDR_IN,
-				SLV_READ_IN              => SLV_READ_IN,
-				SLV_WRITE_IN             => SLV_WRITE_IN,
-				SLV_BUSY_OUT             => open,
-				SLV_ACK_OUT              => open,
-				SLV_DATA_IN              => SLV_DATA_IN,
-				SLV_DATA_OUT             => open,
+				SLV_ADDR_IN              => BUS_IP_RX.addr(7 downto 0),
+				SLV_READ_IN              => BUS_IP_RX.read,
+				SLV_WRITE_IN             => BUS_IP_RX.write,
+				SLV_BUSY_OUT             => busip2.nack,
+				SLV_ACK_OUT              => busip2.ack,
+				SLV_DATA_IN              => BUS_IP_RX.data,
+				SLV_DATA_OUT             => busip2.data,
 				CFG_GBE_ENABLE_IN        => cfg_gbe_enable,
 				CFG_IPU_ENABLE_IN        => cfg_ipu_enable,
 				CFG_MULT_ENABLE_IN       => cfg_mult_enable,
@@ -502,14 +482,17 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(3 * 32 - 1 downto 2 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(3 * 32 - 1 downto 2 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(3 * 32 - 1 downto 2 * 32),
-				MONITOR_GEN_DBG_OUT => open,
+				MONITOR_GEN_DBG_OUT      => open,
 				MAKE_RESET_OUT           => make_reset2
 			);
 	end generate GEN_LINK_2;
-	
+
 	NO_LINK2_GEN : if (LINKS_ACTIVE(2) = '0') generate
-		make_reset2 <= '0';	
-	end generate NO_LINK2_GEN;	
+		make_reset2 <= '0';
+		busip2.data <= (others => '0');
+		busip2.ack  <= '0';
+		busip2.nack <= '0';
+	end generate NO_LINK2_GEN;
 
 	-- sfp6
 	GEN_LINK_1 : if (LINKS_ACTIVE(1) = '1') generate
@@ -539,7 +522,6 @@ begin
 				CLK_RX_125_IN            => clk_125_rx_from_pcs(1),
 				RESET                    => RESET,
 				GSR_N                    => GSR_N,
-				MY_MAC_OUT               => open,
 				MY_MAC_IN                => mac_1,
 				DHCP_DONE_OUT            => dhcp_done(1),
 				MAC_READY_CONF_IN        => mac_ready_conf(1),
@@ -578,7 +560,6 @@ begin
 				FEE_READ_OUT             => mlt_fee_read(1),
 				FEE_STATUS_BITS_IN       => mlt_fee_status(2 * 32 - 1 downto 1 * 32),
 				FEE_BUSY_IN              => mlt_fee_busy(1),
-				MC_UNIQUE_ID_IN          => MC_UNIQUE_ID_IN,
 				GSC_CLK_IN               => mlt_gsc_clk(1),
 				GSC_INIT_DATAREADY_OUT   => mlt_gsc_init_dataready(1),
 				GSC_INIT_DATA_OUT        => mlt_gsc_init_data(2 * 16 - 1 downto 1 * 16),
@@ -589,21 +570,13 @@ begin
 				GSC_REPLY_PACKET_NUM_IN  => mlt_gsc_reply_packet(2 * 3 - 1 downto 1 * 3),
 				GSC_REPLY_READ_OUT       => mlt_gsc_reply_read(1),
 				GSC_BUSY_IN              => mlt_gsc_busy(1),
-
-				--		     SLV_ADDR_IN              => (others => '0'), --SLV_ADDR_IN,
-				--		     SLV_READ_IN              => '0', --SLV_READ_IN,
-				--		     SLV_WRITE_IN             => '0', --SLV_WRITE_IN,
-				--		     SLV_BUSY_OUT             => open, --SLV_BUSY_OUT,
-				--		     SLV_ACK_OUT              => open, --SLV_ACK_OUT,
-				--		     SLV_DATA_IN              => (others => '0'), --SLV_DATA_IN,
-				--		     SLV_DATA_OUT             => open, --SLV_DATA_OUT,
-				SLV_ADDR_IN              => SLV_ADDR_IN,
-				SLV_READ_IN              => SLV_READ_IN,
-				SLV_WRITE_IN             => SLV_WRITE_IN,
-				SLV_BUSY_OUT             => open,
-				SLV_ACK_OUT              => open,
-				SLV_DATA_IN              => SLV_DATA_IN,
-				SLV_DATA_OUT             => open,
+				SLV_ADDR_IN              => BUS_IP_RX.addr(7 downto 0),
+				SLV_READ_IN              => BUS_IP_RX.read,
+				SLV_WRITE_IN             => BUS_IP_RX.write,
+				SLV_BUSY_OUT             => busip1.nack,
+				SLV_ACK_OUT              => busip1.ack,
+				SLV_DATA_IN              => BUS_IP_RX.data,
+				SLV_DATA_OUT             => busip1.data,
 				CFG_GBE_ENABLE_IN        => cfg_gbe_enable,
 				CFG_IPU_ENABLE_IN        => cfg_ipu_enable,
 				CFG_MULT_ENABLE_IN       => cfg_mult_enable,
@@ -628,14 +601,17 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(2 * 32 - 1 downto 1 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(2 * 32 - 1 downto 1 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(2 * 32 - 1 downto 1 * 32),
-				MONITOR_GEN_DBG_OUT => open,
+				MONITOR_GEN_DBG_OUT      => open,
 				MAKE_RESET_OUT           => make_reset1
 			);
 	end generate GEN_LINK_1;
-	
+
 	NO_LINK1_GEN : if (LINKS_ACTIVE(1) = '0') generate
-		make_reset1 <= '0';	
-	end generate NO_LINK1_GEN;	
+		make_reset1 <= '0';
+		busip1.data <= (others => '0');
+		busip1.ack  <= '0';
+		busip1.nack <= '0';
+	end generate NO_LINK1_GEN;
 
 	-- sfp5
 	GEN_LINK_0 : if (LINKS_ACTIVE(0) = '1') generate
@@ -665,7 +641,6 @@ begin
 				CLK_RX_125_IN            => clk_125_rx_from_pcs(0),
 				RESET                    => RESET,
 				GSR_N                    => GSR_N,
-				MY_MAC_OUT               => open,
 				MY_MAC_IN                => mac_0,
 				DHCP_DONE_OUT            => dhcp_done(0),
 				MAC_READY_CONF_IN        => mac_ready_conf(0),
@@ -704,7 +679,6 @@ begin
 				FEE_READ_OUT             => mlt_fee_read(0),
 				FEE_STATUS_BITS_IN       => mlt_fee_status(1 * 32 - 1 downto 0 * 32),
 				FEE_BUSY_IN              => mlt_fee_busy(0),
-				MC_UNIQUE_ID_IN          => MC_UNIQUE_ID_IN,
 				GSC_CLK_IN               => mlt_gsc_clk(0),
 				GSC_INIT_DATAREADY_OUT   => mlt_gsc_init_dataready(0),
 				GSC_INIT_DATA_OUT        => mlt_gsc_init_data(1 * 16 - 1 downto 0 * 16),
@@ -712,24 +686,16 @@ begin
 				GSC_INIT_READ_IN         => mlt_gsc_init_read(0),
 				GSC_REPLY_DATAREADY_IN   => mlt_gsc_reply_dataready(0),
 				GSC_REPLY_DATA_IN        => mlt_gsc_reply_data(1 * 16 - 1 downto 0 * 16),
-				GSC_REPLY_PACKET_NUM_IN  => mlt_gsc_reply_packet(1 * 3 - 1 downto 0* 3),
+				GSC_REPLY_PACKET_NUM_IN  => mlt_gsc_reply_packet(1 * 3 - 1 downto 0 * 3),
 				GSC_REPLY_READ_OUT       => mlt_gsc_reply_read(0),
 				GSC_BUSY_IN              => mlt_gsc_busy(0),
-
-				--		     SLV_ADDR_IN              => (others => '0'), --SLV_ADDR_IN,
-				--		     SLV_READ_IN              => '0', --SLV_READ_IN,
-				--		     SLV_WRITE_IN             => '0', --SLV_WRITE_IN,
-				--		     SLV_BUSY_OUT             => open, --SLV_BUSY_OUT,
-				--		     SLV_ACK_OUT              => open, --SLV_ACK_OUT,
-				--		     SLV_DATA_IN              => (others => '0'), --SLV_DATA_IN,
-				--		     SLV_DATA_OUT             => open, --SLV_DATA_OUT,
-				SLV_ADDR_IN              => SLV_ADDR_IN,
-				SLV_READ_IN              => SLV_READ_IN,
-				SLV_WRITE_IN             => SLV_WRITE_IN,
-				SLV_BUSY_OUT             => open,
-				SLV_ACK_OUT              => open,
-				SLV_DATA_IN              => SLV_DATA_IN,
-				SLV_DATA_OUT             => open,
+				SLV_ADDR_IN              => BUS_IP_RX.addr(7 downto 0),
+				SLV_READ_IN              => BUS_IP_RX.read,
+				SLV_WRITE_IN             => BUS_IP_RX.write,
+				SLV_BUSY_OUT             => busip0.nack,
+				SLV_ACK_OUT              => busip0.ack,
+				SLV_DATA_IN              => BUS_IP_RX.data,
+				SLV_DATA_OUT             => busip0.data,
 				CFG_GBE_ENABLE_IN        => cfg_gbe_enable,
 				CFG_IPU_ENABLE_IN        => cfg_ipu_enable,
 				CFG_MULT_ENABLE_IN       => cfg_mult_enable,
@@ -754,14 +720,21 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(1 * 32 - 1 downto 0 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(1 * 32 - 1 downto 0 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(1 * 32 - 1 downto 0 * 32),
-				MONITOR_GEN_DBG_OUT => open,
+				MONITOR_GEN_DBG_OUT      => open,
 				MAKE_RESET_OUT           => make_reset0
-			);			
+			);
 	end generate GEN_LINK_0;
-	
+
 	NO_LINK0_GEN : if (LINKS_ACTIVE(0) = '0') generate
 		make_reset0 <= '0';
-	end generate NO_LINK0_GEN;	
+		busip0.data <= (others => '0');
+		busip0.ack  <= '0';
+		busip0.nack <= '0';
+	end generate NO_LINK0_GEN;
+
+	BUS_IP_TX.ack  <= busip0.ack or busip1.ack or busip2.ack or busip3.ack when rising_edge(CLK_SYS_IN);
+	BUS_IP_TX.nack <= busip0.nack or busip1.nack or busip2.nack or busip3.nack when rising_edge(CLK_SYS_IN);
+	BUS_IP_TX.data <= busip0.data or busip1.data or busip2.data or busip3.data when rising_edge(CLK_SYS_IN);
 
 	real_ipu_gen : if USE_EXTERNAL_TRBNET_DUMMY = 0 generate
 		ipu_mult : entity work.gbe_ipu_multiplexer
@@ -871,7 +844,6 @@ begin
 				clk                     => CLK_SYS_IN,
 				rst                     => RESET,
 				GBE_READY_IN            => all_links_ready,
-
 				CFG_EVENT_SIZE_IN       => dummy_event,
 				CFG_TRIGGERED_MODE_IN   => '0',
 				TRIGGER_IN              => TRIGGER_IN,
@@ -955,12 +927,12 @@ begin
 				RESET                        => RESET,
 
 				-- interface to regio bus
-				BUS_ADDR_IN                  => BUS_ADDR_IN,
-				BUS_DATA_IN                  => BUS_DATA_IN,
-				BUS_DATA_OUT                 => BUS_DATA_OUT,
-				BUS_WRITE_EN_IN              => BUS_WRITE_EN_IN,
-				BUS_READ_EN_IN               => BUS_READ_EN_IN,
-				BUS_ACK_OUT                  => BUS_ACK_OUT,
+				BUS_ADDR_IN                  => BUS_REG_RX.addr(7 downto 0),
+				BUS_DATA_IN                  => BUS_REG_RX.data,
+				BUS_DATA_OUT                 => BUS_REG_TX.data,
+				BUS_WRITE_EN_IN              => BUS_REG_RX.write,
+				BUS_READ_EN_IN               => BUS_REG_RX.read,
+				BUS_ACK_OUT                  => BUS_REG_TX.ack,
 
 				-- output to gbe_buf
 				GBE_SUBEVENT_ID_OUT          => cfg_subevent_id,
@@ -1001,33 +973,33 @@ begin
 				SCTRL_HIST_IN                => dbg_hist2
 			);
 	end generate;
-	
+
 	setup_sim_gen : if (DO_SIMULATION = 1) generate
-		cfg_subevent_id <= x"12345678";
-		cfg_subevent_dec <= x"00010002";
-		cfg_queue_dec <= x"00030004";
-		cfg_max_frame <= x"0578";
-		cfg_gbe_enable <= '1';
-		cfg_ipu_enable <= '1';
-		cfg_mult_enable <= '0';
-		cfg_readout_ctr <= x"000000";
+		cfg_subevent_id       <= x"12345678";
+		cfg_subevent_dec      <= x"00010002";
+		cfg_queue_dec         <= x"00030004";
+		cfg_max_frame         <= x"0578";
+		cfg_gbe_enable        <= '1';
+		cfg_ipu_enable        <= '1';
+		cfg_mult_enable       <= '0';
+		cfg_readout_ctr       <= x"000000";
 		cfg_readout_ctr_valid <= '0';
-		cfg_allow_rx <= '1';
-		cfg_additional_hdr <= '0';
-		cfg_insert_ttype <= '0';
-		cfg_soft_rst <= '0';
-		cfg_max_reply <= x"0000fff0";
-		cfg_max_sub <= x"fff0";
-		cfg_max_queue <= x"fff0";
+		cfg_allow_rx          <= '1';
+		cfg_additional_hdr    <= '0';
+		cfg_insert_ttype      <= '0';
+		cfg_soft_rst          <= '0';
+		cfg_max_reply         <= x"0000fff0";
+		cfg_max_sub           <= x"fff0";
+		cfg_max_queue         <= x"fff0";
 		cfg_max_subs_in_queue <= x"0001";
-		cfg_max_single_sub <= x"fff0";
+		cfg_max_single_sub    <= x"fff0";
 	end generate;
 
 	SCTRL_MAP_GEN : for i in 0 to NUMBER_OF_GBE_LINKS - 1 generate
 		ACTIVE_MAP_GEN : if (LINK_HAS_SLOWCTRL(i) = '1') generate
 			mlt_gsc_clk(i)                                     <= GSC_CLK_IN;
 			GSC_INIT_DATAREADY_OUT                             <= mlt_gsc_init_dataready(i);
-			GSC_INIT_DATA_OUT                                  <= mlt_gsc_init_data((i + 1) * 16 - 1 downto i* 16);
+			GSC_INIT_DATA_OUT                                  <= mlt_gsc_init_data((i + 1) * 16 - 1 downto i * 16);
 			GSC_INIT_PACKET_NUM_OUT                            <= mlt_gsc_init_packet((i + 1) * 3 - 1 downto i * 3);
 			mlt_gsc_init_read(i)                               <= GSC_INIT_READ_IN;
 			mlt_gsc_reply_dataready(i)                         <= GSC_REPLY_DATAREADY_IN;
@@ -1059,394 +1031,390 @@ begin
 	sum_dropped    <= monitor_dropped(4 * 32 - 1 downto 3 * 32) + monitor_dropped(3 * 32 - 1 downto 2 * 32) + monitor_dropped(2 * 32 - 1 downto 1 * 32) + monitor_dropped(1 * 32 - 1 downto 0 * 32);
 
 	include_debug_gen : if (INCLUDE_DEBUG = 1) generate
---		DEBUG_OUT(0) <= mac_an_ready(3);
---		DEBUG_OUT(1) <= clk_125_rx_from_pcs(3);
---		DEBUG_OUT(2) <= RESET;
---		DEBUG_OUT(3) <= CLK_125_IN;
---
---		DEBUG_OUT(127 downto 4) <= (others => '0');
+		--		DEBUG_OUT(0) <= mac_an_ready(3);
+		--		DEBUG_OUT(1) <= clk_125_rx_from_pcs(3);
+		--		DEBUG_OUT(2) <= RESET;
+		--		DEBUG_OUT(3) <= CLK_125_IN;
+		--
+		--		DEBUG_OUT(127 downto 4) <= (others => '0');
 
-		DEBUG_OUT(63 downto 0) <= monitor_gen_dbg(4 * 64 - 1 downto 3 * 64);
+		DEBUG_OUT(63 downto 0)   <= monitor_gen_dbg(4 * 64 - 1 downto 3 * 64);
 		DEBUG_OUT(127 downto 65) <= (others => '0');
 	end generate;
-	
-	
+
 	testbench_sim : if DO_SIMULATION = 1 generate
-		
 		clk_125_rx_from_pcs(0) <= CLK_125_IN;
 		clk_125_rx_from_pcs(1) <= CLK_125_IN;
 		clk_125_rx_from_pcs(2) <= CLK_125_IN;
 		clk_125_rx_from_pcs(3) <= CLK_125_IN;
-		
+
 		done_generate : for i in 0 to 3 generate
 			process
 			begin
 				mac_tx_done(i) <= '0';
 				wait until rising_edge(mac_fifoeof(i));
 				wait until rising_edge(clk_125_rx_from_pcs(i));
-				wait until rising_edge(clk_125_rx_from_pcs(i));				
 				wait until rising_edge(clk_125_rx_from_pcs(i));
-				wait until rising_edge(clk_125_rx_from_pcs(i));				
+				wait until rising_edge(clk_125_rx_from_pcs(i));
+				wait until rising_edge(clk_125_rx_from_pcs(i));
 				wait until rising_edge(clk_125_rx_from_pcs(i));
 				wait until rising_edge(clk_125_rx_from_pcs(i));
 				mac_tx_done(i) <= '1';
 				wait until rising_edge(clk_125_rx_from_pcs(i));
 			end process;
 		end generate done_generate;
-		
+
 		process
 		begin
-				wait until rising_edge(clk_125_rx_from_pcs(0));
-				mac_tx_read(0) <= mac_fifoavail(0);
-				mac_tx_read(1) <= mac_fifoavail(1);
-				mac_tx_read(2) <= mac_fifoavail(2);
-				mac_tx_read(3) <= mac_fifoavail(3);
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_tx_read(0) <= mac_fifoavail(0);
+			mac_tx_read(1) <= mac_fifoavail(1);
+			mac_tx_read(2) <= mac_fifoavail(2);
+			mac_tx_read(3) <= mac_fifoavail(3);
 		end process;
-		
-		mac_rx_eof(1) <= mac_rx_eof(0);
-		mac_rx_eof(2) <= mac_rx_eof(0);
-		mac_rx_eof(3) <= mac_rx_eof(0);
-		mac_rx_write(1) <= mac_rx_write(0);
-		mac_rx_write(2) <= mac_rx_write(0);
-		mac_rx_write(3) <= mac_rx_write(0);
+
+		mac_rx_eof(1)                       <= mac_rx_eof(0);
+		mac_rx_eof(2)                       <= mac_rx_eof(0);
+		mac_rx_eof(3)                       <= mac_rx_eof(0);
+		mac_rx_write(1)                     <= mac_rx_write(0);
+		mac_rx_write(2)                     <= mac_rx_write(0);
+		mac_rx_write(3)                     <= mac_rx_write(0);
 		mac_rx_data(2 * 8 - 1 downto 1 * 8) <= mac_rx_data(1 * 8 - 1 downto 0 * 8);
 		mac_rx_data(3 * 8 - 1 downto 2 * 8) <= mac_rx_data(1 * 8 - 1 downto 0 * 8);
 		mac_rx_data(4 * 8 - 1 downto 3 * 8) <= mac_rx_data(1 * 8 - 1 downto 0 * 8);
-			
-		
+
 		testbench_proc : process
 		begin
-			
+
 			--trigger <= '0';
 			--gbe_ready <= '0';
-			mac_rx_write(0) <= '0';
+			mac_rx_write(0)                     <= '0';
 			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
-			mac_rx_eof(0) <= '0';
-			
+			mac_rx_eof(0)                       <= '0';
+
 			wait for 5 us;
-		
-		-- FIRST FRAME UDP - DHCP Offer
+
+			-- FIRST FRAME UDP - DHCP Offer
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_write(0) <= '1';
-		-- dest mac
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			mac_rx_write(0)                     <= '1';
+			-- dest mac
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-		-- src mac
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			-- src mac
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"aa";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"aa";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"bb";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"bb";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"cc";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"dd";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"dd";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ee";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ee";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-		-- frame type
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"08";
+			-- frame type
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"08";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-		-- ip headers
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"45";
+			-- ip headers
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"45";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"10";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"10";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"01";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"5a";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"5a";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"49";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"49";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"11";  -- udp
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"11"; -- udp
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"cc";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"cc";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"c0";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"a8";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"01";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"c0";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"a8";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
-		-- udp headers
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"02";
+			-- udp headers
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"43";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"43";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"44";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"44";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"02";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"2c";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"2c";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"aa";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"aa";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"bb";
-		-- dhcp data
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"bb";
+			-- dhcp data
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"02";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"01";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"06";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"06";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";  --transcation id
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff"; --transcation id
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";--transcation id
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff"; --transcation id
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"fa";--transcation id
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"fa"; --transcation id
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ce";--transcation id
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ce"; --transcation id
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"c0";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"a8";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"10";
-			
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"10";
+
 			for i in 0 to 219 loop
 				wait until rising_edge(clk_125_rx_from_pcs(0));
-				mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+				mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			end loop;
-			
+
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"35";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"35";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"01";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"02";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-				mac_rx_eof(0) <= '1';
-			
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_write(0) <='0';
-			mac_rx_eof(0) <= '0';
-			
-			wait for 6 us;
-			
-				wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_write(0) <= '1';
-		-- dest mac
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-		-- src mac
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"aa";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"bb";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"dd";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ee";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-		-- frame type
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"08";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-		-- ip headers
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"45";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"10";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"5a";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"49";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"11";  -- udp
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
-		-- udp headers
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"43";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"44";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"2c";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"aa";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"bb";
-		-- dhcp data
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"06";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"fa";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ce";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c0";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"a8";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"10";
-			
-			for i in 0 to 219 loop
-				wait until rising_edge(clk_125_rx_from_pcs(0));
-				mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
-			end loop;
-			
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"35";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"05";
-			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
 			wait until rising_edge(clk_125_rx_from_pcs(0));
 			mac_rx_eof(0) <= '1';
-			
+
 			wait until rising_edge(clk_125_rx_from_pcs(0));
-			mac_rx_write(0) <='0';
-			mac_rx_eof(0) <= '0';
-			
-			
+			mac_rx_write(0) <= '0';
+			mac_rx_eof(0)   <= '0';
+
+			wait for 6 us;
+
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_write(0)                     <= '1';
+			-- dest mac
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			-- src mac
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"aa";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"bb";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"cc";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"dd";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ee";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			-- frame type
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"08";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			-- ip headers
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"45";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"10";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"5a";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"49";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"11"; -- udp
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"cc";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"cc";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"c0";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"a8";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"c0";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"a8";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"02";
+			-- udp headers
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"43";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"44";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"02";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"2c";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"aa";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"bb";
+			-- dhcp data
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"02";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"06";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ff";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"fa";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"ce";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"c0";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"a8";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"10";
+
+			for i in 0 to 219 loop
+				wait until rising_edge(clk_125_rx_from_pcs(0));
+				mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			end loop;
+
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"35";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"01";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"05";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_data(1 * 8 - 1 downto 0 * 8) <= x"00";
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_eof(0) <= '1';
+
+			wait until rising_edge(clk_125_rx_from_pcs(0));
+			mac_rx_write(0) <= '0';
+			mac_rx_eof(0)   <= '0';
+
 			wait for 5 us;
 
 			wait for 2 us;
-			
+
 			--gbe_ready <= '1';
-			
+
 			wait for 1 us;
-			
+
 			--trigger <= '1';
 
 			wait;
-		
+
 		end process testbench_proc;
-		
+
 	end generate testbench_sim;
 
 end architecture RTL;

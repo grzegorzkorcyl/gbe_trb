@@ -90,7 +90,6 @@ entity gbe_logic_wrapper is
 		FEE_STATUS_BITS_IN       : in  std_logic_vector(31 downto 0);
 		FEE_BUSY_IN              : in  std_logic;
 		-- SlowControl
-		MC_UNIQUE_ID_IN          : in  std_logic_vector(63 downto 0);
 		GSC_CLK_IN               : in  std_logic;
 		GSC_INIT_DATAREADY_OUT   : out std_logic;
 		GSC_INIT_DATA_OUT        : out std_logic_vector(15 downto 0);
@@ -334,7 +333,6 @@ begin
 				PCS_AN_COMPLETE_IN            => MAC_AN_READY_IN,
 
 				-- signals to/from hub
-				MC_UNIQUE_ID_IN               => MC_UNIQUE_ID_IN,
 				GSC_CLK_IN                    => GSC_CLK_IN,
 				GSC_INIT_DATAREADY_OUT        => GSC_INIT_DATAREADY_OUT,
 				GSC_INIT_DATA_OUT             => GSC_INIT_DATA_OUT,
@@ -474,7 +472,6 @@ begin
 				PCS_AN_COMPLETE_IN            => MAC_AN_READY_IN,
 
 				-- signals to/from hub
-				MC_UNIQUE_ID_IN               => MC_UNIQUE_ID_IN,
 				GSC_CLK_IN                    => GSC_CLK_IN,
 				GSC_INIT_DATAREADY_OUT        => GSC_INIT_DATAREADY_OUT,
 				GSC_INIT_DATA_OUT             => GSC_INIT_DATA_OUT,

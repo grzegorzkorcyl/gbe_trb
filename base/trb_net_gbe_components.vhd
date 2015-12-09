@@ -485,7 +485,6 @@ port (
 	MC_RESET_LINK_IN	: in	std_logic;
 	MC_IDLE_TOO_LONG_OUT : out std_logic;
 	MC_DHCP_DONE_OUT : out std_logic;
-	MC_MY_MAC_OUT : out std_logic_vector(47 downto 0);
 	MC_MY_MAC_IN : in std_logic_vector(47 downto 0);
 
 -- signals to/from receive controller
@@ -523,8 +522,6 @@ port (
 	PCS_AN_COMPLETE_IN	: in	std_logic;
 
 -- signals to/from hub
-	MC_UNIQUE_ID_IN		: in	std_logic_vector(63 downto 0);
-	
 	GSC_CLK_IN               : in std_logic;
 	GSC_INIT_DATAREADY_OUT   : out std_logic;
 	GSC_INIT_DATA_OUT        : out std_logic_vector(15 downto 0);
