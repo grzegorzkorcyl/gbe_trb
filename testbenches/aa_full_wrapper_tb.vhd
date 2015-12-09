@@ -79,10 +79,10 @@ begin
 			GSC_REPLY_READ_OUT       => open,
 			GSC_BUSY_IN              => '0',
 			-- IP configuration
-			BUS_IP_RX                => busip1,
+			BUS_IP_RX                => busip0,
 			BUS_IP_TX                => open,
 			-- Registers config
-			BUS_REG_RX               => busip2,
+			BUS_REG_RX               => busip1,
 			BUS_REG_TX               => open,
 			MAKE_RESET_OUT           => open,
 			DEBUG_OUT                => open
