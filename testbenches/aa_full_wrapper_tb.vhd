@@ -16,11 +16,10 @@ ENTITY aa_full_wrapper_tb IS
 END aa_full_wrapper_tb;
 
 ARCHITECTURE behavior OF aa_full_wrapper_tb IS
-
-signal clk_sys, clk_125, reset, gsr_n, trigger : std_logic := '0';
+	signal clk_sys, clk_125, reset, gsr_n, trigger : std_logic := '0';
+	signal busip0, busip1                          : CTRLBUS_RX;
 
 begin
-	
 	uut : entity work.gbe_wrapper
 		generic map(
 			DO_SIMULATION             => 1,
@@ -48,10 +47,6 @@ begin
 			CLK_125_IN               => clk_125,
 			RESET                    => reset,
 			GSR_N                    => gsr_n,
-			SD_RXD_P_IN              => (others => '0'),
-			SD_RXD_N_IN              => (others => '0'),
-			SD_TXD_P_OUT             => open,
-			SD_TXD_N_OUT             => open,
 			SD_PRSNT_N_IN            => (others => '0'),
 			SD_LOS_IN                => (others => '0'),
 			SD_TXDIS_OUT             => open,
@@ -83,35 +78,32 @@ begin
 			GSC_REPLY_PACKET_NUM_IN  => "111",
 			GSC_REPLY_READ_OUT       => open,
 			GSC_BUSY_IN              => '0',
-			SLV_ADDR_IN              => (others => '0'),
-			SLV_READ_IN              => '0',
-			SLV_WRITE_IN             => '0',
-			SLV_BUSY_OUT             => open,
-			SLV_ACK_OUT              => open,
-			SLV_DATA_IN              => (others => '0'),
-			SLV_DATA_OUT             => open,
-			BUS_ADDR_IN              => (others => '0'),
-			BUS_DATA_IN              => (others => '0'),
-			BUS_DATA_OUT             => open,
-			BUS_WRITE_EN_IN          => '0',
-			BUS_READ_EN_IN           => '0',
-			BUS_ACK_OUT              => open,
+			-- IP configuration
+			BUS_IP_RX                => busip1,
+			BUS_IP_TX                => open,
+			-- Registers config
+			BUS_REG_RX               => busip2,
+			BUS_REG_TX               => open,
 			MAKE_RESET_OUT           => open,
 			DEBUG_OUT                => open
 		);
 
 	process
 	begin
-		clk_sys <= '1'; wait for 5 ns;
-		clk_sys <= '0'; wait for 5 ns;
+		clk_sys <= '1';
+		wait for 5 ns;
+		clk_sys <= '0';
+		wait for 5 ns;
 	end process;
-	
+
 	process
 	begin
-		clk_125 <= '1'; wait for 4 ns;
-		clk_125 <= '0'; wait for 4 ns;
+		clk_125 <= '1';
+		wait for 4 ns;
+		clk_125 <= '0';
+		wait for 4 ns;
 	end process;
-	
+
 	process
 	begin
 		reset <= '1';
@@ -120,18 +112,17 @@ begin
 		reset <= '0';
 		gsr_n <= '1';
 		wait for 20 us;
-		
+
 		trigger <= '1';
-		
---		for i in 0 to 10000 loop
---			trigger <= '1';
---			wait for 100 ns;
---			trigger <= '0';
---			wait for 10 us;
---		end loop;
-		
+
+		--		for i in 0 to 10000 loop
+		--			trigger <= '1';
+		--			wait for 100 ns;
+		--			trigger <= '0';
+		--			wait for 10 us;
+		--		end loop;
+
 		wait;
 	end process;
-	
 
 end; 
