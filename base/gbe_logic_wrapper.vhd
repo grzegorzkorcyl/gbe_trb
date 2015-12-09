@@ -42,7 +42,6 @@ entity gbe_logic_wrapper is
 		RESET                    : in  std_logic;
 		GSR_N                    : in  std_logic;
 
-		MY_MAC_OUT               : out std_logic_vector(47 downto 0);
 		MY_MAC_IN                : in  std_logic_vector(47 downto 0);
 		DHCP_DONE_OUT            : out std_logic;
 
@@ -252,7 +251,6 @@ architecture RTL of gbe_logic_wrapper is
 	signal dbg_ft              : std_logic_vector(63 downto 0);
 	signal dbg_q               : std_logic_vector(15 downto 0);
 	signal make_reset          : std_logic;
-	signal my_mac              : std_logic_vector(47 downto 0);
 
 begin
 	reset_sync : process(GSR_N, CLK_SYS_IN)
@@ -272,7 +270,6 @@ begin
 	fc_tos         <= x"10";
 	fc_ttl         <= x"ff";
 
-	MY_MAC_OUT    <= my_mac;
 	DHCP_DONE_OUT <= dhcp_done;
 
 	main_gen : if USE_INTERNAL_TRBNET_DUMMY = 0 generate
@@ -296,7 +293,6 @@ begin
 				MC_RESET_LINK_IN              => global_reset,
 				MC_IDLE_TOO_LONG_OUT          => open,
 				MC_DHCP_DONE_OUT              => dhcp_done,
-				MC_MY_MAC_OUT                 => my_mac,
 				MC_MY_MAC_IN                  => MY_MAC_IN,
 
 				-- signals to/from receive controller
@@ -434,7 +430,6 @@ begin
 				MC_RESET_LINK_IN              => global_reset,
 				MC_IDLE_TOO_LONG_OUT          => open,
 				MC_DHCP_DONE_OUT              => dhcp_done,
-				MC_MY_MAC_OUT                 => my_mac,
 				MC_MY_MAC_IN                  => MY_MAC_IN,
 
 				-- signals to/from receive controller

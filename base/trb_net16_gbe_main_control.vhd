@@ -163,7 +163,7 @@ entity trb_net16_gbe_main_control is
 
 		DATA_HIST_OUT                 : out hist_array;
 		SCTRL_HIST_OUT                : out hist_array;
-		
+
 		DEBUG_OUT                     : out std_logic_vector(63 downto 0)
 	);
 end trb_net16_gbe_main_control;
@@ -252,15 +252,14 @@ architecture trb_net16_gbe_main_control of trb_net16_gbe_main_control is
 	attribute syn_preserve : boolean;
 	attribute syn_keep : boolean;
 	attribute syn_keep of nothing_sent, link_state, state, redirect_state, dhcp_done : signal is true;
-	attribute syn_preserve of  nothing_sent, link_state, state, redirect_state, dhcp_done : signal is true;
+	attribute syn_preserve of nothing_sent, link_state, state, redirect_state, dhcp_done : signal is true;
 
-	signal mc_busy    : std_logic;
-	signal incl_dhcp  : std_logic;
-	signal flow_state : std_logic_vector(3 downto 0);
+	signal mc_busy        : std_logic;
+	signal incl_dhcp      : std_logic;
+	signal flow_state     : std_logic_vector(3 downto 0);
 	signal selector_debug : std_logic_vector(63 downto 0);
 
 begin
-
 	protocol_selector : entity work.trb_net16_gbe_protocol_selector
 		generic map(
 			RX_PATH_ENABLE       => RX_PATH_ENABLE,
@@ -302,6 +301,7 @@ begin
 			TC_SRC_IP_OUT                 => TC_SRC_IP_OUT,
 			TC_SRC_UDP_OUT                => TC_SRC_UDP_OUT,
 			MC_BUSY_IN                    => mc_busy,
+			MY_MAC_IN                     => MC_MY_MAC_IN,
 			MY_IP_OUT                     => open,
 			DHCP_START_IN                 => dhcp_start,
 			DHCP_DONE_OUT                 => dhcp_done,
@@ -373,7 +373,7 @@ begin
 			MONITOR_SELECT_GEN_DBG_OUT    => MONITOR_SELECT_GEN_DBG_OUT,
 			DATA_HIST_OUT                 => DATA_HIST_OUT,
 			SCTRL_HIST_OUT                => SCTRL_HIST_OUT,
-			DEBUG_OUT => selector_debug
+			DEBUG_OUT                     => selector_debug
 		);
 
 	TC_DATA_OUT <= tc_data;
@@ -959,11 +959,11 @@ begin
 	process(CLK)
 	begin
 		if rising_edge(CLK) then
-			DEBUG_OUT(3 downto 0)  <= redirect_state;
-			DEBUG_OUT(7 downto 4)  <= flow_state;
-			DEBUG_OUT(11 downto 8) <= link_state;
+			DEBUG_OUT(3 downto 0)   <= redirect_state;
+			DEBUG_OUT(7 downto 4)   <= flow_state;
+			DEBUG_OUT(11 downto 8)  <= link_state;
 			DEBUG_OUT(31 downto 12) <= (others => '0');
-			
+
 			DEBUG_OUT(63 downto 32) <= selector_debug(31 downto 0);
 		end if;
 	end process;
