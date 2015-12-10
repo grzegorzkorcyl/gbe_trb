@@ -1011,14 +1011,10 @@ begin
 
 		INACTIVE_MAP_GEN : if (LINK_HAS_SLOWCTRL(i) = '0') generate
 			mlt_gsc_clk(i)                                     <= '0';
-			--GSC_INIT_DATAREADY_OUT                             <= '0';
-			--GSC_INIT_DATA_OUT                                  <= (others => '0');
-			--GSC_INIT_PACKET_NUM_OUT                            <= (others => '0');
 			mlt_gsc_init_read(i)                               <= '0';
 			mlt_gsc_reply_dataready(i)                         <= '0';
 			mlt_gsc_reply_data((i + 1) * 16 - 1 downto i * 16) <= (others => '0');
 			mlt_gsc_reply_packet((i + 1) * 3 - 1 downto i * 3) <= (others => '0');
-			--GSC_REPLY_READ_OUT                                 <= '0';
 			mlt_gsc_busy(i)                                    <= '0';
 		end generate INACTIVE_MAP_GEN;
 	end generate SCTRL_MAP_GEN;
@@ -1031,13 +1027,6 @@ begin
 	sum_dropped    <= monitor_dropped(4 * 32 - 1 downto 3 * 32) + monitor_dropped(3 * 32 - 1 downto 2 * 32) + monitor_dropped(2 * 32 - 1 downto 1 * 32) + monitor_dropped(1 * 32 - 1 downto 0 * 32);
 
 	include_debug_gen : if (INCLUDE_DEBUG = 1) generate
-		--		DEBUG_OUT(0) <= mac_an_ready(3);
-		--		DEBUG_OUT(1) <= clk_125_rx_from_pcs(3);
-		--		DEBUG_OUT(2) <= RESET;
-		--		DEBUG_OUT(3) <= CLK_125_IN;
-		--
-		--		DEBUG_OUT(127 downto 4) <= (others => '0');
-
 		DEBUG_OUT(63 downto 0)   <= monitor_gen_dbg(4 * 64 - 1 downto 3 * 64);
 		DEBUG_OUT(127 downto 65) <= (others => '0');
 	end generate;

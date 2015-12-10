@@ -40,7 +40,7 @@ begin
 			LINK_HAS_ARP              => "1111",
 			LINK_HAS_DHCP             => "1111",
 			LINK_HAS_READOUT          => "1100",
-			LINK_HAS_SLOWCTRL         => "1000"
+			LINK_HAS_SLOWCTRL         => "0000"
 		)
 		port map(
 			CLK_SYS_IN               => clk_sys,
