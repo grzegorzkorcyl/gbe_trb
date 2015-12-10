@@ -470,6 +470,12 @@ no_sctrl_gen : if INCLUDE_SLOWCTRL = '0' generate
 	resp_ready(2) <= '0';
 	busy(2) <= '0';
 	MAKE_RESET_OUT <= '0';
+	
+	GSC_INIT_DATAREADY_OUT <= '0';
+	GSC_INIT_DATA_OUT <= (others => '0');
+	GSC_INIT_PACKET_NUM_OUT <= (others => '0');
+	GSC_REPLY_READ_OUT <= '1';
+	
 end generate no_sctrl_gen;
 
 trbnet_gen : if INCLUDE_READOUT = '1' generate 
