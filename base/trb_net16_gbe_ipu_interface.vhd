@@ -198,6 +198,7 @@ begin
 				end if;
 
 			when ADD_MISSING =>
+				rec_state <= x"d";
 				if (saved_size = x"0000" & "1") then
 					save_next_state <= ADD_SUBSUB1;
 				else
