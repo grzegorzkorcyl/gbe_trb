@@ -1000,7 +1000,12 @@ begin
 		GSC_INIT_DATA_OUT       <= (others => '0');
 		GSC_INIT_PACKET_NUM_OUT <= (others => '0');
 		GSC_REPLY_READ_OUT      <= '1';
-
+		mlt_gsc_clk <= (others => '0');
+		mlt_gsc_init_read <= (others => '0');
+		mlt_gsc_reply_dataready <= (others => '0');
+		mlt_gsc_reply_data <= (others => '0');
+		mlt_gsc_reply_packet <= (others => '0');
+		mlt_gsc_busy <= (others => '0');
 	end generate NOSCTRL_MAP_GEN;
 
 	SCTRL_MAP_GEN : if (LINK_HAS_SLOWCTRL /= "0000") generate
