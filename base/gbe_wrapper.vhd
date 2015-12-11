@@ -317,7 +317,7 @@ begin
 				CTS_READ_IN              => mlt_cts_read(3),
 				CTS_LENGTH_OUT           => mlt_cts_length(4 * 16 - 1 downto 3 * 16),
 				CTS_ERROR_PATTERN_OUT    => mlt_cts_error_pattern(4 * 32 - 1 downto 3 * 32),
-				FEE_DATA_IN              => mlt_fee_data(4 * 16 - 1 downto 3 * 16), 
+				FEE_DATA_IN              => mlt_fee_data(4 * 16 - 1 downto 3 * 16),
 				FEE_DATAREADY_IN         => mlt_fee_dataready(3),
 				FEE_READ_OUT             => mlt_fee_read(3),
 				FEE_STATUS_BITS_IN       => mlt_fee_status(4 * 32 - 1 downto 3 * 32),
@@ -995,28 +995,38 @@ begin
 		cfg_max_single_sub    <= x"fff0";
 	end generate;
 
-	SCTRL_MAP_GEN : for i in 0 to NUMBER_OF_GBE_LINKS - 1 generate
-		ACTIVE_MAP_GEN : if (LINK_HAS_SLOWCTRL(i) = '1') generate
-			mlt_gsc_clk(i)                                     <= GSC_CLK_IN;
-			GSC_INIT_DATAREADY_OUT                             <= mlt_gsc_init_dataready(i);
-			GSC_INIT_DATA_OUT                                  <= mlt_gsc_init_data((i + 1) * 16 - 1 downto i * 16);
-			GSC_INIT_PACKET_NUM_OUT                            <= mlt_gsc_init_packet((i + 1) * 3 - 1 downto i * 3);
-			mlt_gsc_init_read(i)                               <= GSC_INIT_READ_IN;
-			mlt_gsc_reply_dataready(i)                         <= GSC_REPLY_DATAREADY_IN;
-			mlt_gsc_reply_data((i + 1) * 16 - 1 downto i * 16) <= GSC_REPLY_DATA_IN;
-			mlt_gsc_reply_packet((i + 1) * 3 - 1 downto i * 3) <= GSC_REPLY_PACKET_NUM_IN;
-			GSC_REPLY_READ_OUT                                 <= mlt_gsc_reply_read(i);
-			mlt_gsc_busy(i)                                    <= GSC_BUSY_IN;
-		end generate ACTIVE_MAP_GEN;
+	NOSCTRL_MAP_GEN : if (LINK_HAS_SLOWCTRL = "0000") generate
+		GSC_INIT_DATAREADY_OUT  <= '0';
+		GSC_INIT_DATA_OUT       <= (others => '0');
+		GSC_INIT_PACKET_NUM_OUT <= (others => '0');
+		GSC_REPLY_READ_OUT      <= '1';
 
-		INACTIVE_MAP_GEN : if (LINK_HAS_SLOWCTRL(i) = '0') generate
-			mlt_gsc_clk(i)                                     <= '0';
-			mlt_gsc_init_read(i)                               <= '0';
-			mlt_gsc_reply_dataready(i)                         <= '0';
-			mlt_gsc_reply_data((i + 1) * 16 - 1 downto i * 16) <= (others => '0');
-			mlt_gsc_reply_packet((i + 1) * 3 - 1 downto i * 3) <= (others => '0');
-			mlt_gsc_busy(i)                                    <= '0';
-		end generate INACTIVE_MAP_GEN;
+	end generate NOSCTRL_MAP_GEN;
+
+	SCTRL_MAP_GEN : if (LINK_HAS_SLOWCTRL /= "0000") generate
+		SCTRL_LOOP_GEN : for i in 0 to NUMBER_OF_GBE_LINKS - 1 generate
+			ACTIVE_MAP_GEN : if (LINK_HAS_SLOWCTRL(i) = '1') generate
+				mlt_gsc_clk(i)                                     <= GSC_CLK_IN;
+				GSC_INIT_DATAREADY_OUT                             <= mlt_gsc_init_dataready(i);
+				GSC_INIT_DATA_OUT                                  <= mlt_gsc_init_data((i + 1) * 16 - 1 downto i * 16);
+				GSC_INIT_PACKET_NUM_OUT                            <= mlt_gsc_init_packet((i + 1) * 3 - 1 downto i * 3);
+				mlt_gsc_init_read(i)                               <= GSC_INIT_READ_IN;
+				mlt_gsc_reply_dataready(i)                         <= GSC_REPLY_DATAREADY_IN;
+				mlt_gsc_reply_data((i + 1) * 16 - 1 downto i * 16) <= GSC_REPLY_DATA_IN;
+				mlt_gsc_reply_packet((i + 1) * 3 - 1 downto i * 3) <= GSC_REPLY_PACKET_NUM_IN;
+				GSC_REPLY_READ_OUT                                 <= mlt_gsc_reply_read(i);
+				mlt_gsc_busy(i)                                    <= GSC_BUSY_IN;
+			end generate ACTIVE_MAP_GEN;
+
+			INACTIVE_MAP_GEN : if (LINK_HAS_SLOWCTRL(i) = '0') generate
+				mlt_gsc_clk(i)                                     <= '0';
+				mlt_gsc_init_read(i)                               <= '0';
+				mlt_gsc_reply_dataready(i)                         <= '0';
+				mlt_gsc_reply_data((i + 1) * 16 - 1 downto i * 16) <= (others => '0');
+				mlt_gsc_reply_packet((i + 1) * 3 - 1 downto i * 3) <= (others => '0');
+				mlt_gsc_busy(i)                                    <= '0';
+			end generate INACTIVE_MAP_GEN;
+		end generate SCTRL_LOOP_GEN;
 	end generate SCTRL_MAP_GEN;
 
 	sum_rx_bytes   <= monitor_rx_bytes(4 * 32 - 1 downto 3 * 32) + monitor_rx_bytes(3 * 32 - 1 downto 2 * 32) + monitor_rx_bytes(2 * 32 - 1 downto 1 * 32) + monitor_rx_bytes(1 * 32 - 1 downto 0 * 32);
