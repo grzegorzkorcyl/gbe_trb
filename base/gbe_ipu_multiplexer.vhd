@@ -83,10 +83,10 @@ begin
 					client_ptr <= 3;
 				end if;
 			else
-				cts_readout   <= CTS_START_READOUT_IN; --MLT_CTS_READOUT_FINISHED_IN(client_ptr);
+				cts_readout   <= MLT_CTS_READOUT_FINISHED_IN(client_ptr);
 				cts_readout_q <= cts_readout;
 
-				if (cts_readout = '0' and cts_readout_q = '1') then
+				if (cts_readout = '1' and cts_readout_q = '0') then
 					client_ptr <= client_ptr;
 					case client_ptr is
 						when 0 =>
