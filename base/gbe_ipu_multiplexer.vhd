@@ -86,7 +86,7 @@ begin
 
 				switch_ptr <= "00";
 			else
-				cts_readout   <= MLT_CTS_READOUT_FINISHED_IN(client_ptr); --CTS_START_READOUT_IN;
+				cts_readout   <= CTS_START_READOUT_IN; --MLT_CTS_READOUT_FINISHED_IN(client_ptr); --CTS_START_READOUT_IN;
 				cts_readout_q <= cts_readout;
 --				if (switch_ptr = "11") then
 --					switch_ptr <= "00";
