@@ -363,7 +363,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(4 * 32 - 1 downto 3 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(4 * 32 - 1 downto 3 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(4 * 32 - 1 downto 3 * 32),
-				MONITOR_GEN_DBG_OUT      => open, --monitor_gen_dbg,
+				MONITOR_GEN_DBG_OUT      => monitor_gen_dbg,
 				MAKE_RESET_OUT           => make_reset3
 			);
 	end generate GEN_LINK_3;
@@ -482,7 +482,7 @@ begin
 				MONITOR_TX_BYTES_OUT     => monitor_tx_bytes(3 * 32 - 1 downto 2 * 32),
 				MONITOR_TX_PACKETS_OUT   => monitor_tx_packets(3 * 32 - 1 downto 2 * 32),
 				MONITOR_DROPPED_OUT      => monitor_dropped(3 * 32 - 1 downto 2 * 32),
-				MONITOR_GEN_DBG_OUT      => monitor_gen_dbg, --open,
+				MONITOR_GEN_DBG_OUT      => open,
 				MAKE_RESET_OUT           => make_reset2
 			);
 	end generate GEN_LINK_2;
