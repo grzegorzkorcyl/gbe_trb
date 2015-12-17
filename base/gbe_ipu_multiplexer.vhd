@@ -86,25 +86,25 @@ begin
 
 				switch_ptr <= "00";
 			else
-				cts_readout   <= CTS_START_READOUT_IN; -- MLT_CTS_READOUT_FINISHED_IN(client_ptr);
+				cts_readout   <= MLT_CTS_READOUT_FINISHED_IN(client_ptr); --CTS_START_READOUT_IN;
 				cts_readout_q <= cts_readout;
-				if (switch_ptr = "11") then
-					switch_ptr <= "00";
-				else
-					if (cts_readout = '0' and cts_readout_q = '1') then
-						switch_ptr(0) <= '1';
-					else
-						switch_ptr(0) <= switch_ptr(0);
-					end if;
+--				if (switch_ptr = "11") then
+--					switch_ptr <= "00";
+--				else
+--					if (cts_readout = '0' and cts_readout_q = '1') then
+--						switch_ptr(0) <= '1';
+--					else
+--						switch_ptr(0) <= switch_ptr(0);
+--					end if;
+--
+--					switch_ptr(1) <= MLT_CTS_READOUT_FINISHED_IN(client_ptr);
+--				end if;
+--				switch_ptr_q   <= switch_ptr;
+--				switch_ptr_qq  <= switch_ptr_q;
+--				switch_ptr_qqq <= switch_ptr_qq;
 
-					switch_ptr(1) <= MLT_CTS_READOUT_FINISHED_IN(client_ptr);
-				end if;
-				switch_ptr_q   <= switch_ptr;
-				switch_ptr_qq  <= switch_ptr_q;
-				switch_ptr_qqq <= switch_ptr_qq;
-
-				--if (cts_readout = '0' and cts_readout_q = '1') then
-				if (switch_ptr_qqq = "11") then
+				if (cts_readout = '0' and cts_readout_q = '1') then
+				--if (switch_ptr_qqq = "11") then
 					client_ptr <= client_ptr;
 					case client_ptr is
 						when 0 =>
