@@ -192,16 +192,16 @@ begin
 				MLT_FEE_STATUS_BITS_OUT(32 * (client_ptr + 1) - 1 downto 32 * client_ptr) <= (others => '0');
 				MLT_FEE_BUSY_OUT(client_ptr)                                              <= '0';
 			else
-				MLT_CTS_NUMBER_OUT        <= (others => '0');
-				MLT_CTS_CODE_OUT          <= (others => '0');
-				MLT_CTS_INFORMATION_OUT   <= (others => '0');
-				MLT_CTS_READOUT_TYPE_OUT  <= (others => '0');
-				MLT_CTS_START_READOUT_OUT <= (others => '0');
-				MLT_CTS_READ_OUT          <= (others => '0');
-				MLT_FEE_DATA_OUT          <= (others => '0');
-				MLT_FEE_DATAREADY_OUT     <= (others => '0');
-				MLT_FEE_STATUS_BITS_OUT   <= (others => '0');
-				MLT_FEE_BUSY_OUT          <= (others => '0');
+--				MLT_CTS_NUMBER_OUT        <= (others => '0');
+--				MLT_CTS_CODE_OUT          <= (others => '0');
+--				MLT_CTS_INFORMATION_OUT   <= (others => '0');
+--				MLT_CTS_READOUT_TYPE_OUT  <= (others => '0');
+--				MLT_CTS_START_READOUT_OUT <= (others => '0');
+--				MLT_CTS_READ_OUT          <= (others => '0');
+--				MLT_FEE_DATA_OUT          <= (others => '0');
+--				MLT_FEE_DATAREADY_OUT     <= (others => '0');
+--				MLT_FEE_STATUS_BITS_OUT   <= (others => '0');
+--				MLT_FEE_BUSY_OUT          <= (others => '0');
 
 				MLT_CTS_NUMBER_OUT(16 * (client_ptr + 1) - 1 downto 16 * client_ptr)     <= CTS_NUMBER_IN;
 				MLT_CTS_CODE_OUT(8 * (client_ptr + 1) - 1 downto 8 * client_ptr)         <= CTS_CODE_IN;
