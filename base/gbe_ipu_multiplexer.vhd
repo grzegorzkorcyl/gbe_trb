@@ -66,7 +66,7 @@ end entity gbe_ipu_multiplexer;
 
 architecture RTL of gbe_ipu_multiplexer is
 	signal client_ptr                                              : integer range 0 to NUMBER_OF_GBE_LINKS - 1 := 0;
-	signal cts_readout, cts_readout_q                              : std_logic;
+	signal cts_readout, cts_readout_q, cts_readout_qq, cts_readout_qqq, cts_readout_qqqq, cts_readout_qqqqq, cts_readout_qqqqqq : std_logic;
 	signal switch_ptr, switch_ptr_q, switch_ptr_qq, switch_ptr_qqq : std_logic_vector(1 downto 0)               := "00";
 
 begin
@@ -88,6 +88,12 @@ begin
 			else
 				cts_readout   <= CTS_START_READOUT_IN; --MLT_CTS_READOUT_FINISHED_IN(client_ptr); --CTS_START_READOUT_IN;
 				cts_readout_q <= cts_readout;
+				cts_readout_qq <= not cts_readout and cts_readout_q;
+				cts_readout_qqq <= cts_readout_qq;
+				cts_readout_qqqq <= cts_readout_qqq;
+				cts_readout_qqqqq <= cts_readout_qqqq;
+				cts_readout_qqqqqq <= cts_readout_qqqqq;
+				
 --				if (switch_ptr = "11") then
 --					switch_ptr <= "00";
 --				else
@@ -103,8 +109,9 @@ begin
 --				switch_ptr_qq  <= switch_ptr_q;
 --				switch_ptr_qqq <= switch_ptr_qq;
 
-				if (cts_readout = '0' and cts_readout_q = '1') then
+				--if (cts_readout = '0' and cts_readout_q = '1') then
 				--if (switch_ptr_qqq = "11") then
+				if (cts_readout_qqqqqq = '1') then
 					client_ptr <= client_ptr;
 					case client_ptr is
 						when 0 =>
