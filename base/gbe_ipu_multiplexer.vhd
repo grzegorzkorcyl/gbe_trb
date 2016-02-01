@@ -113,9 +113,9 @@ begin
 --				switch_ptr_qq  <= switch_ptr_q;
 --				switch_ptr_qqq <= switch_ptr_qq;
 
-				--if (cts_readout = '0' and cts_readout_q = '1') then
+				if (cts_readout = '0' and cts_readout_q = '1') then
 				--if (switch_ptr_qqq = "11") then
-				if (cts_readout_qqqqqq = '1') then
+				--if (cts_readout_qqqqqq = '1') then
 					client_ptr <= client_ptr;
 					case client_ptr is
 						when 0 =>
