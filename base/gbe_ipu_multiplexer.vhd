@@ -87,85 +87,85 @@ begin
 				switch_ptr <= "00";
 			else
 				
-				client_ptr <= 3;
+--				client_ptr <= 3;
 				
 				
---				cts_readout   <= CTS_START_READOUT_IN; --MLT_CTS_READOUT_FINISHED_IN(client_ptr); --CTS_START_READOUT_IN;
---				cts_readout_q <= cts_readout;
---				cts_readout_qq <= not cts_readout and cts_readout_q;
---				cts_readout_qqq <= cts_readout_qq;
---				cts_readout_qqqq <= cts_readout_qqq;
---				cts_readout_qqqqq <= cts_readout_qqqq;
---				cts_readout_qqqqqq <= cts_readout_qqqqq;
---				
-----				if (switch_ptr = "11") then
-----					switch_ptr <= "00";
-----				else
-----					if (cts_readout = '0' and cts_readout_q = '1') then
-----						switch_ptr(0) <= '1';
-----					else
-----						switch_ptr(0) <= switch_ptr(0);
-----					end if;
-----
-----					switch_ptr(1) <= MLT_CTS_READOUT_FINISHED_IN(client_ptr);
-----				end if;
-----				switch_ptr_q   <= switch_ptr;
-----				switch_ptr_qq  <= switch_ptr_q;
-----				switch_ptr_qqq <= switch_ptr_qq;
---
---				--if (cts_readout = '0' and cts_readout_q = '1') then
---				--if (switch_ptr_qqq = "11") then
---				if (cts_readout_qqqqqq = '1') then
---					client_ptr <= client_ptr;
---					case client_ptr is
---						when 0 =>
---							if (LINK_HAS_READOUT(1) = '1') then
---								client_ptr <= 1;
---							elsif (LINK_HAS_READOUT(2) = '1') then
---								client_ptr <= 2;
---							elsif (LINK_HAS_READOUT(3) = '1') then
---								client_ptr <= 3;
---							else
---								client_ptr <= 0;
---							end if;
---
---						when 1 =>
---							if (LINK_HAS_READOUT(2) = '1') then
---								client_ptr <= 2;
---							elsif (LINK_HAS_READOUT(3) = '1') then
---								client_ptr <= 3;
---							elsif (LINK_HAS_READOUT(0) = '1') then
---								client_ptr <= 0;
---							else
---								client_ptr <= 1;
---							end if;
---
---						when 2 =>
---							if (LINK_HAS_READOUT(3) = '1') then
---								client_ptr <= 3;
---							elsif (LINK_HAS_READOUT(0) = '1') then
---								client_ptr <= 0;
---							elsif (LINK_HAS_READOUT(1) = '1') then
---								client_ptr <= 1;
---							else
---								client_ptr <= 2;
---							end if;
---
---						when 3 =>
---							if (LINK_HAS_READOUT(0) = '1') then
---								client_ptr <= 0;
---							elsif (LINK_HAS_READOUT(1) = '1') then
---								client_ptr <= 1;
---							elsif (LINK_HAS_READOUT(2) = '1') then
---								client_ptr <= 2;
---							else
---								client_ptr <= 3;
---							end if;
---						when others => client_ptr <= client_ptr;
---					end case;
+				cts_readout   <= CTS_START_READOUT_IN; --MLT_CTS_READOUT_FINISHED_IN(client_ptr); --CTS_START_READOUT_IN;
+				cts_readout_q <= cts_readout;
+				cts_readout_qq <= not cts_readout and cts_readout_q;
+				cts_readout_qqq <= cts_readout_qq;
+				cts_readout_qqqq <= cts_readout_qqq;
+				cts_readout_qqqqq <= cts_readout_qqqq;
+				cts_readout_qqqqqq <= cts_readout_qqqqq;
+				
+--				if (switch_ptr = "11") then
+--					switch_ptr <= "00";
 --				else
---					client_ptr <= client_ptr;
+--					if (cts_readout = '0' and cts_readout_q = '1') then
+--						switch_ptr(0) <= '1';
+--					else
+--						switch_ptr(0) <= switch_ptr(0);
+--					end if;
+--
+--					switch_ptr(1) <= MLT_CTS_READOUT_FINISHED_IN(client_ptr);
 --				end if;
+--				switch_ptr_q   <= switch_ptr;
+--				switch_ptr_qq  <= switch_ptr_q;
+--				switch_ptr_qqq <= switch_ptr_qq;
+
+				--if (cts_readout = '0' and cts_readout_q = '1') then
+				--if (switch_ptr_qqq = "11") then
+				if (cts_readout_qqqqqq = '1') then
+					client_ptr <= client_ptr;
+					case client_ptr is
+						when 0 =>
+							if (LINK_HAS_READOUT(1) = '1') then
+								client_ptr <= 1;
+							elsif (LINK_HAS_READOUT(2) = '1') then
+								client_ptr <= 2;
+							elsif (LINK_HAS_READOUT(3) = '1') then
+								client_ptr <= 3;
+							else
+								client_ptr <= 0;
+							end if;
+
+						when 1 =>
+							if (LINK_HAS_READOUT(2) = '1') then
+								client_ptr <= 2;
+							elsif (LINK_HAS_READOUT(3) = '1') then
+								client_ptr <= 3;
+							elsif (LINK_HAS_READOUT(0) = '1') then
+								client_ptr <= 0;
+							else
+								client_ptr <= 1;
+							end if;
+
+						when 2 =>
+							if (LINK_HAS_READOUT(3) = '1') then
+								client_ptr <= 3;
+							elsif (LINK_HAS_READOUT(0) = '1') then
+								client_ptr <= 0;
+							elsif (LINK_HAS_READOUT(1) = '1') then
+								client_ptr <= 1;
+							else
+								client_ptr <= 2;
+							end if;
+
+						when 3 =>
+							if (LINK_HAS_READOUT(0) = '1') then
+								client_ptr <= 0;
+							elsif (LINK_HAS_READOUT(1) = '1') then
+								client_ptr <= 1;
+							elsif (LINK_HAS_READOUT(2) = '1') then
+								client_ptr <= 2;
+							else
+								client_ptr <= 3;
+							end if;
+						when others => client_ptr <= client_ptr;
+					end case;
+				else
+					client_ptr <= client_ptr;
+				end if;
 			end if;
 		end if;
 	end process;
