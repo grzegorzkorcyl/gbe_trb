@@ -511,7 +511,7 @@ begin
 			elsif (current_state = CTS_START and ctr = 1) then
 				cts_start_readout <= '1';
 			elsif (current_state = CLOSE) then
-				cts_start_readout <= '0';
+				cts_start_readout <= '1';
 			else
 				cts_start_readout <= cts_start_readout;
 			end if;
