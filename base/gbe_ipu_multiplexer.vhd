@@ -90,7 +90,7 @@ begin
 --				client_ptr <= 3;
 				
 				
-				cts_readout   <= CTS_START_READOUT_IN; --MLT_CTS_READOUT_FINISHED_IN(client_ptr); --CTS_START_READOUT_IN;
+				cts_readout   <= MLT_CTS_READOUT_FINISHED_IN(client_ptr); --CTS_START_READOUT_IN;
 				cts_readout_q <= cts_readout;
 				cts_readout_qq <= not cts_readout and cts_readout_q;
 				cts_readout_qqq <= cts_readout_qq;
