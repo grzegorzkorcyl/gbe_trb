@@ -211,7 +211,7 @@ begin
 
 	all_links_ready <= '1' when dhcp_done = x"f" else '0';
 
-	MAKE_RESET_OUT <= '1' when make_reset3 = '1' or make_reset2 = '1' or make_reset1 = '1' or make_reset0 = '1' else '0';
+	MAKE_RESET_OUT <= '0'; --1' when make_reset3 = '1' or make_reset2 = '1' or make_reset1 = '1' or make_reset0 = '1' else '0';
 
 	physical_impl_gen : if DO_SIMULATION = 0 generate
 		physical : entity work.gbe_med_interface
