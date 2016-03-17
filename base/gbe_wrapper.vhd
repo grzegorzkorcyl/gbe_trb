@@ -186,8 +186,8 @@ architecture RTL of gbe_wrapper is
 
 	signal busip0, busip1, busip2, busip3                       : CTRLBUS_TX;
 	signal SD_RXD_P_IN, SD_RXD_N_IN, SD_TXD_P_OUT, SD_TXD_N_OUT : std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0);
-	attribute nopad : string;
-	attribute nopad of SD_RXD_P_IN, SD_RXD_N_IN, SD_TXD_P_OUT, SD_TXD_N_OUT : signal is "true";
+	--attribute nopad : string;
+	--attribute nopad of SD_RXD_P_IN, SD_RXD_N_IN, SD_TXD_P_OUT, SD_TXD_N_OUT : signal is "true";
 
 	signal dummy_event                                        : std_logic_vector(15 downto 0);
 	signal dummy_mode                                         : std_logic;
