@@ -444,8 +444,8 @@ begin
 	begin
 		if rising_edge(CLK_IPU) then
 			--if (save_current_state = CLOSE) then
-			if (save_current_state = SEND_TERM_PULSE) then
-			--if (save_current_state = CLEANUP) then
+			--if (save_current_state = SEND_TERM_PULSE) then
+			if (save_current_state = CLEANUP) then
 				CTS_READOUT_FINISHED_OUT <= '1';
 			else
 				CTS_READOUT_FINISHED_OUT <= '0';
