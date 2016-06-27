@@ -90,7 +90,7 @@ begin
 --				client_ptr <= 3;
 				
 				
-				cts_readout   <= MLT_CTS_READOUT_FINISHED_IN(client_ptr); --CTS_START_READOUT_IN;
+				cts_readout   <= CTS_START_READOUT_IN; --MLT_CTS_READOUT_FINISHED_IN(client_ptr); --CTS_START_READOUT_IN;
 				cts_readout_q <= cts_readout;
 				cts_readout_qq <= not cts_readout and cts_readout_q;
 				cts_readout_qqq <= cts_readout_qq;
@@ -113,7 +113,7 @@ begin
 --				switch_ptr_qq  <= switch_ptr_q;
 --				switch_ptr_qqq <= switch_ptr_qq;
 
-				if (cts_readout = '1' and cts_readout_q = '0') then
+				if (cts_readout = '0' and cts_readout_q = '1') then
 				--if (switch_ptr_qqq = "11") then
 				--if (cts_readout_qqqqqq = '1') then
 					client_ptr <= client_ptr;
