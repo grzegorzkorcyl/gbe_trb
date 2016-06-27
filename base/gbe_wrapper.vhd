@@ -16,11 +16,9 @@ entity gbe_wrapper is
 	generic(
 		DO_SIMULATION             : integer range 0 to 1         := 0;
 		INCLUDE_DEBUG             : integer range 0 to 1         := 0;
-
 		USE_INTERNAL_TRBNET_DUMMY : integer range 0 to 1         := 0;
 		USE_EXTERNAL_TRBNET_DUMMY : integer range 0 to 1         := 0;
 		RX_PATH_ENABLE            : integer range 0 to 1         := 1;
-
 		FIXED_SIZE_MODE           : integer range 0 to 1         := 1;
 		INCREMENTAL_MODE          : integer range 0 to 1         := 0;
 		FIXED_SIZE                : integer range 0 to 65535     := 10;
@@ -28,7 +26,6 @@ entity gbe_wrapper is
 		UP_DOWN_MODE              : integer range 0 to 1         := 0;
 		UP_DOWN_LIMIT             : integer range 0 to 16777215  := 0;
 		FIXED_DELAY               : integer range 0 to 16777215  := 16777215;
-
 		NUMBER_OF_GBE_LINKS       : integer range 1 to 4         := 4;
 		LINKS_ACTIVE              : std_logic_vector(3 downto 0) := "1111";
 		LINK_HAS_PING             : std_logic_vector(3 downto 0) := "1111";
@@ -42,7 +39,6 @@ entity gbe_wrapper is
 		CLK_125_IN               : in  std_logic;
 		RESET                    : in  std_logic;
 		GSR_N                    : in  std_logic;
-
 		SD_PRSNT_N_IN            : in  std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0);
 		SD_LOS_IN                : in  std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0); -- SFP Loss Of Signal ('0' = OK, '1' = no signal)
 		SD_TXDIS_OUT             : out std_logic_vector(NUMBER_OF_GBE_LINKS - 1 downto 0); -- SFP disable
@@ -84,9 +80,7 @@ entity gbe_wrapper is
 		-- Registers config
 		BUS_REG_RX               : in  CTRLBUS_RX;
 		BUS_REG_TX               : out CTRLBUS_TX;
-
 		MAKE_RESET_OUT           : out std_logic;
-
 		DEBUG_OUT                : out std_logic_vector(127 downto 0)
 	);
 end entity gbe_wrapper;
@@ -193,6 +187,9 @@ architecture RTL of gbe_wrapper is
 	signal dummy_mode                                         : std_logic;
 	signal make_reset0, make_reset1, make_reset2, make_reset3 : std_logic := '0';
 	signal monitor_gen_dbg                                    : std_logic_vector(c_MAX_PROTOCOLS * 64 - 1 downto 0);
+
+	signal cfg_autothrottle   : std_logic;
+	signal cfg_throttle_pause : std_logic_vector(15 downto 0);
 
 begin
 	mac_impl_gen : if DO_SIMULATION = 0 generate
@@ -357,6 +354,8 @@ begin
 				CFG_MAX_SINGLE_SUB_IN    => cfg_max_single_sub,
 				CFG_ADDITIONAL_HDR_IN    => cfg_additional_hdr,
 				CFG_MAX_REPLY_SIZE_IN    => cfg_max_reply,
+				CFG_AUTO_THROTTLE_IN     => cfg_autothrottle,
+				CFG_THROTTLE_PAUSE_IN    => cfg_throttle_pause,
 				MONITOR_RX_FRAMES_OUT    => monitor_rx_frames(4 * 32 - 1 downto 3 * 32),
 				MONITOR_RX_BYTES_OUT     => monitor_rx_bytes(4 * 32 - 1 downto 3 * 32),
 				MONITOR_TX_FRAMES_OUT    => monitor_tx_frames(4 * 32 - 1 downto 3 * 32),
@@ -476,6 +475,8 @@ begin
 				CFG_MAX_SINGLE_SUB_IN    => cfg_max_single_sub,
 				CFG_ADDITIONAL_HDR_IN    => cfg_additional_hdr,
 				CFG_MAX_REPLY_SIZE_IN    => cfg_max_reply,
+				CFG_AUTO_THROTTLE_IN     => cfg_autothrottle,
+				CFG_THROTTLE_PAUSE_IN    => cfg_throttle_pause,
 				MONITOR_RX_FRAMES_OUT    => monitor_rx_frames(3 * 32 - 1 downto 2 * 32),
 				MONITOR_RX_BYTES_OUT     => monitor_rx_bytes(3 * 32 - 1 downto 2 * 32),
 				MONITOR_TX_FRAMES_OUT    => monitor_tx_frames(3 * 32 - 1 downto 2 * 32),
@@ -595,6 +596,8 @@ begin
 				CFG_MAX_SINGLE_SUB_IN    => cfg_max_single_sub,
 				CFG_ADDITIONAL_HDR_IN    => cfg_additional_hdr,
 				CFG_MAX_REPLY_SIZE_IN    => cfg_max_reply,
+				CFG_AUTO_THROTTLE_IN     => cfg_autothrottle,
+				CFG_THROTTLE_PAUSE_IN    => cfg_throttle_pause,
 				MONITOR_RX_FRAMES_OUT    => monitor_rx_frames(2 * 32 - 1 downto 1 * 32),
 				MONITOR_RX_BYTES_OUT     => monitor_rx_bytes(2 * 32 - 1 downto 1 * 32),
 				MONITOR_TX_FRAMES_OUT    => monitor_tx_frames(2 * 32 - 1 downto 1 * 32),
@@ -714,6 +717,8 @@ begin
 				CFG_MAX_SINGLE_SUB_IN    => cfg_max_single_sub,
 				CFG_ADDITIONAL_HDR_IN    => cfg_additional_hdr,
 				CFG_MAX_REPLY_SIZE_IN    => cfg_max_reply,
+				CFG_AUTO_THROTTLE_IN     => cfg_autothrottle,
+				CFG_THROTTLE_PAUSE_IN    => cfg_throttle_pause,
 				MONITOR_RX_FRAMES_OUT    => monitor_rx_frames(1 * 32 - 1 downto 0 * 32),
 				MONITOR_RX_BYTES_OUT     => monitor_rx_bytes(1 * 32 - 1 downto 0 * 32),
 				MONITOR_TX_FRAMES_OUT    => monitor_tx_frames(1 * 32 - 1 downto 0 * 32),
@@ -953,6 +958,8 @@ begin
 				GBE_MAX_QUEUE_OUT            => cfg_max_queue,
 				GBE_MAX_SUBS_IN_QUEUE_OUT    => cfg_max_subs_in_queue,
 				GBE_MAX_SINGLE_SUB_OUT       => cfg_max_single_sub,
+				GBE_AUTOTHROTTLE_OUT         => cfg_autothrottle,
+				GBE_THROTTLE_PAUSE_OUT       => cfg_throttle_pause,
 				MONITOR_RX_BYTES_IN          => sum_rx_bytes,
 				MONITOR_RX_FRAMES_IN         => sum_rx_frames,
 				MONITOR_TX_BYTES_IN          => sum_tx_bytes,
@@ -1000,12 +1007,12 @@ begin
 		GSC_INIT_DATA_OUT       <= (others => '0');
 		GSC_INIT_PACKET_NUM_OUT <= (others => '0');
 		GSC_REPLY_READ_OUT      <= '1';
-		mlt_gsc_clk <= (others => '0');
-		mlt_gsc_init_read <= (others => '0');
+		mlt_gsc_clk             <= (others => '0');
+		mlt_gsc_init_read       <= (others => '0');
 		mlt_gsc_reply_dataready <= (others => '0');
-		mlt_gsc_reply_data <= (others => '0');
-		mlt_gsc_reply_packet <= (others => '0');
-		mlt_gsc_busy <= (others => '0');
+		mlt_gsc_reply_data      <= (others => '0');
+		mlt_gsc_reply_packet    <= (others => '0');
+		mlt_gsc_busy            <= (others => '0');
 	end generate NOSCTRL_MAP_GEN;
 
 	SCTRL_MAP_GEN : if (LINK_HAS_SLOWCTRL /= "0000") generate

@@ -1010,7 +1010,10 @@ port(
 	GBE_MAX_SUB_OUT           : out std_logic_vector(15 downto 0);
 	GBE_MAX_QUEUE_OUT         : out std_logic_vector(15 downto 0);
 	GBE_MAX_SUBS_IN_QUEUE_OUT : out std_logic_vector(15 downto 0);
-	GBE_MAX_SINGLE_SUB_OUT    : out std_logic_vector(15 downto 0);
+	GBE_MAX_SINGLE_SUB_OUT    : out std_logic_vector(15 downto 0);	
+	
+	GBE_AUTOTHROTTLE_OUT	  : out std_logic;
+	GBE_THROTTLE_PAUSE_OUT    : out std_logic_vector(15 downto 0);
 	
 	MONITOR_RX_BYTES_IN       : in std_logic_vector(31 downto 0);
 	MONITOR_RX_FRAMES_IN      : in std_logic_vector(31 downto 0);

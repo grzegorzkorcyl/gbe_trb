@@ -41,6 +41,9 @@ port(
 	GBE_SOFT_RESET_OUT        : out std_logic;
 	GBE_MAX_REPLY_OUT         : out std_logic_vector(31 downto 0);
 	
+	GBE_AUTOTHROTTLE_OUT	  : out std_logic;
+	GBE_THROTTLE_PAUSE_OUT    : out std_logic_vector(15 downto 0);
+	
 	GBE_MAX_SUB_OUT           : out std_logic_vector(15 downto 0);
 	GBE_MAX_QUEUE_OUT         : out std_logic_vector(15 downto 0);
 	GBE_MAX_SUBS_IN_QUEUE_OUT : out std_logic_vector(15 downto 0);
@@ -91,6 +94,9 @@ signal max_reply         : std_logic_vector(31 downto 0);
   signal max_sub, max_queue, max_subs_in_queue, max_single_sub : std_logic_vector(15 downto 0);
   signal dummy_event : std_logic_vector(15 downto 0);
   signal dummy_mode : std_logic;
+  signal autothrottle : std_logic;
+  signal throttle_pause : std_logic_vector(15 downto 0);
+  
 
 begin
 
@@ -119,6 +125,8 @@ begin
 		GBE_MAX_REPLY_OUT         <= max_reply;
 		DUMMY_EVENT_SIZE_OUT      <= dummy_event;
 		DUMMY_TRIGGERED_MODE_OUT  <= dummy_mode;
+		GBE_AUTOTHROTTLE_OUT      <= autothrottle;
+		GBE_THROTTLE_PAUSE_OUT    <= throttle_pause;
 	end if;
 end process OUT_PROC;
 
@@ -160,6 +168,8 @@ begin
 			max_reply         <= x"0000_fa00";
 			dummy_event       <= x"0100";
 			dummy_mode        <= '0';
+			autothrottle      <= '0';
+			throttle_pause    <= x"0000";
 
 		elsif (BUS_WRITE_EN_IN = '1') then
 		
@@ -233,6 +243,11 @@ begin
 					
 				when x"13" =>
 					dummy_mode       <= BUS_DATA_IN(0);
+					
+				when x"14" =>
+					autothrottle     <= BUS_DATA_IN(0);
+					throttle_pause   <= BUS_DATA_IN(31 downto 16);	
+				
 
 				when x"ff" =>
 					if (BUS_DATA_IN = x"ffff_ffff") then
@@ -264,6 +279,8 @@ begin
 					max_reply          <= max_reply;	
 					dummy_event        <= dummy_event;
 					dummy_mode         <= dummy_mode;	
+					autothrottle       <= autothrottle;
+					throttle_pause     <= throttle_pause;
 			end case;
 		else
 			reset_values      <= '0';
@@ -358,6 +375,9 @@ begin
 					data_out(0) <= dummy_mode;
 					data_out(31 downto 1) <= (others => '0');
 					
+				when 20 =>
+					data_out(0) <= autothrottle;
+					data_out(31 downto 16) <= throttle_pause;
 										
 				-- Histogram of sctrl data sizes
 				when 96 to 127 =>

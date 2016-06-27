@@ -16,17 +16,14 @@ entity gbe_logic_wrapper is
 		INCLUDE_DEBUG             : integer range 0 to 1;
 		USE_INTERNAL_TRBNET_DUMMY : integer range 0 to 1;
 		RX_PATH_ENABLE            : integer range 0 to 1;
-
 		INCLUDE_READOUT           : std_logic                   := '0';
 		INCLUDE_SLOWCTRL          : std_logic                   := '0';
 		INCLUDE_DHCP              : std_logic                   := '0';
 		INCLUDE_ARP               : std_logic                   := '0';
 		INCLUDE_PING              : std_logic                   := '0';
-
 		FRAME_BUFFER_SIZE         : integer range 1 to 4        := 1;
 		READOUT_BUFFER_SIZE       : integer range 1 to 4        := 1;
 		SLOWCTRL_BUFFER_SIZE      : integer range 1 to 4        := 1;
-
 		FIXED_SIZE_MODE           : integer range 0 to 1        := 1;
 		INCREMENTAL_MODE          : integer range 0 to 1        := 0;
 		FIXED_SIZE                : integer range 0 to 65535    := 10;
@@ -41,7 +38,6 @@ entity gbe_logic_wrapper is
 		CLK_RX_125_IN            : in  std_logic;
 		RESET                    : in  std_logic;
 		GSR_N                    : in  std_logic;
-
 		MY_MAC_IN                : in  std_logic_vector(47 downto 0);
 		DHCP_DONE_OUT            : out std_logic;
 
@@ -49,19 +45,16 @@ entity gbe_logic_wrapper is
 		MAC_READY_CONF_IN        : in  std_logic;
 		MAC_RECONF_OUT           : out std_logic;
 		MAC_AN_READY_IN          : in  std_logic;
-
 		MAC_FIFOAVAIL_OUT        : out std_logic;
 		MAC_FIFOEOF_OUT          : out std_logic;
 		MAC_FIFOEMPTY_OUT        : out std_logic;
 		MAC_RX_FIFOFULL_OUT      : out std_logic;
-
 		MAC_TX_DATA_OUT          : out std_logic_vector(7 downto 0);
 		MAC_TX_READ_IN           : in  std_logic;
 		MAC_TX_DISCRFRM_IN       : in  std_logic;
 		MAC_TX_STAT_EN_IN        : in  std_logic;
 		MAC_TX_STATS_IN          : in  std_logic_vector(30 downto 0);
 		MAC_TX_DONE_IN           : in  std_logic;
-
 		MAC_RX_FIFO_ERR_IN       : in  std_logic;
 		MAC_RX_STATS_IN          : in  std_logic_vector(31 downto 0);
 		MAC_RX_DATA_IN           : in  std_logic_vector(7 downto 0);
@@ -126,7 +119,8 @@ entity gbe_logic_wrapper is
 		CFG_MAX_SINGLE_SUB_IN    : in  std_logic_vector(15 downto 0);
 		CFG_ADDITIONAL_HDR_IN    : in  std_logic;
 		CFG_MAX_REPLY_SIZE_IN    : in  std_logic_vector(31 downto 0);
-
+		CFG_AUTO_THROTTLE_IN     : in  std_logic;
+		CFG_THROTTLE_PAUSE_IN    : in  std_logic_vector(15 downto 0);
 		MONITOR_RX_BYTES_OUT     : out std_logic_vector(31 downto 0);
 		MONITOR_RX_FRAMES_OUT    : out std_logic_vector(31 downto 0);
 		MONITOR_TX_BYTES_OUT     : out std_logic_vector(31 downto 0);
@@ -134,7 +128,6 @@ entity gbe_logic_wrapper is
 		MONITOR_TX_PACKETS_OUT   : out std_logic_vector(31 downto 0);
 		MONITOR_DROPPED_OUT      : out std_logic_vector(31 downto 0);
 		MONITOR_GEN_DBG_OUT      : out std_logic_vector(2 * c_MAX_PROTOCOLS * 32 - 1 downto 0);
-
 		MAKE_RESET_OUT           : out std_logic
 	);
 end entity gbe_logic_wrapper;
@@ -385,6 +378,8 @@ begin
 				CFG_MAX_SINGLE_SUB_IN         => CFG_MAX_SINGLE_SUB_IN,
 				CFG_ADDITIONAL_HDR_IN         => CFG_ADDITIONAL_HDR_IN,
 				CFG_MAX_REPLY_SIZE_IN         => CFG_MAX_REPLY_SIZE_IN,
+				CFG_AUTO_THROTTLE_IN          => CFG_AUTO_THROTTLE_IN,
+				CFG_THROTTLE_PAUSE_IN         => CFG_THROTTLE_PAUSE_IN,
 				TSM_HADDR_OUT                 => open, --mac_haddr,
 				TSM_HDATA_OUT                 => open, --mac_hdataout,
 				TSM_HCS_N_OUT                 => open, --mac_hcs,
@@ -522,6 +517,8 @@ begin
 
 				CFG_ADDITIONAL_HDR_IN         => '0',
 				CFG_MAX_REPLY_SIZE_IN         => x"0000_fa00",
+				CFG_AUTO_THROTTLE_IN          => CFG_AUTO_THROTTLE_IN,
+				CFG_THROTTLE_PAUSE_IN         => CFG_THROTTLE_PAUSE_IN,
 
 				-- signal to/from Host interface of TriSpeed MAC
 				TSM_HADDR_OUT                 => open, --mac_haddr,

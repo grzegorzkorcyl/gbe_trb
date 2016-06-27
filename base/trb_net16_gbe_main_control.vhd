@@ -136,6 +136,9 @@ entity trb_net16_gbe_main_control is
 
 		CFG_ADDITIONAL_HDR_IN         : in  std_logic;
 		CFG_MAX_REPLY_SIZE_IN         : in  std_logic_vector(31 downto 0);
+		
+		CFG_AUTO_THROTTLE_IN     : in  std_logic;
+		CFG_THROTTLE_PAUSE_IN    : in  std_logic_vector(15 downto 0);
 
 		MAKE_RESET_OUT                : out std_logic;
 
@@ -358,6 +361,8 @@ begin
 			CFG_MAX_SINGLE_SUB_IN         => CFG_MAX_SINGLE_SUB_IN,
 			CFG_ADDITIONAL_HDR_IN         => CFG_ADDITIONAL_HDR_IN,
 			CFG_MAX_REPLY_SIZE_IN         => CFG_MAX_REPLY_SIZE_IN,
+			CFG_AUTO_THROTTLE_IN          => CFG_AUTO_THROTTLE_IN,
+			CFG_THROTTLE_PAUSE_IN         => CFG_THROTTLE_PAUSE_IN,
 
 			-- input for statistics from outside
 			STAT_DATA_IN                  => stat_data,

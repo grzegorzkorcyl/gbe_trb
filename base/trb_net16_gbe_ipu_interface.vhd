@@ -52,6 +52,8 @@ entity trb_net16_gbe_ipu_interface is
 		MAX_SINGLE_SUB_SIZE_IN   : in  std_logic_vector(15 downto 0);
 		READOUT_CTR_IN           : in  std_logic_vector(23 downto 0); -- gk 26.04.10
 		READOUT_CTR_VALID_IN     : in  std_logic; -- gk 26.04.10
+		CFG_AUTO_THROTTLE_IN     : in  std_logic;
+		CFG_THROTTLE_PAUSE_IN    : in  std_logic_vector(15 downto 0);
 		-- PacketConstructor interface
 		PC_WR_EN_OUT             : out std_logic;
 		PC_DATA_OUT              : out std_logic_vector(7 downto 0);
@@ -70,7 +72,7 @@ end entity trb_net16_gbe_ipu_interface;
 architecture RTL of trb_net16_gbe_ipu_interface is
 	attribute syn_encoding : string;
 
-	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, ADD_MISSING, TERMINATE, SEND_TERM_PULSE, CLOSE, FINISH_4_WORDS, CLEANUP);
+	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, ADD_MISSING, TERMINATE, SEND_TERM_PULSE, THROTTLE_PAUSE, CLOSE, FINISH_4_WORDS, CLEANUP);
 	signal save_current_state, save_next_state : saveStates;
 	attribute syn_encoding of save_current_state : signal is "onehot";
 
@@ -124,6 +126,10 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal last_three_bytes    : std_logic_vector(3 downto 0);
 	signal sf_eos_q, sf_eos_qq : std_logic;
 	signal eos_ctr             : std_logic_vector(3 downto 0);
+
+	signal stream_bytes_ps : std_logic_vector(31 downto 0);
+	signal one_sec_ctr     : std_logic_vector(31 downto 0);
+	signal one_sec_tick    : std_logic;
 
 begin
 
@@ -438,7 +444,8 @@ begin
 	begin
 		if rising_edge(CLK_IPU) then
 			--if (save_current_state = CLOSE) then
-			if (save_current_state = SEND_TERM_PULSE) then
+			--if (save_current_state = SEND_TERM_PULSE) then
+			if (save_current_state = CLEANUP) then
 				CTS_READOUT_FINISHED_OUT <= '1';
 			else
 				CTS_READOUT_FINISHED_OUT <= '0';
@@ -556,6 +563,34 @@ begin
 		--			end if;
 		end if;
 	end process FEE_READ_PROC;
+
+	process(CLK_IPU)
+	begin
+		if rising_edge(CLK_IPU) then
+			if (one_sec_tick = '1') then
+				stream_bytes_ps <= (others => '0');
+			else
+				if (sf_rd_en = '1') then
+					stream_bytes_ps <= stream_bytes_ps + x"2";
+				else
+					stream_bytes_ps <= stream_bytes_ps;
+				end if;
+			end if;
+		end if;
+	end process;
+
+	process(CLK_IPU)
+	begin
+		if rising_edge(CLK_IPU) then
+			if (sf_reset = '1' or one_sec_ctr = x"05f5_e100") then
+				one_sec_tick <= '1';
+				one_sec_ctr  <= (others => '0');
+			else
+				one_sec_ctr  <= one_sec_ctr + x"1";
+				one_sec_tick <= '0';
+			end if;
+		end if;
+	end process;
 
 	THE_SPLIT_FIFO : entity work.fifo_32kx18x9_wcnt -- fifo_32kx16x8_mb2  --fifo_16kx18x9
 		port map(
@@ -847,7 +882,6 @@ begin
 				end if;
 			end if;
 
-
 		end if;
 	end process SF_RD_EN_PROC;
 
@@ -1018,7 +1052,7 @@ begin
 	begin
 		if rising_edge(CLK_GBE) then
 			if (PC_READY_IN = '1') then
-				if ( (load_current_state = LOAD and sf_eos = '0') or load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
+				if ((load_current_state = LOAD and sf_eos = '0') or load_current_state = FINISH_ONE or load_current_state = FINISH_TWO) then
 					PC_WR_EN_OUT <= '1';
 				else
 					PC_WR_EN_OUT <= '0';
