@@ -193,15 +193,15 @@ begin
 
 			when CLOSE =>
 				rec_state <= x"6";
-				if (CTS_START_READOUT_IN = '0') then
+				--if (CTS_START_READOUT_IN = '0') then
 					if (saved_size = x"0000" & "0") then
 						save_next_state <= ADD_SUBSUB1;
 					else
 						save_next_state <= ADD_MISSING;
 					end if;
-				else
-					save_next_state <= CLOSE;
-				end if;
+				--else
+				--	save_next_state <= CLOSE;
+				--end if;
 
 			when ADD_MISSING =>
 				rec_state <= x"d";
