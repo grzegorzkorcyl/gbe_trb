@@ -910,6 +910,8 @@ begin
 				MAX_SINGLE_SUB_SIZE_IN   => (others => '0'),
 				READOUT_CTR_IN           => (others => '0'),
 				READOUT_CTR_VALID_IN     => '0',
+				CFG_AUTO_THROTTLE_IN     => '0',
+				CFG_THROTTLE_PAUSE_IN    => (others => '0'),
 				-- PacketConstructor interface
 				PC_WR_EN_OUT             => open,
 				PC_DATA_OUT              => open,
