@@ -182,7 +182,7 @@ begin
 				
 			when THROTTLE_PAUSE =>
 				rec_state <= x"d";
-				if (pause_ctr = x"1000") then
+				if (pause_ctr = x"0100") then
 					save_next_state <= TERMINATE;
 				else
 					save_next_state <= THROTTLE_PAUSE;
