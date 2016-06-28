@@ -116,6 +116,9 @@ architecture trb_net16_api_ipu_streaming_arch of trb_net16_api_ipu_streaming is
   signal data_counter                   : signed(17 downto 0);
   signal data_length                    : signed(17 downto 0);
   signal buf_FEE_DATAREADY_OUT          : std_logic;
+  
+  
+  signal CTS_DATAREADY_IN_a : std_logic;
 
 begin
 
@@ -146,7 +149,7 @@ APL_FEE_LENGTH_IN <= x"0000";
       APL_DATA_IN           => APL_CTS_DATA_IN,
       APL_PACKET_NUM_IN     => APL_CTS_PACKET_NUM_IN,
       APL_DATAREADY_IN      => APL_CTS_DATAREADY_IN,
-      APL_READ_OUT          => APL_CTS_READ_OUT,
+      APL_READ_OUT          => open, --APL_CTS_READ_OUT,
       APL_SHORT_TRANSFER_IN => APL_CTS_SHORT_TRANSFER_IN,
       APL_DTYPE_IN          => APL_CTS_DTYPE_IN,
       APL_ERROR_PATTERN_IN  => APL_CTS_ERROR_PATTERN_IN,
@@ -191,7 +194,12 @@ begin
 	APL_CTS_TYP_OUT <= "000";
 	APL_CTS_DATAREADY_OUT <= '0';
 	APL_CTS_PACKET_NUM_OUT <= "000";
-	wait for 1 us;
+	
+	APL_CTS_READ_OUT <= '1';
+	
+	CTS_DATAREADY_IN_a <= '0';
+	
+	wait for 9 us;
 	wait until rising_edge(CLK);
 	APL_CTS_TYP_OUT <= "011";
 	APL_CTS_DATAREADY_OUT <= '1';
@@ -200,6 +208,11 @@ begin
 	APL_CTS_TYP_OUT <= "000";
 	APL_CTS_DATAREADY_OUT <= '0';
 	APL_CTS_PACKET_NUM_OUT <= "000";
+	
+	wait for 100 ns;
+	CTS_DATAREADY_IN_a <= '1';
+	wait for 100 ns;
+	CTS_DATAREADY_IN_a <= '0';
 	
 	
 	wait;
@@ -313,7 +326,7 @@ end process;
       IPU_START_READOUT_OUT  => buf_CTS_START_READOUT_OUT,
       --detector data, equipped with DHDR
       IPU_DATA_IN            => CTS_DATA_IN,
-      IPU_DATAREADY_IN       => CTS_DATAREADY_IN,
+      IPU_DATAREADY_IN       => CTS_DATAREADY_IN_a,
       --no more data, end transfer, send TRM
       IPU_READOUT_FINISHED_IN => CTS_READOUT_FINISHED_IN,
       --will be low every second cycle due to 32bit -> 16bit conversion
