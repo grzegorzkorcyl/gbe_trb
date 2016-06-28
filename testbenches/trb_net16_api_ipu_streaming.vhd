@@ -305,7 +305,11 @@ end process;
 process
 begin
 	wait until rising_edge(CLK);
-	just_ctr <= just_ctr + 1;
+	if (just_ctr = 510) then
+		just_ctr <= 0;
+	else
+		just_ctr <= just_ctr + 1;
+	end if;
 end process;
 	
 
