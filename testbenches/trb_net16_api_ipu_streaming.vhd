@@ -212,14 +212,14 @@ begin
 	
 	data_ctr <= x"0000";
 	
-	test_data_len <= x"1000";
+	test_data_len <= x"0064";
 	
 	saved_words_ctr <= 0;
 	
 	wait for 9 us;
 	
 	
-	for i in 0 to 10000 loop
+	for i in 0 to 1 loop
 	
 		wait until rising_edge(CLK);
 		APL_CTS_TYP_OUT <= "011";
