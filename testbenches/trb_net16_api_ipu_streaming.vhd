@@ -188,14 +188,14 @@ APL_FEE_LENGTH_IN <= x"0000";
 
 process
 begin
-	APL_CTS_TYP_OUT <= c_F0;
+	APL_CTS_TYP_OUT <= "000";
 	APL_CTS_DATAREADY_OUT <= '0';
 	wait for 1 us;
 	wait until rising_edge(CLK);
-	APL_CTS_TYP_OUT <= c_F3;
+	APL_CTS_TYP_OUT <= "011";
 	APL_CTS_DATAREADY_OUT <= '1';
 	wait until rising_edge(CLK);
-	APL_CTS_TYP_OUT <= c_F0;
+	APL_CTS_TYP_OUT <= "000";
 	APL_CTS_DATAREADY_OUT <= '0';
 	
 	
