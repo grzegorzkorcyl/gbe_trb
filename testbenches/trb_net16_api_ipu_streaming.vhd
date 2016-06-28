@@ -124,6 +124,7 @@ architecture trb_net16_api_ipu_streaming_arch of trb_net16_api_ipu_streaming is
   signal test_data_len : std_logic_vector(15 downto 0);
   signal saved_words_ctr : integer range 0 to 65535 := 0;
   signal trigger_ctr : std_logic_vector(15 downto 0);
+  signal just_ctr : integer range 0 to 511 := 0;
 
 begin
 
@@ -263,7 +264,7 @@ begin
 		
 		while saved_words_ctr /= (2 * (to_integer(unsigned(test_data_len)) - 1)) loop
 			wait until rising_edge(CLK);
-			if (saved_words_ctr mod 16 = 0) then
+			if (just_ctr mod 16 = 0) then
 				APL_FEE_DATAREADY_OUT <= '0';
 			else
 			
@@ -300,6 +301,13 @@ begin
 	
 	wait;
 end process;
+
+process
+begin
+	wait until rising_edge(CLK);
+	just_ctr <= just_ctr + 1;
+end process;
+	
 
 -------------------------------------------------------------------------------
 --Application Interface, sending request to FEE
