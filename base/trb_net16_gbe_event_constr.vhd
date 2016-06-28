@@ -116,7 +116,7 @@ begin
 	-- SAVING PART
 	--*******
 	
-		ready_impl_gen : if DO_SIMULATION = 0 generate
+--	ready_impl_gen : if DO_SIMULATION = 0 generate
 		READY_PROC : process(CLK)
 		begin
 			if rising_edge(CLK) then
@@ -129,65 +129,65 @@ begin
 		end process READY_PROC;
 
 		df_full <= df_afull;            --df_full_real;
-	end generate ready_impl_gen;
+--	end generate ready_impl_gen;
 
-	ready_sim_gen : if DO_SIMULATION = 1 generate
-
-		--		FULL_PROC : process
-		--		begin
-		--			df_full <= '0';
-		--
-		--			wait for 22000 ns;
-		--			wait until rising_edge(CLK);
-		--			df_full <= '1';
-		--			wait until rising_edge(CLK);
-		--			wait until rising_edge(CLK);
-		--			wait until rising_edge(CLK);
-		--			df_full <= '0';
-		--
-		--			wait;
-		--		end process FULL_PROC;
-		
-		afull_rand_inst : random_size
-			port map(Clk  => CLK,
-				     Enb  => '1',
-				     Rst  => RESET,
-				     Dout => s
-			);	
-		
-		process(clk)
-			variable seed1, seed2 : positive;
-			variable rand : real;
-			variable int_rand : integer;
-			variable stim : std_logic_vector(11 downto 0);
-		begin
-			if rising_edge(CLK) then
-				uniform(seed1, seed2, rand);
-				int_rand := integer(trunc(rand*4096.0));
-				stim := std_logic_vector(to_unsigned(int_rand, stim'length));
-				
-				rand_vec <= stim;
-			end if;
-		end process;
-		
-
-		df_full <= df_afull;
-
-		READY_PROC : process(CLK)
-		begin
-			if rising_edge(CLK) then
-				
-				df_afull_q <= df_afull;
-				
-				--if (load_current_state = IDLE) then
-					PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not rand_vec(0); -- and not s(0); -- ORIGINAL
-				--else
-				--	PC_READY_OUT <= '0';
-				--end if;
-			end if;
-		end process READY_PROC;
-
-	end generate ready_sim_gen;
+--	ready_sim_gen : if DO_SIMULATION = 1 generate
+--
+--		--		FULL_PROC : process
+--		--		begin
+--		--			df_full <= '0';
+--		--
+--		--			wait for 22000 ns;
+--		--			wait until rising_edge(CLK);
+--		--			df_full <= '1';
+--		--			wait until rising_edge(CLK);
+--		--			wait until rising_edge(CLK);
+--		--			wait until rising_edge(CLK);
+--		--			df_full <= '0';
+--		--
+--		--			wait;
+--		--		end process FULL_PROC;
+--		
+--		afull_rand_inst : random_size
+--			port map(Clk  => CLK,
+--				     Enb  => '1',
+--				     Rst  => RESET,
+--				     Dout => s
+--			);	
+--		
+--		process(clk)
+--			variable seed1, seed2 : positive;
+--			variable rand : real;
+--			variable int_rand : integer;
+--			variable stim : std_logic_vector(11 downto 0);
+--		begin
+--			if rising_edge(CLK) then
+--				uniform(seed1, seed2, rand);
+--				int_rand := integer(trunc(rand*4096.0));
+--				stim := std_logic_vector(to_unsigned(int_rand, stim'length));
+--				
+--				rand_vec <= stim;
+--			end if;
+--		end process;
+--		
+--
+--		df_full <= df_afull;
+--
+--		READY_PROC : process(CLK)
+--		begin
+--			if rising_edge(CLK) then
+--				
+--				df_afull_q <= df_afull;
+--				
+--				--if (load_current_state = IDLE) then
+--					PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not rand_vec(0); -- and not s(0); -- ORIGINAL
+--				--else
+--				--	PC_READY_OUT <= '0';
+--				--end if;
+--			end if;
+--		end process READY_PROC;
+--
+--	end generate ready_sim_gen;
 	
 	
 
