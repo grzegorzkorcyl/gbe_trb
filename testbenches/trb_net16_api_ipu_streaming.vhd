@@ -278,6 +278,7 @@ begin
 		APL_FEE_DATAREADY_OUT <= '0';
 		
 		trigger_ctr <= trigger_ctr + x"1";
+		test_data_len <= test_data_len + x"1";
 		
 		
 		wait for 100 ns;
