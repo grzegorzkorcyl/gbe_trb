@@ -130,6 +130,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal stream_bytes_ps : std_logic_vector(31 downto 0);
 	signal one_sec_ctr     : std_logic_vector(31 downto 0);
 	signal one_sec_tick    : std_logic;
+	signal pause_ctr	   : std_logic_vector(31 downto 0);
 
 begin
 
@@ -174,9 +175,17 @@ begin
 				rec_state <= x"4";
 				--if (FEE_BUSY_IN = '0') then
 				if (local_fee_busy = '0') then
-					save_next_state <= TERMINATE;
+					save_next_state <= THROTTLE_PAUSE; --TERMINATE;
 				else
 					save_next_state <= SAVE_DATA;
+				end if;
+				
+			when THROTTLE_PAUSE =>
+				rec_state <= x"d";
+				if (pause_ctr = x"1000") then
+					save_next_state <= TERMINATE;
+				else
+					save_next_state <= THROTTLE_PAUSE;
 				end if;
 
 			when TERMINATE =>
@@ -237,20 +246,30 @@ begin
 
 			when CLEANUP =>
 				rec_state       <= x"c";
-				save_next_state <= THROTTLE_PAUSE; -- IDLE;
-				
-			when THROTTLE_PAUSE =>
-				rec_state <= x"d";
+				--save_next_state <= THROTTLE_PAUSE; -- IDLE;
 				if (CTS_START_READOUT_IN = '0') then
 					save_next_state <= IDLE;
 				else
-					save_next_state <= THROTTLE_PAUSE;
+					save_next_state <= CLEANUP;
 				end if;
 
 			when others => save_next_state <= IDLE;
 
 		end case;
 	end process SAVE_MACHINE;
+	
+	process(CLK_IPU)
+	begin
+		if rising_edge(CLK_IPU) then
+			if (save_current_state = IDLE) then
+				pause_ctr <= (others => '0');
+			elsif (save_current_state = THROTTLE_PAUSE) then
+				pause_ctr <= pause_ctr + x"1";
+			else
+				pause_ctr <= pause_ctr;
+			end if;
+		end if;
+	end process;	
 
 	SF_WR_EN_PROC : process(CLK_IPU)
 	begin
