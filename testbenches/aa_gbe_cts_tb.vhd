@@ -25,6 +25,10 @@ ARCHITECTURE behavior OF aa_gbe_cts_tb IS
 	signal cts_length : std_logic_vector(15 downto 0);
 	signal cts_status : std_logic_vector(31 downto 0);
 	signal cts_start_readout : std_logic;
+	signal fee_data : std_logic_vector(15 downto 0);
+	signal fee_dataready : std_logic;
+	signal fee_read : std_logic;
+	signal fee_busy : std_logic;
 
 begin
 
@@ -75,11 +79,11 @@ begin
     CTS_STATUS_BITS_IN      => cts_status,
 
     -- Data from Frontends
-    FEE_DATA_OUT           => open,
-    FEE_DATAREADY_OUT      => open,
-    FEE_READ_IN            => '1',
+    FEE_DATA_OUT           => fee_data,
+    FEE_DATAREADY_OUT      => fee_dataready,
+    FEE_READ_IN            => fee_read,
     FEE_STATUS_BITS_OUT    => open,
-    FEE_BUSY_OUT           => open,
+    FEE_BUSY_OUT           => fee_busy,
                                              --has been read.
 
     MY_ADDRESS_IN         => x"1234",
@@ -130,11 +134,11 @@ begin
 		CTS_READ_IN              => cts_read,
 		CTS_LENGTH_OUT           => cts_length,
 		CTS_ERROR_PATTERN_OUT    => cts_status,
-		FEE_DATA_IN              => (others => '0'),
-		FEE_DATAREADY_IN         => '0',
-		FEE_READ_OUT             => open,
+		FEE_DATA_IN              => fee_data,
+		FEE_DATAREADY_IN         => fee_dataready,
+		FEE_READ_OUT             => fee_read,
 		FEE_STATUS_BITS_IN       => (others => '0'),
-		FEE_BUSY_IN              => '0',
+		FEE_BUSY_IN              => fee_busy,
 		MC_UNIQUE_ID_IN          => (others => '0'),
 		GSC_CLK_IN               => clk_sys,
 		GSC_INIT_DATAREADY_OUT   => open,
