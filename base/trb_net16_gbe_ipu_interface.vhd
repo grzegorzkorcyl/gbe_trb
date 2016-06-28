@@ -175,17 +175,9 @@ begin
 				rec_state <= x"4";
 				--if (FEE_BUSY_IN = '0') then
 				if (local_fee_busy = '0') then
-					save_next_state <= THROTTLE_PAUSE; --TERMINATE;
-				else
-					save_next_state <= SAVE_DATA;
-				end if;
-				
-			when THROTTLE_PAUSE =>
-				rec_state <= x"d";
-				if (pause_ctr = x"0100") then
 					save_next_state <= TERMINATE;
 				else
-					save_next_state <= THROTTLE_PAUSE;
+					save_next_state <= SAVE_DATA;
 				end if;
 
 			when TERMINATE =>
