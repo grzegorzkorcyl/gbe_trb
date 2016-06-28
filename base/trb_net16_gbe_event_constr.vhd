@@ -212,7 +212,7 @@ begin
 		end if;
 	end process DF_QQ_PROC;
 
---	ready_impl_gen : if DO_SIMULATION = 0 generate
+	ready_impl_gen : if DO_SIMULATION = 0 generate
 		READY_PROC : process(CLK)
 		begin
 			if rising_edge(CLK) then
@@ -225,7 +225,7 @@ begin
 		end process READY_PROC;
 
 		df_full <= df_afull;            --df_full_real;
---	end generate ready_impl_gen;
+	end generate ready_impl_gen;
 
 --	ready_sim_gen : if DO_SIMULATION = 1 generate
 --
