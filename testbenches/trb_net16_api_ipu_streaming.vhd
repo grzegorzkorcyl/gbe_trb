@@ -263,15 +263,22 @@ begin
 		
 		while saved_words_ctr /= (2 * (to_integer(unsigned(test_data_len)) - 1)) loop
 			wait until rising_edge(CLK);
-			if (FEE_READ_IN = '1') then
-				data_ctr <= data_ctr + x"1";
-				saved_words_ctr <= saved_words_ctr + 1;
+			if (saved_words_ctr mod 16 = 0) then
+				APL_FEE_DATAREADY_OUT <= '0';
 			else
-				data_ctr <= data_ctr;
-				saved_words_ctr <= saved_words_ctr;
-			end if;
 			
-			fee_data <= data_ctr;
+				APL_FEE_DATAREADY_OUT <= '1';
+				
+				if (FEE_READ_IN = '1') then
+					data_ctr <= data_ctr + x"1";
+					saved_words_ctr <= saved_words_ctr + 1;
+				else
+					data_ctr <= data_ctr;
+					saved_words_ctr <= saved_words_ctr;
+				end if;
+				
+				fee_data <= data_ctr;
+			end if;
 		end loop;
 		
 		wait until rising_edge(CLK);
