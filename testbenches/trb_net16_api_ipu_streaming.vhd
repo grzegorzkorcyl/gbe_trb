@@ -264,7 +264,7 @@ begin
 		
 		while saved_words_ctr /= (2 * (to_integer(unsigned(test_data_len)) - 1)) loop
 			wait until rising_edge(CLK);
-			if (just_ctr mod 16 = 0) then
+			if (just_ctr mod 16 = 0 and FEE_READ_IN = '0') then
 				APL_FEE_DATAREADY_OUT <= '0';
 			else
 			
