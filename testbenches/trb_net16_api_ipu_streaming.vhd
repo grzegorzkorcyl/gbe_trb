@@ -205,34 +205,42 @@ begin
 	APL_FEE_RUN_OUT <= '0';
 	
 	wait for 9 us;
-	wait until rising_edge(CLK);
-	APL_CTS_TYP_OUT <= "011";
-	APL_CTS_DATAREADY_OUT <= '1';
-	APL_CTS_PACKET_NUM_OUT <= "011";
-	wait until rising_edge(CLK);
-	APL_CTS_TYP_OUT <= "000";
-	APL_CTS_DATAREADY_OUT <= '0';
-	APL_CTS_PACKET_NUM_OUT <= "000";
-	
-	wait until rising_edge(CLK);
-	APL_FEE_RUN_OUT <= '1';
-	
-	wait for 100 ns;
-	CTS_DATAREADY_IN_a <= '1';
-	wait for 1000 ns;
-	CTS_DATAREADY_IN_a <= '0';
 	
 	
-	wait for 10 ns;
+	for i in 0 to 10 loop
 	
-	APL_FEE_DATAREADY_OUT <= '1';
-	
-	wait for 1000 ns;
-	APL_FEE_DATAREADY_OUT <= '0';
-	
-	wait for 100 ns;
-	
-	APL_FEE_RUN_OUT <= '0'; 
+		wait until rising_edge(CLK);
+		APL_CTS_TYP_OUT <= "011";
+		APL_CTS_DATAREADY_OUT <= '1';
+		APL_CTS_PACKET_NUM_OUT <= "011";
+		wait until rising_edge(CLK);
+		APL_CTS_TYP_OUT <= "000";
+		APL_CTS_DATAREADY_OUT <= '0';
+		APL_CTS_PACKET_NUM_OUT <= "000";
+		
+		wait until rising_edge(CLK);
+		APL_FEE_RUN_OUT <= '1';
+		
+		wait for 100 ns;
+		CTS_DATAREADY_IN_a <= '1';
+		wait for 1000 ns;
+		CTS_DATAREADY_IN_a <= '0';
+		
+		
+		wait for 10 ns;
+		
+		APL_FEE_DATAREADY_OUT <= '1';
+		
+		wait for 1000 ns;
+		APL_FEE_DATAREADY_OUT <= '0';
+		
+		wait for 100 ns;
+		
+		APL_FEE_RUN_OUT <= '0';
+		
+		wait for 1 us; 
+		
+	end loop;
 	
 	
 	wait;
