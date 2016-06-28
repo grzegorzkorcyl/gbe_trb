@@ -222,7 +222,7 @@ begin
 	
 	APL_FEE_DATAREADY_OUT <= '1';
 	
-	wait for 100 ns;
+	wait for 1000 ns;
 	APL_FEE_DATAREADY_OUT <= '0';
 	
 	
