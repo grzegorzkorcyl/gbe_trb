@@ -200,6 +200,7 @@ begin
 	CTS_DATAREADY_IN_a <= '0';
 	
 	APL_FEE_DATAREADY_OUT <= '0';
+	APL_FEE_TYP_OUT <= TYPE_DAT;
 	
 	wait for 9 us;
 	wait until rising_edge(CLK);
@@ -262,7 +263,7 @@ end process;
       -- Receiver port
       APL_DATA_OUT      => APL_FEE_DATA_OUT,
       APL_PACKET_NUM_OUT=> APL_FEE_PACKET_NUM_OUT,
-      APL_TYP_OUT       => APL_FEE_TYP_OUT,
+      APL_TYP_OUT       => open, --APL_FEE_TYP_OUT,
       APL_DATAREADY_OUT => open, -- APL_FEE_DATAREADY_OUT,
       APL_READ_IN       => APL_FEE_READ_IN,
       -- APL Control port
