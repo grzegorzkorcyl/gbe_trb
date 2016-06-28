@@ -236,6 +236,7 @@ begin
 		wait for 10 ns;
 		
 		APL_FEE_DATAREADY_OUT <= '1';
+		data_ctr <= x"0000";
 		
 		for i in 0 to 200 loop
 			data_ctr <= data_ctr + x"1";
