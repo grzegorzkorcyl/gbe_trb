@@ -211,7 +211,7 @@ begin
 	
 	wait for 100 ns;
 	CTS_DATAREADY_IN_a <= '1';
-	wait for 100 ns;
+	wait for 1000 ns;
 	CTS_DATAREADY_IN_a <= '0';
 	
 	
