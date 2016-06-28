@@ -147,7 +147,7 @@ begin
 		end if;
 	end process SAVE_MACHINE_PROC;
 
-	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, local_fee_busy, saved_size, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
+	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, pause_ctr, local_fee_busy, saved_size, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
 	begin
 		rec_state <= x"0";
 		case (save_current_state) is
