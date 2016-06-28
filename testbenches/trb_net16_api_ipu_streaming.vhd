@@ -212,7 +212,7 @@ begin
 	
 	data_ctr <= x"0000";
 	
-	test_data_len <= x"0100";
+	test_data_len <= x"1000";
 	
 	saved_words_ctr <= 0;
 	
