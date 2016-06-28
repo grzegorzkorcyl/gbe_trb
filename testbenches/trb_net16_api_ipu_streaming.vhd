@@ -2,6 +2,7 @@
 LIBRARY ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+USE IEEE.std_logic_UNSIGNED.ALL;
 
 library work;
 use work.trb_net_std.all;
@@ -119,6 +120,7 @@ architecture trb_net16_api_ipu_streaming_arch of trb_net16_api_ipu_streaming is
   
   
   signal CTS_DATAREADY_IN_a : std_logic;
+  signal data_ctr : std_logic_vector(15 downto 0);
 
 begin
 
@@ -189,6 +191,8 @@ APL_FEE_LENGTH_IN <= x"0000";
       STAT_FIFO_TO_APL => open
       );
 
+APL_FEE_DATA_OUT <= data_ctr;
+
 process
 begin
 	APL_CTS_TYP_OUT <= "000";
@@ -203,6 +207,8 @@ begin
 	APL_FEE_TYP_OUT <= TYPE_DAT;
 	
 	APL_FEE_RUN_OUT <= '0';
+	
+	data_ctr <= x"0000";
 	
 	wait for 9 us;
 	
@@ -231,8 +237,12 @@ begin
 		
 		APL_FEE_DATAREADY_OUT <= '1';
 		
-		wait for 2 us;
+		for i in 0 to 200 loop
+			data_ctr <= data_ctr + x"1";
+			wait until rising_edge(CLK);
+		end loop;
 		APL_FEE_DATAREADY_OUT <= '0';
+		
 		
 		wait for 100 ns;
 		
@@ -278,7 +288,7 @@ end process;
       APL_SEND_IN           => APL_FEE_SEND_IN,
       APL_TARGET_ADDRESS_IN => (others => '1'),
       -- Receiver port
-      APL_DATA_OUT      => APL_FEE_DATA_OUT,
+      APL_DATA_OUT      => open, --APL_FEE_DATA_OUT,
       APL_PACKET_NUM_OUT=> APL_FEE_PACKET_NUM_OUT,
       APL_TYP_OUT       => open, --APL_FEE_TYP_OUT,
       APL_DATAREADY_OUT => open, -- APL_FEE_DATAREADY_OUT,
