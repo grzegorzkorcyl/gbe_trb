@@ -122,6 +122,7 @@ architecture trb_net16_api_ipu_streaming_arch of trb_net16_api_ipu_streaming is
   signal CTS_DATAREADY_IN_a : std_logic;
   signal data_ctr, fee_data : std_logic_vector(15 downto 0);
   signal test_data_len : std_logic_vector(15 downto 0);
+  signal saved_words_ctr : integer range 0 to 65535 := 0;
 
 begin
 
@@ -213,6 +214,8 @@ begin
 	
 	test_data_len <= x"1000";
 	
+	saved_words_ctr <= 0;
+	
 	wait for 9 us;
 	
 	
@@ -240,6 +243,7 @@ begin
 		
 		APL_FEE_DATAREADY_OUT <= '1';
 		data_ctr <= x"0000";		
+		saved_words_ctr <= 0;
 		fee_data <= x"00aa";
 		wait until rising_edge(CLK);
 		fee_data <= x"00bb";
@@ -254,9 +258,16 @@ begin
 		wait until rising_edge(CLK);
 		fee_data <= x"ff22";
 		
-		for i in 0 to (2 * (to_integer(unsigned(test_data_len)) - 1)) loop
+		while saved_words_ctr = (2 * (to_integer(unsigned(test_data_len)) - 1)) loop
 			wait until rising_edge(CLK);
-			data_ctr <= data_ctr + x"1";
+			if (FEE_READ_IN = '1') then
+				data_ctr <= data_ctr + x"1";
+				saved_words_ctr <= saved_words_ctr + 1;
+			else
+				data_ctr <= data_ctr;
+				saved_words_ctr <= saved_words_ctr;
+			end if;
+			
 			fee_data <= data_ctr;
 		end loop;
 		
