@@ -156,7 +156,7 @@ APL_FEE_LENGTH_IN <= x"0000";
       APL_DATA_OUT      => APL_CTS_DATA_OUT,
       APL_PACKET_NUM_OUT=> APL_CTS_PACKET_NUM_OUT,
       APL_TYP_OUT       => open,
-      APL_DATAREADY_OUT => APL_CTS_DATAREADY_OUT,
+      APL_DATAREADY_OUT => open, --APL_CTS_DATAREADY_OUT,
       APL_READ_IN       => APL_CTS_READ_IN,
       -- APL Control port
       APL_RUN_OUT       => APL_CTS_RUN_OUT,
@@ -189,11 +189,14 @@ APL_FEE_LENGTH_IN <= x"0000";
 process
 begin
 	APL_CTS_TYP_OUT <= c_F0;
+	APL_CTS_DATAREADY_OUT <= '0';
 	wait for 1 us;
 	wait until rising_edge(CLK);
 	APL_CTS_TYP_OUT <= c_F3;
+	APL_CTS_DATAREADY_OUT <= '1';
 	wait until rising_edge(CLK);
 	APL_CTS_TYP_OUT <= c_F0;
+	APL_CTS_DATAREADY_OUT <= '0';
 	
 	
 	wait;
