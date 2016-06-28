@@ -120,7 +120,8 @@ architecture trb_net16_api_ipu_streaming_arch of trb_net16_api_ipu_streaming is
   
   
   signal CTS_DATAREADY_IN_a : std_logic;
-  signal data_ctr : std_logic_vector(15 downto 0);
+  signal data_ctr, fee_data : std_logic_vector(15 downto 0);
+  signal test_data_len : std_logic_vector(15 downto 0);
 
 begin
 
@@ -191,7 +192,7 @@ APL_FEE_LENGTH_IN <= x"0000";
       STAT_FIFO_TO_APL => open
       );
 
-APL_FEE_DATA_OUT <= data_ctr;
+APL_FEE_DATA_OUT <= fee_data;
 
 process
 begin
@@ -209,6 +210,8 @@ begin
 	APL_FEE_RUN_OUT <= '0';
 	
 	data_ctr <= x"0000";
+	
+	test_data_len <= x"0064";
 	
 	wait for 9 us;
 	
@@ -237,11 +240,25 @@ begin
 		
 		APL_FEE_DATAREADY_OUT <= '1';
 		data_ctr <= x"0000";
+		fee_data <= x"00bb";
+		wait until rising_edge(CLK);
+		fee_data <= x"0001";
+		wait until rising_edge(CLK);
+		fee_data <= test_data_len + x"1";
+		wait until rising_edge(CLK);
+		fee_data <= x"ff21";
+		wait until rising_edge(CLK);
+		fee_data <= test_data_len;
+		wait until rising_edge(CLK);
+		fee_data <= x"ff22";
 		
-		for i in 0 to 200 loop
-			data_ctr <= data_ctr + x"1";
+		for i in 0 to (2 * (to_integer(unsigned(test_data_len)) - 1)) loop
 			wait until rising_edge(CLK);
+			data_ctr <= data_ctr + x"1";
+			fee_data <= data_ctr;
 		end loop;
+		
+		wait until rising_edge(CLK);
 		APL_FEE_DATAREADY_OUT <= '0';
 		
 		
