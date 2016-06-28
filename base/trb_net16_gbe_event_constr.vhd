@@ -180,7 +180,8 @@ begin
 				df_afull_q <= df_afull;
 				
 				--if (load_current_state = IDLE) then
-					PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not rand_vec(0); -- and not s(0); -- COMMENTED SIMULATED FIFO AFULL
+					--PC_READY_OUT <= not df_full and not qsf_full and not shf_full and not rand_vec(0); -- and not s(0); -- ORIGINAL
+					PC_READY_OUT <= rand_vec(0);
 				--else
 				--	PC_READY_OUT <= '0';
 				--end if;
