@@ -258,7 +258,7 @@ begin
 		wait until rising_edge(CLK);
 		fee_data <= x"ff22";
 		
-		while saved_words_ctr = (2 * (to_integer(unsigned(test_data_len)) - 1)) loop
+		while saved_words_ctr /= (2 * (to_integer(unsigned(test_data_len)) - 1)) loop
 			wait until rising_edge(CLK);
 			if (FEE_READ_IN = '1') then
 				data_ctr <= data_ctr + x"1";
