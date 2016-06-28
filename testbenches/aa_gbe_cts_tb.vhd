@@ -24,6 +24,7 @@ ARCHITECTURE behavior OF aa_gbe_cts_tb IS
 	signal cts_read : std_logic;
 	signal cts_length : std_logic_vector(15 downto 0);
 	signal cts_status : std_logic_vector(31 downto 0);
+	signal cts_start_readout : std_logic;
 
 begin
 
@@ -61,7 +62,7 @@ begin
     CTS_CODE_OUT              => open,
     CTS_INFORMATION_OUT       => open,
     CTS_READOUT_TYPE_OUT      => open,
-    CTS_START_READOUT_OUT     => open,
+    CTS_START_READOUT_OUT     => cts_start_readout,
                                                 --after user send information to cts.
 
     --Information sent to CTS
@@ -122,7 +123,7 @@ begin
 		CTS_CODE_IN              => (others => '0'),
 		CTS_INFORMATION_IN       => (others => '0'),
 		CTS_READOUT_TYPE_IN      => (others => '0'),
-		CTS_START_READOUT_IN     => '0',
+		CTS_START_READOUT_IN     => cts_start_readout,
 		CTS_DATA_OUT             => cts_data,
 		CTS_DATAREADY_OUT        => cts_dataready,
 		CTS_READOUT_FINISHED_OUT => cts_readout_finished,
