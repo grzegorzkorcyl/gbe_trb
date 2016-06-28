@@ -216,7 +216,7 @@ begin
 	wait for 9 us;
 	
 	
-	for i in 0 to 0 loop
+	for i in 0 to 10 loop
 	
 		wait until rising_edge(CLK);
 		APL_CTS_TYP_OUT <= "011";
