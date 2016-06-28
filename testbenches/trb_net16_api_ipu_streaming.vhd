@@ -285,7 +285,8 @@ begin
 		
 		APL_FEE_RUN_OUT <= '0';
 		
-		wait for 300 ns; 
+		wait until CTS_READOUT_FINISHED_IN = '1';
+		wait for 100 ns; 
 		
 	end loop;
 	
