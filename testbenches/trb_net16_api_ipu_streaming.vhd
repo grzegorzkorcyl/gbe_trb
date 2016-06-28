@@ -199,6 +199,8 @@ begin
 	
 	CTS_DATAREADY_IN_a <= '0';
 	
+	APL_FEE_DATAREADY_OUT <= '0';
+	
 	wait for 9 us;
 	wait until rising_edge(CLK);
 	APL_CTS_TYP_OUT <= "011";
@@ -213,6 +215,14 @@ begin
 	CTS_DATAREADY_IN_a <= '1';
 	wait for 1000 ns;
 	CTS_DATAREADY_IN_a <= '0';
+	
+	
+	wait for 10 ns;
+	
+	APL_FEE_DATAREADY_OUT <= '1';
+	
+	wait for 100 ns;
+	APL_FEE_DATAREADY_OUT <= '0';
 	
 	
 	wait;
@@ -253,7 +263,7 @@ end process;
       APL_DATA_OUT      => APL_FEE_DATA_OUT,
       APL_PACKET_NUM_OUT=> APL_FEE_PACKET_NUM_OUT,
       APL_TYP_OUT       => APL_FEE_TYP_OUT,
-      APL_DATAREADY_OUT => APL_FEE_DATAREADY_OUT,
+      APL_DATAREADY_OUT => open, -- APL_FEE_DATAREADY_OUT,
       APL_READ_IN       => APL_FEE_READ_IN,
       -- APL Control port
       APL_RUN_OUT       => APL_FEE_RUN_OUT,
