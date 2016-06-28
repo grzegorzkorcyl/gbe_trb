@@ -216,7 +216,7 @@ begin
 	wait for 9 us;
 	
 	
-	for i in 0 to 1 loop
+	for i in 0 to 0 loop
 	
 		wait until rising_edge(CLK);
 		APL_CTS_TYP_OUT <= "011";
@@ -239,7 +239,9 @@ begin
 		wait for 10 ns;
 		
 		APL_FEE_DATAREADY_OUT <= '1';
-		data_ctr <= x"0000";
+		data_ctr <= x"0000";		
+		fee_data <= x"00aa";
+		wait until rising_edge(CLK);
 		fee_data <= x"00bb";
 		wait until rising_edge(CLK);
 		fee_data <= x"0001";
