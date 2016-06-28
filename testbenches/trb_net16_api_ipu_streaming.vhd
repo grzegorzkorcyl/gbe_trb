@@ -285,7 +285,7 @@ begin
 		
 		APL_FEE_RUN_OUT <= '0';
 		
-		wait for 200 ns; 
+		wait for 300 ns; 
 		
 	end loop;
 	
