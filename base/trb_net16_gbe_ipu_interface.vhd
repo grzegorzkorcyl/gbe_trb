@@ -237,7 +237,15 @@ begin
 
 			when CLEANUP =>
 				rec_state       <= x"c";
-				save_next_state <= IDLE;
+				save_next_state <= THROTTLE_PAUSE; -- IDLE;
+				
+			when THROTTLE_PAUSE =>
+				rec_state <= x"d";
+				if (CTS_START_READOUT_IN = '0') then
+					save_next_state <= IDLE;
+				else
+					save_next_state <= THROTTLE_PAUSE;
+				end if;
 
 			when others => save_next_state <= IDLE;
 
