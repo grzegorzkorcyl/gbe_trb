@@ -211,7 +211,7 @@ begin
 	
 	data_ctr <= x"0000";
 	
-	test_data_len <= x"0064";
+	test_data_len <= x"1000";
 	
 	wait for 9 us;
 	
@@ -268,7 +268,7 @@ begin
 		
 		APL_FEE_RUN_OUT <= '0';
 		
-		wait for 1 us; 
+		wait for 100 ns; 
 		
 	end loop;
 	
