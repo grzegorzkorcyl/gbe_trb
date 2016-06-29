@@ -366,10 +366,10 @@ med_stat_op(5 * 16 - 1 downto 4 * 16 + 3) <= (others => '0');
 	THE_HUB : entity work.trb_net16_hub_streaming_port_sctrl_cts
 		generic map(
 			INIT_ADDRESS                  => x"FAAA",
-			MII_NUMBER                    => INTERFACE_NUM,
-			MII_IS_UPLINK                 => IS_UPLINK,
-			MII_IS_DOWNLINK               => IS_DOWNLINK,
-			MII_IS_UPLINK_ONLY            => IS_UPLINK_ONLY,
+--			MII_NUMBER                    => INTERFACE_NUM,
+--			MII_IS_UPLINK                 => IS_UPLINK,
+--			MII_IS_DOWNLINK               => IS_DOWNLINK,
+--			MII_IS_UPLINK_ONLY            => IS_UPLINK_ONLY,
 			HARDWARE_VERSION              => x"9000cee0",
 			INIT_ENDPOINT_ID              => x"0005",
 			BROADCAST_BITMASK             => x"7E",
