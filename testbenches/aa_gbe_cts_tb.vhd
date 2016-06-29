@@ -335,7 +335,7 @@ begin
 		fee_trg_statusbits_i <= (others => '0');
 		
 		wait until valid_trigger = '1';
-		wait for 100 ns;
+		wait for 1 us;
 		wait until rising_edge(clk_sys);
 		fee_data_write_i <= '1';
 		
