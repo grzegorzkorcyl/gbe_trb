@@ -189,7 +189,7 @@ begin
 		CTS_DATA_OUT             => cts_data,
 		CTS_DATAREADY_OUT        => cts_dataready,
 		CTS_READOUT_FINISHED_OUT => cts_readout_finished,
-		CTS_READ_IN              => cts_read,
+		CTS_READ_IN              => '1',
 		CTS_LENGTH_OUT           => cts_length,
 		CTS_ERROR_PATTERN_OUT    => cts_status,
 		FEE_DATA_IN              => fee_data,
