@@ -12,6 +12,12 @@ use work.trb_net16_hub_func.all;
 use work.trb_net_gbe_components.all;
 use work.trb_net_gbe_protocols.all;
 
+use work.trb3_components.all;
+use work.cts_pkg.all;
+
+--Configuration is done in this file:   
+use work.config.all;
+
 ENTITY aa_gbe_cts_tb IS
 END aa_gbe_cts_tb;
 
