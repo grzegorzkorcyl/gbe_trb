@@ -342,6 +342,7 @@ begin
 		for i in 0 to 99 loop
 			fee_data_i <= std_logic_vector(to_unsigned(ctr, 32));
 			wait until rising_edge(clk_sys);
+			ctr := ctr + 1;
 		end loop;
 
 		fee_data_finished_i <= '1';
