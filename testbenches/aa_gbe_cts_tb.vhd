@@ -254,8 +254,8 @@ begin
 			MED_DATA_IN                        => med_data_out(2 * 16 - 1 downto 1 * 16),
 			MED_PACKET_NUM_IN                  => med_packet_num_out( 2 * 3 - 1 downto 1 * 3),
 			MED_READ_OUT                       => med_read_in(2 * 1 - 1),
-			MED_STAT_OP_IN                     => med_stat_op,
-			MED_CTRL_OP_OUT                    => med_ctrl_op,
+			MED_STAT_OP_IN                     => med_stat_op(2 * 16 - 1 downto 1 * 16),
+			MED_CTRL_OP_OUT                    => med_ctrl_op(2 * 16 - 1 downto 1 * 16),
 
 			--Timing trigger in
 			TRG_TIMING_TRG_RECEIVED_IN         => cts_ext_trigger,
