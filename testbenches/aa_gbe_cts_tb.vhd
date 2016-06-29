@@ -38,16 +38,16 @@ ARCHITECTURE behavior OF aa_gbe_cts_tb IS
 	signal fee_read : std_logic;
 	signal fee_busy : std_logic;
 	
-	signal med_stat_op                 : std_logic_vector(2 * 16 - 1 downto 0);
-	signal med_ctrl_op                 : std_logic_vector(2 * 16 - 1 downto 0);
-	signal med_data_out                : std_logic_vector(2 * 16 - 1 downto 0);
-	signal med_packet_num_out          : std_logic_vector(2 * 3 - 1 downto 0);
-	signal med_dataready_out           : std_logic_vector(2 * 1 - 1 downto 0);
-	signal med_read_out                : std_logic_vector(2 * 1 - 1 downto 0);
-	signal med_data_in                 : std_logic_vector(2 * 16 - 1 downto 0);
-	signal med_packet_num_in           : std_logic_vector(2 * 3 - 1 downto 0);
-	signal med_dataready_in            : std_logic_vector(2 * 1 - 1 downto 0);
-	signal med_read_in                 : std_logic_vector(2 * 1 - 1 downto 0);
+	signal med_stat_op                 : std_logic_vector(5 * 16 - 1 downto 0);
+	signal med_ctrl_op                 : std_logic_vector(5 * 16 - 1 downto 0);
+	signal med_data_out                : std_logic_vector(5 * 16 - 1 downto 0);
+	signal med_packet_num_out          : std_logic_vector(5 * 3 - 1 downto 0);
+	signal med_dataready_out           : std_logic_vector(5 * 1 - 1 downto 0);
+	signal med_read_out                : std_logic_vector(5 * 1 - 1 downto 0);
+	signal med_data_in                 : std_logic_vector(5 * 16 - 1 downto 0);
+	signal med_packet_num_in           : std_logic_vector(5 * 3 - 1 downto 0);
+	signal med_dataready_in            : std_logic_vector(5 * 1 - 1 downto 0);
+	signal med_read_in                 : std_logic_vector(5 * 1 - 1 downto 0);
 	
 	signal fee_trg_release_i    : std_logic;
 	signal fee_trg_statusbits_i : std_logic_vector(31 downto 0);
@@ -219,6 +219,8 @@ begin
 	);
 	
 	
+	endp_gen : for i in 1 to 5 generate 
+	
 	THE_ENDPOINT : entity work.trb_net16_endpoint_hades_full_handler
 		generic map(
 			REGIO_NUM_STAT_REGS       => 1,
@@ -246,14 +248,14 @@ begin
 			CLK                                => clk_sys,
 			RESET                              => reset,
 			CLK_EN                             => '1',
-			MED_DATAREADY_OUT                  => med_dataready_in(2 * 1 - 1),
-			MED_DATA_OUT                       => med_data_in(2 * 16 - 1 downto 1 * 16),
-			MED_PACKET_NUM_OUT                 => med_packet_num_in( 2 * 3 - 1 downto 1 * 3),
-			MED_READ_IN                        => med_read_out(2 * 1 - 1),
-			MED_DATAREADY_IN                   => med_dataready_out(2 * 1 - 1),
-			MED_DATA_IN                        => med_data_out(2 * 16 - 1 downto 1 * 16),
-			MED_PACKET_NUM_IN                  => med_packet_num_out( 2 * 3 - 1 downto 1 * 3),
-			MED_READ_OUT                       => med_read_in(2 * 1 - 1),
+			MED_DATAREADY_OUT                  => med_dataready_in( (i + 1) * 1 - 1),
+			MED_DATA_OUT                       => med_data_in((i + 1) * 16 - 1 downto i * 16),
+			MED_PACKET_NUM_OUT                 => med_packet_num_in( (i + 1) * 3 - 1 downto i * 3),
+			MED_READ_IN                        => med_read_out((i + 1) * 1 - 1),
+			MED_DATAREADY_IN                   => med_dataready_out((i + 1) * 1 - 1),
+			MED_DATA_IN                        => med_data_out((i + 1) * 16 - 1 downto i * 16),
+			MED_PACKET_NUM_IN                  => med_packet_num_out( (i + 1) * 3 - 1 downto i * 3),
+			MED_READ_OUT                       => med_read_in((i + 1) * 1 - 1),
 			MED_STAT_OP_IN                     => (others => '0'), --med_stat_op(2 * 16 - 1 downto 1 * 16),
 			MED_CTRL_OP_OUT                    => open, --med_ctrl_op(2 * 16 - 1 downto 1 * 16),
 
@@ -324,7 +326,7 @@ begin
 			STAT_ADDR_DEBUG                    => open,
 			DEBUG_LVL1_HANDLER_OUT             => open
 		);
-
+end generate;
 
 	process
 		variable ctr : integer := 0;
@@ -367,7 +369,7 @@ med_read_in(1 * 1 - 1) <= '1';
 	THE_HUB : entity work.trb_net16_hub_streaming_port_sctrl_cts
 		generic map(
 			INIT_ADDRESS                  => x"FAAA",
-			MII_NUMBER                    => 2, --INTERFACE_NUM,
+			MII_NUMBER                    => 5,
 			MII_IS_UPLINK                 => (0 => 1, others => 0),
 			MII_IS_DOWNLINK               => (0 => 0, others => 1),
 			MII_IS_UPLINK_ONLY            => (0 => 1, others => 0),
