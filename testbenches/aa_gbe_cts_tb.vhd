@@ -556,6 +556,7 @@ begin
 	process
 	begin
 		reset <= '1';
+				cts_ext_trigger <= '0';
 		gsr_n <= '0';
 		wait for 100 ns;
 		reset <= '0';
