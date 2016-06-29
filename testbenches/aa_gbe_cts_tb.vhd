@@ -329,7 +329,7 @@ begin
 	THE_HUB : entity work.trb_net16_hub_streaming_port_sctrl_cts
 		generic map(
 			INIT_ADDRESS                  => x"FAAA",
-			MII_NUMBER                    => 3, --INTERFACE_NUM,
+			MII_NUMBER                    => 2, --INTERFACE_NUM,
 			MII_IS_UPLINK                 => (0 => 1, others => 0),
 			MII_IS_DOWNLINK               => (0 => 0, others => 1),
 			MII_IS_UPLINK_ONLY            => (0 => 1, others => 0),
@@ -475,7 +475,7 @@ begin
 
 
 			TRIGGER_COIN_COUNT   => 1,
-			TRIGGER_PULSER_COUNT => 1,
+			TRIGGER_PULSER_COUNT => 2,
 			TRIGGER_RAND_PULSER  => 1,
 			TRIGGER_INPUT_COUNT  => 0,  -- obsolete! now all inputs are routed via an input multiplexer!
 			TRIGGER_ADDON_COUNT  => 1,
