@@ -359,12 +359,8 @@ end generate;
 	end process;
 
 med_stat_op(2 downto 0) <= "111";
-med_stat_op(31 downto 3) <= (others => '0');
+med_stat_op(5 * 16 - 1 downto 3) <= (others => '0');
 
-med_dataready_in(1 * 1 - 1) <= '0';
-med_data_in(1 * 16 - 1 downto 0) <= (others => '0');
-med_packet_num_in( 1 * 3 - 1 downto 0) <= (others => '0');
-med_read_in(1 * 1 - 1) <= '1';
 
 	THE_HUB : entity work.trb_net16_hub_streaming_port_sctrl_cts
 		generic map(
