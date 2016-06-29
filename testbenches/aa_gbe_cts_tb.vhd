@@ -258,7 +258,7 @@ begin
 			MED_CTRL_OP_OUT                    => open,
 
 			--Timing trigger in
-			TRG_TIMING_TRG_RECEIVED_IN         => '0',
+			TRG_TIMING_TRG_RECEIVED_IN         => cts_ext_trigger,
 			--LVL1 trigger to FEE
 			LVL1_TRG_DATA_VALID_OUT            => open,
 			LVL1_VALID_TIMING_TRG_OUT          => open,
