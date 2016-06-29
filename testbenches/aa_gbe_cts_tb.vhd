@@ -506,6 +506,8 @@ med_stat_op(5 * 16 - 1 downto 4 * 16 + 3) <= (others => '0');
 			CTRL_DEBUG                                         => (others => '0')
 		);
 
+cts_rdo_trigger <= cts_trigger_out;
+
 	THE_CTS : entity work.CTS
 		generic map(
 			EXTERNAL_TRIGGER_ID  => x"60", -- fill in trigger logic enumeration id of external trigger logic
