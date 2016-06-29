@@ -38,16 +38,16 @@ ARCHITECTURE behavior OF aa_gbe_cts_tb IS
 	signal fee_read : std_logic;
 	signal fee_busy : std_logic;
 	
-	signal med_stat_op                 : std_logic_vector(2 * 16 - 1 downto 0);
-	signal med_ctrl_op                 : std_logic_vector(2 * 16 - 1 downto 0);
-	signal med_data_out                : std_logic_vector(2 * 16 - 1 downto 0);
-	signal med_packet_num_out          : std_logic_vector(2 * 3 - 1 downto 0);
-	signal med_dataready_out           : std_logic_vector(2 * 1 - 1 downto 0);
-	signal med_read_out                : std_logic_vector(2 * 1 - 1 downto 0);
-	signal med_data_in                 : std_logic_vector(2 * 16 - 1 downto 0);
-	signal med_packet_num_in           : std_logic_vector(2 * 3 - 1 downto 0);
-	signal med_dataready_in            : std_logic_vector(2 * 1 - 1 downto 0);
-	signal med_read_in                 : std_logic_vector(2 * 1 - 1 downto 0);
+	signal med_stat_op                 : std_logic_vector(3 * 16 - 1 downto 0);
+	signal med_ctrl_op                 : std_logic_vector(3 * 16 - 1 downto 0);
+	signal med_data_out                : std_logic_vector(3 * 16 - 1 downto 0);
+	signal med_packet_num_out          : std_logic_vector(3 * 3 - 1 downto 0);
+	signal med_dataready_out           : std_logic_vector(3 * 1 - 1 downto 0);
+	signal med_read_out                : std_logic_vector(3 * 1 - 1 downto 0);
+	signal med_data_in                 : std_logic_vector(3 * 16 - 1 downto 0);
+	signal med_packet_num_in           : std_logic_vector(3 * 3 - 1 downto 0);
+	signal med_dataready_in            : std_logic_vector(3 * 1 - 1 downto 0);
+	signal med_read_in                 : std_logic_vector(3 * 1 - 1 downto 0);
 	
 	signal fee_trg_release_i    : std_logic;
 	signal fee_trg_statusbits_i : std_logic_vector(31 downto 0);
@@ -329,7 +329,7 @@ begin
 	THE_HUB : entity work.trb_net16_hub_streaming_port_sctrl_cts
 		generic map(
 			INIT_ADDRESS                  => x"FAAA",
-			MII_NUMBER                    => 2, --INTERFACE_NUM,
+			MII_NUMBER                    => 3, --INTERFACE_NUM,
 			MII_IS_UPLINK                 => (0 => 1, others => 0),
 			MII_IS_DOWNLINK               => (0 => 0, others => 1),
 			MII_IS_UPLINK_ONLY            => (0 => 1, others => 0),
@@ -341,7 +341,7 @@ begin
 			INIT_ENDPOINT_ID              => x"0005",
 			BROADCAST_BITMASK             => x"7E",
 			CLOCK_FREQUENCY               => 100,
-			USE_ONEWIRE                   => 0,
+			USE_ONEWIRE                   => 1,
 			BROADCAST_SPECIAL_ADDR        => x"35",
 			RDO_ADDITIONAL_PORT           => 0, --cts_rdo_additional_ports,
 			RDO_DATA_BUFFER_DEPTH         => 9,
