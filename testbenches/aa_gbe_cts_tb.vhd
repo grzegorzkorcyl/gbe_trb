@@ -561,7 +561,7 @@ begin
 		wait for 100 ns;
 		reset <= '0';
 		gsr_n <= '1';
-		wait for 10 us;
+		wait for 2 us;
 
 		cts_ext_trigger <= '1';
 		
