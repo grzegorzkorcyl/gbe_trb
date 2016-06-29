@@ -356,14 +356,16 @@ begin
 			
 	end process;
 
+med_stat_op(2 downto 0) <= "111";
+med_stat_op(31 downto 3) <= (others => '0');
 
 	THE_HUB : entity work.trb_net16_hub_streaming_port_sctrl_cts
 		generic map(
 			INIT_ADDRESS                  => x"FAAA",
 			MII_NUMBER                    => 2, --INTERFACE_NUM,
-			MII_IS_UPLINK                 => (0 => 0, others => 0),
+			MII_IS_UPLINK                 => (0 => 1, others => 0),
 			MII_IS_DOWNLINK               => (0 => 0, others => 1),
-			MII_IS_UPLINK_ONLY            => (0 => 0, others => 0),
+			MII_IS_UPLINK_ONLY            => (0 => 1, others => 0),
 			--			MII_NUMBER                    => INTERFACE_NUM,
 			--			MII_IS_UPLINK                 => IS_UPLINK,
 			--			MII_IS_DOWNLINK               => IS_DOWNLINK,
@@ -394,7 +396,7 @@ begin
 			MED_DATA_IN       => med_data_in,
 			MED_PACKET_NUM_IN  => med_packet_num_in,
 			MED_READ_OUT       => med_read_out,
-			MED_STAT_OP       => (others => '0'), --med_stat_op,
+			MED_STAT_OP       => med_stat_op,
 			MED_CTRL_OP       => open, --med_ctrl_op,
 
 			-- Gbe Read-out Path ---------------------------------------------------------------
