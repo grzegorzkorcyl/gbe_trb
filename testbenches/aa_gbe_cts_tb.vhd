@@ -361,9 +361,9 @@ begin
 		generic map(
 			INIT_ADDRESS                  => x"FAAA",
 			MII_NUMBER                    => 2, --INTERFACE_NUM,
-			MII_IS_UPLINK                 => (0 => 1, others => 0),
+			MII_IS_UPLINK                 => (0 => 0, others => 0),
 			MII_IS_DOWNLINK               => (0 => 0, others => 1),
-			MII_IS_UPLINK_ONLY            => (0 => 1, others => 0),
+			MII_IS_UPLINK_ONLY            => (0 => 0, others => 0),
 			--			MII_NUMBER                    => INTERFACE_NUM,
 			--			MII_IS_UPLINK                 => IS_UPLINK,
 			--			MII_IS_DOWNLINK               => IS_DOWNLINK,
