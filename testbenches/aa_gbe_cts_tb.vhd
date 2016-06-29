@@ -260,8 +260,8 @@ begin
 			--Timing trigger in
 			TRG_TIMING_TRG_RECEIVED_IN         => cts_ext_trigger,
 			--LVL1 trigger to FEE
-			LVL1_TRG_DATA_VALID_OUT            => open,
-			LVL1_VALID_TIMING_TRG_OUT          => valid_trigger,
+			LVL1_TRG_DATA_VALID_OUT            => valid_trigger,
+			LVL1_VALID_TIMING_TRG_OUT          => open,
 			LVL1_VALID_NOTIMING_TRG_OUT        => open,
 			LVL1_INVALID_TRG_OUT               => open,
 			LVL1_TRG_TYPE_OUT                  => open,
