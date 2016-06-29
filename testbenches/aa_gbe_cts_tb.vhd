@@ -469,16 +469,16 @@ begin
 			EXTERNAL_TRIGGER_ID  => x"60", -- fill in trigger logic enumeration id of external trigger logic
 
 
-			TRIGGER_COIN_COUNT   => 4,
-			TRIGGER_PULSER_COUNT => 2,
+			TRIGGER_COIN_COUNT   => 1,
+			TRIGGER_PULSER_COUNT => 1,
 			TRIGGER_RAND_PULSER  => 1,
 			TRIGGER_INPUT_COUNT  => 0,  -- obsolete! now all inputs are routed via an input multiplexer!
-			TRIGGER_ADDON_COUNT  => 6,
-			PERIPH_TRIGGER_COUNT => 2,
+			TRIGGER_ADDON_COUNT  => 1,
+			PERIPH_TRIGGER_COUNT => 1,
 			OUTPUT_MULTIPLEXERS  => 1,
 			ADDON_LINE_COUNT     => 0,
-			ADDON_GROUPS         => 7,
-			ADDON_GROUP_UPPER    => (3, 7, 11, 15, 16, 17, others => 0)
+			ADDON_GROUPS         => 1,
+			ADDON_GROUP_UPPER    => (3)
 		)
 		port map(
 			CLK                        => clk_sys,
