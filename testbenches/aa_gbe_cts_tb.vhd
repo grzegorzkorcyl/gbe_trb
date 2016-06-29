@@ -81,12 +81,12 @@ ARCHITECTURE behavior OF aa_gbe_cts_tb IS
 	signal cts_ipu_status_bits : std_logic_vector(31 downto 0);
 	signal cts_ipu_busy        : std_logic;
 	
-	signal cts_ext_trigger, cts_trigger_out, valid_trigger : std_logic;
+	signal cts_ext_trigger, cts_trigger_out : std_logic;
 	
 	signal cts_number                  : std_logic_vector(15 downto 0);
 	signal cts_code                    : std_logic_vector(7 downto 0);
 	signal cts_info		               : std_logic_vector(7 downto 0);
-	signal cts_readout_type            : std_logic_vector(3 downto 0);
+	signal cts_readout_type, valid_trigger            : std_logic_vector(3 downto 0);
 
 begin
 
@@ -262,7 +262,7 @@ begin
 			--Timing trigger in
 			TRG_TIMING_TRG_RECEIVED_IN         => cts_ext_trigger,
 			--LVL1 trigger to FEE
-			LVL1_TRG_DATA_VALID_OUT            => valid_trigger,
+			LVL1_TRG_DATA_VALID_OUT            => valid_trigger(i),
 			LVL1_VALID_TIMING_TRG_OUT          => open,
 			LVL1_VALID_NOTIMING_TRG_OUT        => open,
 			LVL1_INVALID_TRG_OUT               => open,
@@ -336,7 +336,7 @@ end generate;
 		fee_data_finished_i <= '0';
 		fee_trg_statusbits_i <= (others => '0');
 		
-		wait until valid_trigger = '1';
+		wait until valid_trigger(0) = '1';
 		wait for 1 us;
 		wait until rising_edge(clk_sys);
 		fee_data_write_i <= '1';
