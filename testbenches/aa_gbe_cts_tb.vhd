@@ -24,7 +24,6 @@ END aa_gbe_cts_tb;
 ARCHITECTURE behavior OF aa_gbe_cts_tb IS
 	
 	
-	
 	signal clk_sys, clk_125, reset, gsr_n, trigger : std_logic := '0';
 	signal busip0, busip1                          : CTRLBUS_RX;
 	signal cts_data : std_logic_vector(31 downto 0);
@@ -222,24 +221,24 @@ begin
 	
 	THE_ENDPOINT : entity work.trb_net16_endpoint_hades_full_handler
 		generic map(
-			REGIO_NUM_STAT_REGS       => REGIO_NUM_STAT_REGS,
-			REGIO_NUM_CTRL_REGS       => REGIO_NUM_CTRL_REGS,
+			REGIO_NUM_STAT_REGS       => 1,
+			REGIO_NUM_CTRL_REGS       => 1,
 			ADDRESS_MASK              => x"FFFF",
 			BROADCAST_BITMASK         => x"FF",
-			BROADCAST_SPECIAL_ADDR    => BROADCAST_SPECIAL_ADDR,
-			REGIO_COMPILE_TIME        => std_logic_vector(to_unsigned(VERSION_NUMBER_TIME, 32)),
-			REGIO_HARDWARE_VERSION    => HARDWARE_INFO,
-			REGIO_INCLUDED_FEATURES   => INCLUDED_FEATURES,
-			REGIO_INIT_ADDRESS        => INIT_ADDRESS,
-			REGIO_USE_VAR_ENDPOINT_ID => c_YES,
-			CLOCK_FREQUENCY           => CLOCK_FREQUENCY,
-			TIMING_TRIGGER_RAW        => c_YES,
+			BROADCAST_SPECIAL_ADDR    => x"1223",
+			REGIO_COMPILE_TIME        => x"12345678",
+			REGIO_HARDWARE_VERSION    => x"01234567",
+			REGIO_INCLUDED_FEATURES   => x"12345678_12345678",
+			REGIO_INIT_ADDRESS        => x"4567",
+			REGIO_USE_VAR_ENDPOINT_ID => '1',
+			CLOCK_FREQUENCY           => 0,
+			TIMING_TRIGGER_RAW        => '1',
 			--Configure data handler
 			DATA_INTERFACE_NUMBER     => 1,
-			DATA_BUFFER_DEPTH         => EVENT_BUFFER_SIZE,
+			DATA_BUFFER_DEPTH         => 11,
 			DATA_BUFFER_WIDTH         => 32,
-			DATA_BUFFER_FULL_THRESH   => 2 ** EVENT_BUFFER_SIZE - EVENT_MAX_SIZE,
-			TRG_RELEASE_AFTER_DATA    => c_YES,
+			DATA_BUFFER_FULL_THRESH   => 2 ** 11 - 1024,
+			TRG_RELEASE_AFTER_DATA    => '1',
 			HEADER_BUFFER_DEPTH       => 9,
 			HEADER_BUFFER_FULL_THRESH => 2 ** 9 - 16
 		)
