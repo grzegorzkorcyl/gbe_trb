@@ -38,16 +38,16 @@ ARCHITECTURE behavior OF aa_gbe_cts_tb IS
 	signal fee_read : std_logic;
 	signal fee_busy : std_logic;
 	
-	signal med_stat_op                 : std_logic_vector(6 * 16 - 1 downto 0);
-	signal med_ctrl_op                 : std_logic_vector(6 * 16 - 1 downto 0);
-	signal med_data_out                : std_logic_vector(6 * 16 - 1 downto 0);
-	signal med_packet_num_out          : std_logic_vector(6 * 3 - 1 downto 0);
-	signal med_dataready_out           : std_logic_vector(6 * 1 - 1 downto 0);
-	signal med_read_out                : std_logic_vector(6 * 1 - 1 downto 0);
-	signal med_data_in                 : std_logic_vector(6 * 16 - 1 downto 0);
-	signal med_packet_num_in           : std_logic_vector(6 * 3 - 1 downto 0);
-	signal med_dataready_in            : std_logic_vector(6 * 1 - 1 downto 0);
-	signal med_read_in                 : std_logic_vector(6 * 1 - 1 downto 0);
+	signal med_stat_op                 : std_logic_vector(5 * 16 - 1 downto 0);
+	signal med_ctrl_op                 : std_logic_vector(5 * 16 - 1 downto 0);
+	signal med_data_out                : std_logic_vector(5 * 16 - 1 downto 0);
+	signal med_packet_num_out          : std_logic_vector(5 * 3 - 1 downto 0);
+	signal med_dataready_out           : std_logic_vector(5 * 1 - 1 downto 0);
+	signal med_read_out                : std_logic_vector(5 * 1 - 1 downto 0);
+	signal med_data_in                 : std_logic_vector(5 * 16 - 1 downto 0);
+	signal med_packet_num_in           : std_logic_vector(5 * 3 - 1 downto 0);
+	signal med_dataready_in            : std_logic_vector(5 * 1 - 1 downto 0);
+	signal med_read_in                 : std_logic_vector(5 * 1 - 1 downto 0);
 	
 	signal fee_trg_release_i    : std_logic;
 	signal fee_trg_statusbits_i : std_logic_vector(31 downto 0);
