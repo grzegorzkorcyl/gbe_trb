@@ -231,7 +231,7 @@ begin
 			REGIO_INCLUDED_FEATURES   => x"12345678_12345678",
 			REGIO_INIT_ADDRESS        => x"4567",
 			REGIO_USE_VAR_ENDPOINT_ID => 1,
-			CLOCK_FREQUENCY           => 0,
+			CLOCK_FREQUENCY           => 100,
 			TIMING_TRIGGER_RAW        => 1,
 			--Configure data handler
 			DATA_INTERFACE_NUMBER     => 1,
@@ -428,7 +428,7 @@ begin
 			-- Slow Control --------------------------------------------------------------------
 			COMMON_STAT_REGS                                   => open,
 			COMMON_CTRL_REGS                                   => open,
-			ONEWIRE                                            => '0',
+			ONEWIRE                                            => open,
 			ONEWIRE_MONITOR_IN                                 => '0',
 			MY_ADDRESS_OUT                                     => open,
 			UNIQUE_ID_OUT                                      => open,
