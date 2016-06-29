@@ -219,7 +219,7 @@ begin
 	);
 	
 	
-	endp_gen : for i in 1 to 5 generate 
+	endp_gen : for i in 1 to 4 generate 
 	
 	THE_ENDPOINT : entity work.trb_net16_endpoint_hades_full_handler
 		generic map(
