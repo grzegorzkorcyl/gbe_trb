@@ -225,7 +225,7 @@ begin
 			REGIO_NUM_CTRL_REGS       => 1,
 			ADDRESS_MASK              => x"FFFF",
 			BROADCAST_BITMASK         => x"FF",
-			BROADCAST_SPECIAL_ADDR    => x"1223",
+			BROADCAST_SPECIAL_ADDR    => x"23",
 			REGIO_COMPILE_TIME        => x"12345678",
 			REGIO_HARDWARE_VERSION    => x"01234567",
 			REGIO_INCLUDED_FEATURES   => x"12345678_12345678",
@@ -422,8 +422,8 @@ begin
 			--Data from additional modules
 			RDO_ADDITIONAL_STATUSBITS_IN                       => (others => '0'),
 			RDO_ADDITIONAL_DATA                                => (others => '0'),
-			RDO_ADDITIONAL_WRITE                               => '0',
-			RDO_ADDITIONAL_FINISHED                            => '0',
+			RDO_ADDITIONAL_WRITE                               => (others => '0'),
+			RDO_ADDITIONAL_FINISHED                            => (others => '0'),
 
 			-- Slow Control --------------------------------------------------------------------
 			COMMON_STAT_REGS                                   => open,
@@ -482,8 +482,8 @@ begin
 			PERIPH_TRIGGER_COUNT => 1,
 			OUTPUT_MULTIPLEXERS  => 1,
 			ADDON_LINE_COUNT     => 0,
-			ADDON_GROUPS         => 1,
-			ADDON_GROUP_UPPER    => (3)
+			ADDON_GROUPS         => 2,
+			ADDON_GROUP_UPPER    => (others => 1)
 		)
 		port map(
 			CLK                        => clk_sys,
