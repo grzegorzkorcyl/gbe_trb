@@ -230,15 +230,15 @@ begin
 			REGIO_HARDWARE_VERSION    => x"01234567",
 			REGIO_INCLUDED_FEATURES   => x"12345678_12345678",
 			REGIO_INIT_ADDRESS        => x"4567",
-			REGIO_USE_VAR_ENDPOINT_ID => '1',
+			REGIO_USE_VAR_ENDPOINT_ID => 1,
 			CLOCK_FREQUENCY           => 0,
-			TIMING_TRIGGER_RAW        => '1',
+			TIMING_TRIGGER_RAW        => 1,
 			--Configure data handler
 			DATA_INTERFACE_NUMBER     => 1,
 			DATA_BUFFER_DEPTH         => 11,
 			DATA_BUFFER_WIDTH         => 32,
 			DATA_BUFFER_FULL_THRESH   => 2 ** 11 - 1024,
-			TRG_RELEASE_AFTER_DATA    => '1',
+			TRG_RELEASE_AFTER_DATA    => 1,
 			HEADER_BUFFER_DEPTH       => 9,
 			HEADER_BUFFER_FULL_THRESH => 2 ** 9 - 16
 		)
@@ -283,7 +283,7 @@ begin
 			FEE_DATA_IN                        => fee_data_i, --(others => '0'),
 			FEE_DATA_WRITE_IN(0)               => fee_data_write_i, --'0',
 			FEE_DATA_FINISHED_IN(0)            => fee_data_finished_i, --'0',
-			FEE_DATA_ALMOST_FULL_OUT(0)        => open,
+			FEE_DATA_ALMOST_FULL_OUT           => open,
 
 			-- Slow Control Data Port
 			REGIO_COMMON_STAT_REG_IN           => (others => '0'), --0x00
