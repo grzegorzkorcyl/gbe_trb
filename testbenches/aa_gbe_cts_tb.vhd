@@ -362,6 +362,10 @@ med_stat_op(4 * 16 - 1 downto 0) <= (others => '0');
 med_stat_op(4 * 16 + 2 downto 4 * 16) <= "111";
 med_stat_op(5 * 16 - 1 downto 4 * 16 + 3) <= (others => '0');
 
+med_dataready_in( (4 + 1) * 1 - 1) <= '0';
+med_data_in((4 + 1) * 16 - 1 downto 4 * 16) <= (others => '0');
+med_packet_num_in( (4 + 1) * 3 - 1 downto 4 * 3) <= (others => '0');
+med_read_in((4 + 1) * 1 - 1) <= '0';
 
 	THE_HUB : entity work.trb_net16_hub_streaming_port_sctrl_cts
 		generic map(
