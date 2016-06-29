@@ -347,6 +347,7 @@ begin
 
 		fee_data_finished_i <= '1';
 		wait until rising_edge(clk_sys);
+		fee_data_write_i <= '0';
 		fee_data_finished_i <= '0';
 		wait until rising_edge(clk_sys);
 		fee_trg_release_i <= '1';
