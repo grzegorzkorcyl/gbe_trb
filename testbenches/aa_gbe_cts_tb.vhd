@@ -219,7 +219,7 @@ begin
 	);
 	
 	
-	endp_gen : for i in 1 to 4 generate 
+	endp_gen : for i in 0 to 3 generate 
 	
 	THE_ENDPOINT : entity work.trb_net16_endpoint_hades_full_handler
 		generic map(
@@ -358,8 +358,8 @@ end generate;
 			
 	end process;
 
-med_stat_op(2 downto 0) <= "111";
-med_stat_op(5 * 16 - 1 downto 3) <= (others => '0');
+--med_stat_op(2 downto 0) <= "111";
+--med_stat_op(5 * 16 - 1 downto 3) <= (others => '0');
 
 
 	THE_HUB : entity work.trb_net16_hub_streaming_port_sctrl_cts
