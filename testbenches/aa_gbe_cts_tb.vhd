@@ -596,7 +596,7 @@ cts_rdo_trigger <= cts_trigger_out;
 		wait for 100 ns;
 		reset <= '0';
 		gsr_n <= '1';
-		wait for 2 us;
+		wait for 20 us;
 
 		cts_ext_trigger <= '1';
 		
