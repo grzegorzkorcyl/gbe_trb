@@ -343,7 +343,7 @@ begin
 			CLOCK_FREQUENCY               => 100,
 			USE_ONEWIRE                   => 0,
 			BROADCAST_SPECIAL_ADDR        => x"35",
-			RDO_ADDITIONAL_PORT           => 1, --cts_rdo_additional_ports,
+			RDO_ADDITIONAL_PORT           => 0, --cts_rdo_additional_ports,
 			RDO_DATA_BUFFER_DEPTH         => 9,
 			RDO_DATA_BUFFER_FULL_THRESH   => 2 ** 9 - 128,
 			RDO_HEADER_BUFFER_DEPTH       => 9,
