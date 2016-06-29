@@ -358,6 +358,8 @@ end generate;
 			
 	end process;
 
+med_stat_op(2 downto 0) <= "111";
+med_stat_op(1 * 16 - 1 downto 0) <= (others => '0');
 med_stat_op(4 * 16 - 1 downto 0) <= (others => '0');
 med_stat_op(4 * 16 + 2 downto 4 * 16) <= "111";
 med_stat_op(5 * 16 - 1 downto 4 * 16 + 3) <= (others => '0');
