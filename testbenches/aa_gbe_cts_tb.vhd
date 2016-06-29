@@ -358,8 +358,9 @@ end generate;
 			
 	end process;
 
---med_stat_op(2 downto 0) <= "111";
---med_stat_op(5 * 16 - 1 downto 3) <= (others => '0');
+med_stat_op(4 * 16 - 1 downto 0) <= (others => '0');
+med_stat_op(4 * 16 + 2 downto 4 * 16) <= "111";
+med_stat_op(5 * 16 - 1 downto 4 * 16 + 3) <= (others => '0');
 
 
 	THE_HUB : entity work.trb_net16_hub_streaming_port_sctrl_cts
