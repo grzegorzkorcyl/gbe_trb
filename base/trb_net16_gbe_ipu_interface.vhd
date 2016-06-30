@@ -72,7 +72,7 @@ end entity trb_net16_gbe_ipu_interface;
 architecture RTL of trb_net16_gbe_ipu_interface is
 	attribute syn_encoding : string;
 
-	type saveStates is (IDLE, PRE_SAVE_DATA, WAIT_FOR_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, ADD_MISSING, TERMINATE, SEND_TERM_PULSE, THROTTLE_PAUSE, CLOSE, FINISH_4_WORDS, CLEANUP);
+	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, PRE_SAVE_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, ADD_MISSING, TERMINATE, SEND_TERM_PULSE, THROTTLE_PAUSE, CLOSE, FINISH_4_WORDS, CLEANUP);
 	signal save_current_state, save_next_state : saveStates;
 	attribute syn_encoding of save_current_state : signal is "onehot";
 
@@ -156,14 +156,14 @@ begin
 			when IDLE =>
 				rec_state <= x"1";
 				if (CTS_START_READOUT_IN = '1') then
-					save_next_state <= WAIT_FOR_DATA; --SAVE_EVT_ADDR;
+					save_next_state <= SAVE_EVT_ADDR;
 				else
 					save_next_state <= IDLE;
 				end if;
 
---			when SAVE_EVT_ADDR =>
---				rec_state       <= x"2";
---				save_next_state <= WAIT_FOR_DATA;
+			when SAVE_EVT_ADDR =>
+				rec_state       <= x"2";
+				save_next_state <= WAIT_FOR_DATA;
 
 			when WAIT_FOR_DATA =>
 				rec_state <= x"3";
@@ -175,7 +175,11 @@ begin
 				
 			when PRE_SAVE_DATA =>
 				rec_state <= x"e";
-				if ()
+				if (size_check_ctr = 5) then
+					save_next_state <= SAVE_DATA;
+				else
+					save_next_state <= PRE_SAVE_DATA;
+				end if;
 
 			when SAVE_DATA =>
 				rec_state <= x"4";
