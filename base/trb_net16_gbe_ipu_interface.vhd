@@ -134,7 +134,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	
 	signal fee_dataready, fee_dataready_q, fee_dataready_qq, fee_dataready_qqq, fee_dataready_qqqq, fee_dataready_qqqqq : std_logic;
 	
-	signal temp_data_store : std_logic_vector(4 * 16 - 1 downto 0) := (others => '0');
+	signal temp_data_store : std_logic_vector(5 * 16 - 1 downto 0) := (others => '0');
 
 begin
 
@@ -341,7 +341,7 @@ begin
 					save_eod             <= '0';
 					
 				when SAVE_PRE_DATA =>
-					sf_data <= temp_data_store( (size_check_ctr + 1) * 16 - 1 downto size_check_ctr * 16);
+					sf_data <= temp_data_store( (4 - size_check_ctr + 1) * 16 - 1 downto (4 - size_check_ctr) * 16);
 					save_eod <= '0';
 
 				when SAVE_DATA =>
