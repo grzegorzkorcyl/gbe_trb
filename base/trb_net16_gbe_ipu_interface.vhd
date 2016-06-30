@@ -72,7 +72,7 @@ end entity trb_net16_gbe_ipu_interface;
 architecture RTL of trb_net16_gbe_ipu_interface is
 	attribute syn_encoding : string;
 
-	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, PRE_SAVE_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, ADD_MISSING, TERMINATE, SEND_TERM_PULSE, THROTTLE_PAUSE, CLOSE, FINISH_4_WORDS, CLEANUP);
+	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, PRE_SAVE_DATA, SAVE_PRE_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, ADD_MISSING, TERMINATE, SEND_TERM_PULSE, THROTTLE_PAUSE, CLOSE, FINISH_4_WORDS, CLEANUP);
 	signal save_current_state, save_next_state : saveStates;
 	attribute syn_encoding of save_current_state : signal is "onehot";
 
@@ -175,10 +175,18 @@ begin
 				
 			when PRE_SAVE_DATA =>
 				rec_state <= x"e";
-				if (size_check_ctr = 5) then
+				if (size_check_ctr = 4) then
 					save_next_state <= SAVE_DATA;
 				else
 					save_next_state <= PRE_SAVE_DATA;
+				end if;
+				
+			when SAVE_PRE_DATA =>
+				rec_state <= x"e";
+				if (size_check_ctr = 0) then
+					save_next_state <= SAVE_DATA;
+				else
+					save_next_state <= SAVE_PRE_DATA;
 				end if;
 
 			when SAVE_DATA =>
@@ -418,8 +426,10 @@ begin
 		if rising_edge(CLK_IPU) then
 			if (save_current_state = IDLE) then
 				size_check_ctr <= 0;
-			elsif (save_current_state = PRE_SAVE_DATA and FEE_DATAREADY_IN = '1' and size_check_ctr /= 5) then
+			elsif (save_current_state = PRE_SAVE_DATA and FEE_DATAREADY_IN = '1' and size_check_ctr /= 4) then
 				size_check_ctr <= size_check_ctr + 1;
+			elsif (save_current_state = SAVE_PRE_DATA) then
+				size_check_ctr <= size_check_ctr - 1;				
 			else
 				size_check_ctr <= size_check_ctr;
 			end if;
@@ -427,9 +437,10 @@ begin
 			if (save_current_state = IDLE) then
 				sf_wr_lock <= '1';
 				saved_size <= (others => '0');
-			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr = 5 and FEE_DATAREADY_IN = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
+			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr = 4 and FEE_DATAREADY_IN = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
 				sf_wr_lock <= '0';
 				saved_size <= (FEE_DATA_IN & "0") + x"1";
+
 --			elsif (save_current_state = PRE_SAVE_DATA and sf_wr_q = '1') then
 --				saved_size <= saved_size - x"1";
 --			elsif (save_current_state = ADD_MISSING) then
@@ -622,19 +633,11 @@ begin
 				else
 					FEE_READ_OUT <= '0';
 				end if;
+			elsif (save_current_state = SAVE_PRE_DATA) then
+				FEE_READ_OUT <= '0';
 			else
 				FEE_READ_OUT <= '1';
 			end if;
-
-		--			if (sf_afull = '0') then
-		--				--if (save_current_state = IDLE or save_current_state = SAVE_EVT_ADDR or save_current_state = WAIT_FOR_DATA or save_current_state = SAVE_DATA) then
-		--					FEE_READ_OUT <= '1';
-		--				--else
-		--				--	FEE_READ_OUT <= '0';
-		--				--end if;
-		--			else
-		--				FEE_READ_OUT <= '0';
-		--			end if;
 		end if;
 	end process FEE_READ_PROC;
 
