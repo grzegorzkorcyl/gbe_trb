@@ -445,7 +445,7 @@ begin
 			if (save_current_state = IDLE) then
 				sf_wr_lock <= '1';
 				saved_size <= (others => '0');
-			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr = 5 and FEE_DATAREADY_IN = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
+			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr = 3 and FEE_DATAREADY_IN = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
 				sf_wr_lock <= '0';
 				saved_size <= (FEE_DATA_IN & "0") + x"1";
 
@@ -656,7 +656,7 @@ begin
 				end if;
 			elsif (save_current_state = SAVE_PRE_DATA) then
 				FEE_READ_OUT <= '0';
-			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr = 5) then				
+			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr < 4) then				
 				FEE_READ_OUT <= '0';
 			else
 				FEE_READ_OUT <= '1';
