@@ -460,7 +460,7 @@ med_read_in((4 + 1) * 1 - 1) <= '0';
 			RDO_ADDITIONAL_STATUSBITS_IN                       => (others => '0'),
 			RDO_ADDITIONAL_DATA                                => (others => '0'),
 			RDO_ADDITIONAL_WRITE                               => (others => '0'),
-			RDO_ADDITIONAL_FINISHED                            => (others => '0'),
+			RDO_ADDITIONAL_FINISHED                            => (others => '1'),
 
 			-- Slow Control --------------------------------------------------------------------
 			COMMON_STAT_REGS                                   => open,
