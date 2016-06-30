@@ -268,11 +268,7 @@ begin
 	SF_WR_EN_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			sf_afull_q     <= sf_afull;
-			sf_afull_qq    <= sf_afull_q;
-			sf_afull_qqq   <= sf_afull_qq;
-			sf_afull_qqqq  <= sf_afull_qqq;
-			sf_afull_qqqqq <= sf_afull_qqqq;
+
 
 			--if (sf_afull_q = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
 			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
@@ -354,8 +350,7 @@ begin
 	process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			--if (sf_wr_en = '1') then
-			if (fee_dataready = '1') then
+			if (sf_wr_en = '1') then
 				sf_data_q     <= sf_data;
 				sf_data_qq    <= sf_data_q;
 				sf_data_qqq   <= sf_data_qq;
@@ -367,12 +362,12 @@ begin
 				save_eod_qqq   <= save_eod_qq;
 				save_eod_qqqq  <= save_eod_qqq;
 				save_eod_qqqqq <= save_eod_qqqq;
-
-				fee_dataready_q <= fee_dataready;
-				fee_dataready_qq <= fee_dataready_q;
-				fee_dataready_qqq <= fee_dataready_qq;
-				fee_dataready_qqqq <= fee_dataready_qqq;
-				fee_dataready_qqqqq <= fee_dataready_qqqq;
+				
+				sf_afull_q     <= sf_afull;
+				sf_afull_qq    <= sf_afull_q;
+				sf_afull_qqq   <= sf_afull_qq;
+				sf_afull_qqqq  <= sf_afull_qqq;
+				sf_afull_qqqqq <= sf_afull_qqqq;
 			else
 				sf_data_q     <= sf_data_q;
 				sf_data_qq    <= sf_data_qq;
@@ -385,6 +380,12 @@ begin
 				save_eod_qqq   <= save_eod_qqq;
 				save_eod_qqqq  <= save_eod_qqqq;
 				save_eod_qqqqq <= save_eod_qqqq;
+				
+				sf_afull_q     <= sf_afull_q;
+				sf_afull_qq    <= sf_afull_qq;
+				sf_afull_qqq   <= sf_afull_qqq;
+				sf_afull_qqqq  <= sf_afull_qqqq;
+				sf_afull_qqqqq <= sf_afull_qqqqq;
 			end if;
 
 			sf_wr_q     <= sf_wr_en and (not sf_wr_lock) and DATA_GBE_ENABLE_IN;
@@ -393,6 +394,11 @@ begin
 			sf_wr_qqqq  <= sf_wr_qqq;
 			sf_wr_qqqqq <= sf_wr_qqqq;	
 			
+			fee_dataready_q <= fee_dataready;
+			fee_dataready_qq <= fee_dataready_q;
+			fee_dataready_qqq <= fee_dataready_qq;
+			fee_dataready_qqqq <= fee_dataready_qqq;
+			fee_dataready_qqqqq <= fee_dataready_qqqq;
 			fee_dataready <= FEE_DATAREADY_IN;		
 
 		end if;
