@@ -293,6 +293,8 @@ begin
 			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and local_fee_busy = '1') then
 			if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and fee_dataready_qqqqq = '1') then --FEE_DATAREADY_IN = '1') then
 				sf_wr_en <= '1';
+			elsif (save_current_state = SAVE_PRE_DATA) then
+				sf_wr_en <= '1';
 			elsif (save_current_state = SAVE_EVT_ADDR) then
 				sf_wr_en <= '1';
 			elsif (save_current_state = ADD_SUBSUB1 or save_current_state = ADD_SUBSUB2 or save_current_state = ADD_SUBSUB3 or save_current_state = ADD_SUBSUB4) then
@@ -337,6 +339,10 @@ begin
 					sf_data(7 downto 4)  <= CTS_READOUT_TYPE_IN;
 					sf_data(15 downto 8) <= x"ab";
 					save_eod             <= '0';
+					
+				when SAVE_PRE_DATA =>
+					sf_data <= temp_data_store( (size_check_ctr + 1) * 16 - 1 downto size_check_ctr * 16);
+					save_eod <= '0';
 
 				when SAVE_DATA =>
 					sf_data  <= FEE_DATA_IN;
@@ -653,34 +659,6 @@ begin
 			end if;
 		end if;
 	end process FEE_READ_PROC;
-
-	process(CLK_IPU)
-	begin
-		if rising_edge(CLK_IPU) then
-			if (one_sec_tick = '1') then
-				stream_bytes_ps <= (others => '0');
-			else
-				if (sf_rd_en = '1') then
-					stream_bytes_ps <= stream_bytes_ps + x"2";
-				else
-					stream_bytes_ps <= stream_bytes_ps;
-				end if;
-			end if;
-		end if;
-	end process;
-
-	process(CLK_IPU)
-	begin
-		if rising_edge(CLK_IPU) then
-			if (sf_reset = '1' or one_sec_ctr = x"05f5_e100") then
-				one_sec_tick <= '1';
-				one_sec_ctr  <= (others => '0');
-			else
-				one_sec_ctr  <= one_sec_ctr + x"1";
-				one_sec_tick <= '0';
-			end if;
-		end if;
-	end process;
 
 	THE_SPLIT_FIFO : entity work.fifo_32kx18x9_wcnt -- fifo_32kx16x8_mb2  --fifo_16kx18x9
 		port map(
