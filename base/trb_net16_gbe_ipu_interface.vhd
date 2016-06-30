@@ -354,7 +354,8 @@ begin
 	process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			if (sf_wr_en = '1') then
+			--if (sf_wr_en = '1') then
+			if (fee_dataready = '1') then
 				sf_data_q     <= sf_data;
 				sf_data_qq    <= sf_data_q;
 				sf_data_qqq   <= sf_data_qq;
