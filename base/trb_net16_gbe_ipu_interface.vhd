@@ -134,7 +134,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	
 	signal fee_dataready, fee_dataready_q, fee_dataready_qq, fee_dataready_qqq, fee_dataready_qqqq, fee_dataready_qqqqq : std_logic;
 	
-	signal temp_data_store : std_logic_vector(5 * 16 - 1 downto 0) := (others => '0');
+	signal temp_data_store : std_logic_vector(6 * 16 - 1 downto 0) := (others => '0');
 
 begin
 
@@ -177,7 +177,7 @@ begin
 				
 			when PRE_SAVE_DATA =>
 				rec_state <= x"e";
-				if (size_check_ctr = 4) then
+				if (size_check_ctr = 5) then
 					save_next_state <= SAVE_PRE_DATA;
 				else
 					save_next_state <= PRE_SAVE_DATA;
@@ -341,7 +341,7 @@ begin
 					save_eod             <= '0';
 					
 				when SAVE_PRE_DATA =>
-					sf_data <= temp_data_store( (4 - size_check_ctr + 1) * 16 - 1 downto (4 - size_check_ctr) * 16);
+					sf_data <= temp_data_store( (5 - size_check_ctr + 1) * 16 - 1 downto (5 - size_check_ctr) * 16);
 					save_eod <= '0';
 
 				when SAVE_DATA =>
@@ -433,8 +433,8 @@ begin
 	begin
 		if rising_edge(CLK_IPU) then
 			if (save_current_state = IDLE) then
-				size_check_ctr <= 0;
-			elsif (save_current_state = PRE_SAVE_DATA and FEE_DATAREADY_IN = '1' and size_check_ctr /= 4) then
+				size_check_ctr <= 1;
+			elsif (save_current_state = PRE_SAVE_DATA and FEE_DATAREADY_IN = '1' and size_check_ctr /= 5) then
 				size_check_ctr <= size_check_ctr + 1;
 			elsif (save_current_state = SAVE_PRE_DATA and size_check_ctr /= 0) then
 				size_check_ctr <= size_check_ctr - 1;				
@@ -445,7 +445,7 @@ begin
 			if (save_current_state = IDLE) then
 				sf_wr_lock <= '1';
 				saved_size <= (others => '0');
-			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr = 4 and FEE_DATAREADY_IN = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
+			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr = 5 and FEE_DATAREADY_IN = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
 				sf_wr_lock <= '0';
 				saved_size <= (FEE_DATA_IN & "0") + x"1";
 
@@ -464,8 +464,10 @@ begin
 	process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			if (save_current_state = PRE_SAVE_DATA and FEE_DATAREADY_IN = '1') then
-				temp_data_store( (size_check_ctr + 1) * 16 - 1 downto size_check_ctr * 16) <= FEE_DATA_IN;
+			if (save_current_state = SAVE_EVT_ADDR) then
+				temp_data_store(15 downto 0) <= x"ab" & CTS_READOUT_TYPE_IN & CTS_INFORMATION_IN(3 downto 0);
+			elsif (save_current_state = PRE_SAVE_DATA and FEE_DATAREADY_IN = '1') then
+				temp_data_store( (size_check_ctr + 2) * 16 - 1 downto (size_check_ctr + 1) * 16) <= FEE_DATA_IN;
 			else
 				temp_data_store <= temp_data_store;
 			end if;
