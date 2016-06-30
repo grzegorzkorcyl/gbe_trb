@@ -428,7 +428,7 @@ begin
 				size_check_ctr <= 0;
 			elsif (save_current_state = PRE_SAVE_DATA and FEE_DATAREADY_IN = '1' and size_check_ctr /= 4) then
 				size_check_ctr <= size_check_ctr + 1;
-			elsif (save_current_state = SAVE_PRE_DATA) then
+			elsif (save_current_state = SAVE_PRE_DATA and size_check_ctr /= 0) then
 				size_check_ctr <= size_check_ctr - 1;				
 			else
 				size_check_ctr <= size_check_ctr;
