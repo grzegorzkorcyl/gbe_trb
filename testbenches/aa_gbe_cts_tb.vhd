@@ -330,7 +330,13 @@ end generate;
 
 	process
 		variable ctr : integer := 0;
+		variable seed1, seed2 : positive;
+		variable rand : real;
+		variable range_of_rand : real := 1000;
+		variable data_size : positive;
 	begin
+		range_of_rand := 1000;
+		
 		fee_data_write_i <= '0';
 		fee_trg_release_i <= '0';
 		fee_data_finished_i <= '0';
@@ -341,7 +347,10 @@ end generate;
 		wait until rising_edge(clk_sys);
 		fee_data_write_i <= '1';
 		
-		for i in 1 to 1000 loop
+		uniform(seed1, seed2, rand);
+		data_size := integer(range_of_rand * rand);
+		
+		for i in 1 to data_size loop
 			fee_data_i <= std_logic_vector(to_unsigned(ctr, 32));
 			wait until rising_edge(clk_sys);
 			ctr := ctr + 1;
