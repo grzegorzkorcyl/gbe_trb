@@ -601,12 +601,16 @@ cts_rdo_trigger <= cts_trigger_out;
 		reset <= '0';
 		gsr_n <= '1';
 		
+		wait for 21 us;
+			
 		for i in 0 to 1000 loop
 		
-			wait for 30 us;
 			cts_ext_trigger <= '1';
 			wait for 150 ns;
 			cts_ext_trigger <= '0';
+			
+			wait until falling_edge(cts_ipu_busy);
+			wait for 1 us;
 
 		end loop;
 
