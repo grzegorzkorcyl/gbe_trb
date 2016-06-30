@@ -600,20 +600,15 @@ cts_rdo_trigger <= cts_trigger_out;
 		wait for 100 ns;
 		reset <= '0';
 		gsr_n <= '1';
-		wait for 20 us;
-
-		cts_ext_trigger <= '1';
 		
-		wait for 150 ns;
+		for i in 0 to 1000 loop
 		
-		cts_ext_trigger <= '0';
+			wait for 21 us;
+			cts_ext_trigger <= '1';
+			wait for 150 ns;
+			cts_ext_trigger <= '0';
 
-		--		for i in 0 to 10000 loop
-		--			trigger <= '1';
-		--			wait for 100 ns;
-		--			trigger <= '0';
-		--			wait for 10 us;
-		--		end loop;
+		end loop;
 
 		wait;
 	end process;
