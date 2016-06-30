@@ -654,6 +654,8 @@ begin
 				end if;
 			elsif (save_current_state = SAVE_PRE_DATA) then
 				FEE_READ_OUT <= '0';
+			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr = 4) then				
+				FEE_READ_OUT <= '0';
 			else
 				FEE_READ_OUT <= '1';
 			end if;
