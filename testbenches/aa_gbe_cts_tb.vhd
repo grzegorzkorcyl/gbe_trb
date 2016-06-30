@@ -341,7 +341,7 @@ end generate;
 		wait until rising_edge(clk_sys);
 		fee_data_write_i <= '1';
 		
-		for i in 0 to 99 loop
+		for i in 1 to 200 loop
 			fee_data_i <= std_logic_vector(to_unsigned(ctr, 32));
 			wait until rising_edge(clk_sys);
 			ctr := ctr + 1;
