@@ -72,7 +72,7 @@ end entity trb_net16_gbe_ipu_interface;
 architecture RTL of trb_net16_gbe_ipu_interface is
 	attribute syn_encoding : string;
 
-	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, ADD_MISSING, TERMINATE, SEND_TERM_PULSE, THROTTLE_PAUSE, CLOSE, FINISH_4_WORDS, CLEANUP);
+	type saveStates is (IDLE, PRE_SAVE_DATA, WAIT_FOR_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, ADD_MISSING, TERMINATE, SEND_TERM_PULSE, THROTTLE_PAUSE, CLOSE, FINISH_4_WORDS, CLEANUP);
 	signal save_current_state, save_next_state : saveStates;
 	attribute syn_encoding of save_current_state : signal is "onehot";
 
@@ -156,22 +156,26 @@ begin
 			when IDLE =>
 				rec_state <= x"1";
 				if (CTS_START_READOUT_IN = '1') then
-					save_next_state <= SAVE_EVT_ADDR;
+					save_next_state <= WAIT_FOR_DATA; --SAVE_EVT_ADDR;
 				else
 					save_next_state <= IDLE;
 				end if;
 
-			when SAVE_EVT_ADDR =>
-				rec_state       <= x"2";
-				save_next_state <= WAIT_FOR_DATA;
+--			when SAVE_EVT_ADDR =>
+--				rec_state       <= x"2";
+--				save_next_state <= WAIT_FOR_DATA;
 
 			when WAIT_FOR_DATA =>
 				rec_state <= x"3";
 				if (FEE_BUSY_IN = '1') then
-					save_next_state <= SAVE_DATA;
+					save_next_state <= PRE_SAVE_DATA;
 				else
 					save_next_state <= WAIT_FOR_DATA;
 				end if;
+				
+			when PRE_SAVE_DATA =>
+				rec_state <= x"e";
+				if ()
 
 			when SAVE_DATA =>
 				rec_state <= x"4";
@@ -404,36 +408,66 @@ begin
 		end if;
 	end process;
 
+
 	process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
 			if (save_current_state = IDLE) then
 				size_check_ctr <= 0;
-			elsif (save_current_state = SAVE_DATA and sf_wr_en = '1' and size_check_ctr /= 4) then
+			elsif (save_current_state = PRE_SAVE_DATA and FEE_DATAREADY_IN = '1' and size_check_ctr /= 5) then
 				size_check_ctr <= size_check_ctr + 1;
-			elsif (save_current_state = FINISH_4_WORDS and size_check_ctr /= 0) then
-				size_check_ctr <= size_check_ctr - 1;
 			else
 				size_check_ctr <= size_check_ctr;
 			end if;
-
+			
 			if (save_current_state = IDLE) then
 				sf_wr_lock <= '1';
 				saved_size <= (others => '0');
-			elsif (save_current_state = SAVE_DATA and size_check_ctr = 2 and sf_wr_en = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
+			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr = 5 and FEE_DATAREADY_IN = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
 				sf_wr_lock <= '0';
-				saved_size <= (sf_data & "0") + x"1";
-			elsif (save_current_state = SAVE_DATA and sf_wr_q = '1') then
-				saved_size <= saved_size - x"1";
-			elsif (save_current_state = ADD_MISSING) then
-				saved_size <= saved_size - x"1";
+				saved_size <= (FEE_DATA_IN & "0") + x"1";
+--			elsif (save_current_state = PRE_SAVE_DATA and sf_wr_q = '1') then
+--				saved_size <= saved_size - x"1";
+--			elsif (save_current_state = ADD_MISSING) then
+--				saved_size <= saved_size - x"1";
 			else
 				sf_wr_lock <= sf_wr_lock;
 				saved_size <= saved_size;
 			end if;
-
+			
 		end if;
 	end process;
+
+--	process(CLK_IPU)
+--	begin
+--		if rising_edge(CLK_IPU) then
+--			if (save_current_state = IDLE) then
+--				size_check_ctr <= 0;
+--			elsif (save_current_state = SAVE_DATA and sf_wr_en = '1' and size_check_ctr /= 4) then
+--				size_check_ctr <= size_check_ctr + 1;
+--			elsif (save_current_state = FINISH_4_WORDS and size_check_ctr /= 0) then
+--				size_check_ctr <= size_check_ctr - 1;
+--			else
+--				size_check_ctr <= size_check_ctr;
+--			end if;
+--
+--			if (save_current_state = IDLE) then
+--				sf_wr_lock <= '1';
+--				saved_size <= (others => '0');
+--			elsif (save_current_state = SAVE_DATA and size_check_ctr = 2 and sf_wr_en = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
+--				sf_wr_lock <= '0';
+--				saved_size <= (sf_data & "0") + x"1";
+--			elsif (save_current_state = SAVE_DATA and sf_wr_q = '1') then
+--				saved_size <= saved_size - x"1";
+--			elsif (save_current_state = ADD_MISSING) then
+--				saved_size <= saved_size - x"1";
+--			else
+--				sf_wr_lock <= sf_wr_lock;
+--				saved_size <= saved_size;
+--			end if;
+--
+--		end if;
+--	end process;
 
 	process(RESET, CLK_IPU)
 	begin
