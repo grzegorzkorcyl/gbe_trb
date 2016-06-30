@@ -277,7 +277,7 @@ begin
 			--if (sf_afull_q = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
 			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
 			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and local_fee_busy = '1') then
-			if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1') then
+			if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and fee_dataready_qqqqq = '1') then --FEE_DATAREADY_IN = '1') then
 				sf_wr_en <= '1';
 			elsif (save_current_state = SAVE_EVT_ADDR) then
 				sf_wr_en <= '1';
