@@ -459,7 +459,7 @@ begin
 	begin
 		if rising_edge(CLK_IPU) then
 			if (save_current_state = PRE_SAVE_DATA and FEE_DATAREADY_IN = '1') then
-				temp_data_store( (size_check_ctr + 1) * 16 - 1 downto size_check_ctr);
+				temp_data_store( (size_check_ctr + 1) * 16 - 1 downto size_check_ctr * 16) <= FEE_DATA_IN;
 			else
 				temp_data_store <= temp_data_store;
 			end if;
