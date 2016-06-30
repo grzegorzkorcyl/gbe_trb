@@ -133,6 +133,8 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal pause_ctr	   : std_logic_vector(31 downto 0);
 	
 	signal fee_dataready, fee_dataready_q, fee_dataready_qq, fee_dataready_qqq, fee_dataready_qqqq, fee_dataready_qqqqq : std_logic;
+	
+	signal temp_data_store : std_logic_vector(4 * 16 - 1 downto 0) := (others => '0');
 
 begin
 
@@ -450,6 +452,17 @@ begin
 				saved_size <= saved_size;
 			end if;
 			
+		end if;
+	end process;
+	
+	process(CLK_IPU)
+	begin
+		if rising_edge(CLK_IPU) then
+			if (save_current_state = PRE_SAVE_DATA and FEE_DATAREADY_IN = '1') then
+				temp_data_store( (size_check_ctr + 1) * 16 - 1 downto size_check_ctr);
+			else
+				temp_data_store <= temp_data_store;
+			end if;
 		end if;
 	end process;
 
