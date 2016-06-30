@@ -176,7 +176,7 @@ begin
 			when PRE_SAVE_DATA =>
 				rec_state <= x"e";
 				if (size_check_ctr = 4) then
-					save_next_state <= SAVE_DATA;
+					save_next_state <= SAVE_PRE_DATA;
 				else
 					save_next_state <= PRE_SAVE_DATA;
 				end if;
