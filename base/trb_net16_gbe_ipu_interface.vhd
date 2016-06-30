@@ -367,6 +367,12 @@ begin
 				save_eod_qqq   <= save_eod_qq;
 				save_eod_qqqq  <= save_eod_qqq;
 				save_eod_qqqqq <= save_eod_qqqq;
+
+				fee_dataready_q <= fee_dataready;
+				fee_dataready_qq <= fee_dataready_q;
+				fee_dataready_qqq <= fee_dataready_qq;
+				fee_dataready_qqqq <= fee_dataready_qqq;
+				fee_dataready_qqqqq <= fee_dataready_qqqq;
 			else
 				sf_data_q     <= sf_data_q;
 				sf_data_qq    <= sf_data_qq;
@@ -385,15 +391,9 @@ begin
 			sf_wr_qq    <= sf_wr_q;
 			sf_wr_qqq   <= sf_wr_qq;
 			sf_wr_qqqq  <= sf_wr_qqq;
-			sf_wr_qqqqq <= sf_wr_qqqq;
+			sf_wr_qqqqq <= sf_wr_qqqq;	
 			
-			fee_dataready <= FEE_DATAREADY_IN;
-			fee_dataready_q <= fee_dataready;
-			fee_dataready_qq <= fee_dataready_q;
-			fee_dataready_qqq <= fee_dataready_qq;
-			fee_dataready_qqqq <= fee_dataready_qqq;
-			fee_dataready_qqqqq <= fee_dataready_qqqq;
-			
+			fee_dataready <= FEE_DATAREADY_IN;		
 
 		end if;
 	end process;
