@@ -131,6 +131,8 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal one_sec_ctr     : std_logic_vector(31 downto 0);
 	signal one_sec_tick    : std_logic;
 	signal pause_ctr	   : std_logic_vector(31 downto 0);
+	
+	signal fee_dataready, fee_dataready_q, fee_dataready_qq, fee_dataready_qqq, fee_dataready_qqqq, fee_dataready_qqqqq : std_logic;
 
 begin
 
@@ -383,6 +385,14 @@ begin
 			sf_wr_qqq   <= sf_wr_qq;
 			sf_wr_qqqq  <= sf_wr_qqq;
 			sf_wr_qqqqq <= sf_wr_qqqq;
+			
+			fee_dataready <= FEE_DATAREADY_IN;
+			fee_dataready_q <= fee_dataready;
+			fee_dataready_qq <= fee_dataready_q;
+			fee_dataready_qqq <= fee_dataready_qq;
+			fee_dataready_qqqq <= fee_dataready_qqq;
+			fee_dataready_qqqqq <= fee_dataready_qqqq;
+			
 
 		end if;
 	end process;
