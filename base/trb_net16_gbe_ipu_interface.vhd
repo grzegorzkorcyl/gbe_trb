@@ -262,7 +262,7 @@ begin
 
 				when ADD_SUBSUB2 =>
 					sf_data  <= x"5555";
-					save_eod <= '1';
+					save_eod <= '0';
 
 				when ADD_SUBSUB3 =>
 					sf_data  <= FEE_STATUS_BITS_IN(31 downto 16);
@@ -270,7 +270,7 @@ begin
 
 				when ADD_SUBSUB4 =>
 					sf_data  <= FEE_STATUS_BITS_IN(15 downto 0);
-					save_eod <= '0';
+					save_eod <= '1';
 
 				when others => sf_data <= sf_data;
 					save_eod <= '0';
