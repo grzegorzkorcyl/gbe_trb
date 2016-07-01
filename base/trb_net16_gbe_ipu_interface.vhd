@@ -483,7 +483,7 @@ begin
 			if rising_edge(CLK_IPU) then
 				if (RESET = '1') then
 					saved_bytes_ctr <= (others => '0');
-				elsif (save_current_state = SAVE_DATA and sf_wr_q = '1') then
+				elsif (save_current_state = SAVE_DATA and sf_wr_en = '1') then
 					saved_bytes_ctr <= saved_bytes_ctr + x"2";
 				elsif (save_current_state = CLEANUP) then
 					saved_bytes_ctr <= (others => '0');
@@ -658,8 +658,6 @@ begin
 			else
 				sf_eos_q <= sf_eos_q;
 			end if;
-
-			sf_eos_qq <= sf_eos_q;
 
 			if (load_current_state = REMOVE or load_current_state = IDLE) then
 				eos_ctr <= x"f";
