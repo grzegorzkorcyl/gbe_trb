@@ -297,8 +297,6 @@ begin
 				sf_wr_en <= '1';
 			elsif (save_current_state = SAVE_PRE_DATA) then
 				sf_wr_en <= '1';
-			elsif (save_current_state = SAVE_EVT_ADDR) then
-				sf_wr_en <= '1';
 			elsif (save_current_state = ADD_SUBSUB1 or save_current_state = ADD_SUBSUB2 or save_current_state = ADD_SUBSUB3 or save_current_state = ADD_SUBSUB4) then
 				sf_wr_en <= '1';
 			elsif (save_current_state = FINISH_4_WORDS) then
@@ -336,18 +334,13 @@ begin
 	begin
 		if rising_edge(CLK_IPU) then
 			case (save_current_state) is
-				when SAVE_EVT_ADDR =>
-					sf_data(3 downto 0)  <= CTS_INFORMATION_IN(3 downto 0);
-					sf_data(7 downto 4)  <= CTS_READOUT_TYPE_IN;
-					sf_data(15 downto 8) <= x"ab";
-					save_eod             <= '0';
-					
+									
 				when SAVE_PRE_DATA =>
 					sf_data <= temp_data_store( (5 - size_check_ctr + 1) * 16 - 1 downto (5 - size_check_ctr) * 16);
 					save_eod <= '0';
 
 				when SAVE_DATA =>
-					sf_data  <= FEE_DATA_IN;
+					sf_data  <= sf_data_q;
 					save_eod <= '0';
 
 				when ADD_SUBSUB1 =>
@@ -551,8 +544,6 @@ begin
 	CTS_READOUT_FINISHED_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			--if (save_current_state = CLOSE) then
-			--if (save_current_state = SEND_TERM_PULSE) then
 			if (save_current_state = CLEANUP) then
 				CTS_READOUT_FINISHED_OUT <= '1';
 			else
@@ -618,7 +609,6 @@ begin
 
 	sf_afull_impl_gen : if DO_SIMULATION = 0 generate
 		sf_afull <= sf_afull_real;
-
 	end generate sf_afull_impl_gen;
 
 	--	size_check_debug : if DO_SIMULATION = 1 generate
@@ -658,7 +648,9 @@ begin
 				end if;
 			elsif (save_current_state = SAVE_PRE_DATA) then
 				local_read <= '0';
-			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr > 3) then				
+			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr > 2 and FEE_DATAREADY_IN = '1') then	
+				local_read <= '0';
+			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr > 3) then	
 				local_read <= '0';
 			else
 				local_read <= '1';
