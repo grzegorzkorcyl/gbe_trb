@@ -85,7 +85,6 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal sf_q, pc_data                                                               : std_logic_vector(7 downto 0);
 
 	signal cts_rnd, cts_trg : std_logic_vector(15 downto 0);
-	signal save_ctr         : std_logic_vector(15 downto 0);
 
 	signal saved_events_ctr, loaded_events_ctr, saved_events_ctr_gbe : std_logic_vector(31 downto 0);
 	signal loaded_bytes_ctr                                          : std_Logic_vector(15 downto 0);
@@ -97,30 +96,23 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 
 	signal bank_select                                                          : std_logic_vector(3 downto 0);
 	signal readout_ctr                                                          : std_logic_vector(23 downto 0) := x"000000";
-	signal pc_ready_q                                                           : std_logic;
-	signal sf_afull_q, sf_afull_qq, sf_afull_qqq, sf_afull_qqqq, sf_afull_qqqqq : std_logic := '0';
+	signal sf_afull_q, sf_afull_qq, sf_afull_qqq, sf_afull_qqqq : std_logic := '0';
 	signal sf_aempty                                                            : std_logic;
 	signal rec_state, load_state                                                : std_logic_vector(3 downto 0);
 	signal queue_size                                                           : std_logic_vector(17 downto 0);
 	signal number_of_subs                                                       : std_logic_vector(15 downto 0);
 	signal size_check_ctr                                                       : integer range 0 to 7;
 	signal sf_data_q, sf_data_qq, sf_data_qqq, sf_data_qqqq, sf_data_qqqqq, sf_data_qqqqqq      : std_logic_vector(15 downto 0);
-	signal sf_wr_q, sf_wr_lock                                                  : std_logic;
+	signal sf_wr_lock                                                  : std_logic;
 	signal too_large_dropped                                                    : std_logic_vector(31 downto 0);
 	signal previous_ttype, previous_bank                                        : std_logic_vector(3 downto 0);
-	signal sf_afull_real                                                        : std_logic;
 	signal sf_cnt                                                               : std_logic_vector(15 downto 0);
 
 	attribute syn_keep : string;
 	attribute syn_keep of sf_cnt : signal is "true";
 	signal saved_bytes_ctr : std_logic_vector(31 downto 0);
-	signal longer_busy_ctr : std_logic_vector(7 downto 0);
-	signal uneven_ctr      : std_logic_vector(3 downto 0);
-	signal saved_size      : std_logic_vector(16 downto 0);
-	signal overwrite_afull : std_logic;
-
 	signal last_three_bytes    : std_logic_vector(3 downto 0);
-	signal sf_eos_q, sf_eos_qq : std_logic;
+	signal sf_eos_q : std_logic;
 	signal eos_ctr             : std_logic_vector(3 downto 0);
 	
 	signal fee_dataready, fee_dataready_q, fee_dataready_qq, fee_dataready_qqq, fee_dataready_qqqq, fee_dataready_qqqqq : std_logic;
@@ -302,7 +294,6 @@ begin
 			sf_afull_qq    <= sf_afull_q;
 			sf_afull_qqq   <= sf_afull_qq;
 			sf_afull_qqqq  <= sf_afull_qqq;
-			sf_afull_qqqqq <= sf_afull_qqqq;
 			
 			fee_dataready <= FEE_DATAREADY_IN;	
 			fee_dataready_q <= fee_dataready;
@@ -415,12 +406,9 @@ begin
 	CTS_RND_TRG_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			if (save_current_state = SAVE_DATA and save_ctr = x"0000") then
-				cts_rnd <= sf_data;
-				cts_trg <= cts_trg;
-			elsif (save_current_state = SAVE_DATA and save_ctr = x"0001") then
-				cts_rnd <= cts_rnd;
-				cts_trg <= sf_data;
+			if (save_current_state = SAVE_PRE_DATA and size_check_ctr = 5) then
+				cts_rnd <= temp_data_store(4 * 16 - 1 downto 3 * 16);
+				cts_trg <= temp_data_store(5 * 16 - 1 downto 4 * 16);
 			else
 				cts_rnd <= cts_rnd;
 				cts_trg <= cts_trg;
@@ -428,70 +416,11 @@ begin
 		end if;
 	end process CTS_RND_TRG_PROC;
 
-	SAVE_CTR_PROC : process(CLK_IPU)
-	begin
-		if rising_edge(CLK_IPU) then
-			if (save_current_state = IDLE) then
-				save_ctr <= (others => '0');
-			elsif (save_current_state = SAVE_DATA and sf_wr_en = '1') then
-				save_ctr <= save_ctr + x"1";
-			else
-				save_ctr <= save_ctr;
-			end if;
-		end if;
-	end process SAVE_CTR_PROC;
-
-	sf_afull_sim_gen : if DO_SIMULATION = 1 generate
-
-		--				process
-		--				begin
-		--					sf_afull <= '0';
-		--					wait for 21310 ns;
-		--					sf_afull <= '1';
-		--					wait for 10 ns;
-		--					sf_afull <= sf_afull_real;			
-		--					wait;
-		--				end process;
-
-		sf_afull <= sf_afull_real;
-
-	end generate sf_afull_sim_gen;
-
-	sf_afull_impl_gen : if DO_SIMULATION = 0 generate
-		sf_afull <= sf_afull_real;
-	end generate sf_afull_impl_gen;
-
-	--	size_check_debug : if DO_SIMULATION = 1 generate
-	--		
-	--		process(save_ctr, sf_data_qqqqq, save_current_state)
-	--		begin
-	--			if (save_ctr > x"000c" and save_current_state = SAVE_DATA) then
-	--				assert (save_ctr - x"000c" = sf_data_qqqqq) report "IPU_INTERFACE: Mismatch between data and internal counters" severity warning;
-	--			end if;
-	--		end process;
-	--		
-	--	end generate size_check_debug;
-
-	process(CLK_IPU)
-	begin
-		if rising_edge(CLK_IPU) then
-			if (save_current_state = IDLE) then
-				overwrite_afull <= '0';
-			elsif (sf_wr_q = '1' and save_current_state /= SAVE_DATA) then
-				overwrite_afull <= '1';
-			elsif (save_current_state = SAVE_DATA) then
-				overwrite_afull <= '0';
-			else
-				overwrite_afull <= overwrite_afull;
-			end if;
-		end if;
-	end process;
-
 	FEE_READ_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
 			if (save_current_state = SAVE_DATA) then
-				if (sf_afull = '0' or overwrite_afull = '1') then
+				if (sf_afull = '0') then
 					local_read <= '1';
 				else
 					local_read <= '0';
@@ -543,7 +472,7 @@ begin
 			Empty             => sf_empty,
 			AlmostEmpty       => sf_aempty,
 			Full              => sf_full, -- WARNING, JUST FOR DEBUG
-			AlmostFull        => sf_afull_real
+			AlmostFull        => sf_afull
 		);
 
 	sf_reset <= RESET;
