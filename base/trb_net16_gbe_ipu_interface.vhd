@@ -377,7 +377,7 @@ begin
 	begin
 		if rising_edge(CLK_IPU) then
 			if ( (local_read = '1' or local_read_q = '1' or local_read_qq = '1') and FEE_DATAREADY_IN = '1') then
-				sf_data_q     <= sf_data;
+				sf_data_q     <= FEE_DATA_IN; --sf_data;
 				sf_data_qq    <= sf_data_q;
 				sf_data_qqq   <= sf_data_qq;
 				sf_data_qqqq  <= sf_data_qqq;
