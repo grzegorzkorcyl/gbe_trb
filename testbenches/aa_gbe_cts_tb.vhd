@@ -335,7 +335,7 @@ end generate;
 		variable range_of_rand : real := 1000.0;
 		variable data_size : positive;
 	begin
-		range_of_rand := 100.0;
+		range_of_rand := 1000.0;
 		
 		fee_data_write_i <= '0';
 		fee_trg_release_i <= '0';
