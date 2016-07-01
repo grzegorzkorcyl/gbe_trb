@@ -407,8 +407,8 @@ begin
 	begin
 		if rising_edge(CLK_IPU) then
 			if (save_current_state = SAVE_PRE_DATA and size_check_ctr = 5) then
-				cts_rnd <= temp_data_store(4 * 16 - 1 downto 3 * 16);
-				cts_trg <= temp_data_store(5 * 16 - 1 downto 4 * 16);
+				cts_rnd <= temp_data_store(3 * 16 - 1 downto 2 * 16);
+				cts_trg <= temp_data_store(4 * 16 - 1 downto 3 * 16);
 			else
 				cts_rnd <= cts_rnd;
 				cts_trg <= cts_trg;
