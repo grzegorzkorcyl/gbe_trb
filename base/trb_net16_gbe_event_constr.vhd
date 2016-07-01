@@ -647,12 +647,12 @@ begin
 	end generate evt_ctr_gen;
 					
 
-	process(CLK)
-	begin
-		if rising_edge(CLK) then
+	--process(CLK)
+	--begin
+		--if rising_edge(CLK) then
 			load_eod_q <= load_eod;
-		end if;
-	end process;
+		--end if;
+	--end process;
 
 	HEADER_CTR_PROC : process(CLK)
 	begin
