@@ -436,7 +436,7 @@ begin
 			end if;
 			
 			local_read_q <= local_read;
-			local_read_qq <= local_read_q;
+			local_read_qq <= local_read_q or not FEE_DATAREADY_IN;
 			local_read_qqq <= local_read_qq;
 			local_read_qqqq <= local_read_qqq;
 			local_read_qqqqq <= local_read_qqqq;
