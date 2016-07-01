@@ -347,6 +347,8 @@ end generate;
 		wait until rising_edge(clk_sys);
 		fee_data_write_i <= '1';
 		
+		ctr := 0;
+		
 		uniform(seed1, seed2, rand);
 		data_size := integer(range_of_rand * rand);
 		
