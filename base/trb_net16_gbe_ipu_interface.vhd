@@ -136,7 +136,7 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	
 	signal temp_data_store : std_logic_vector(6 * 16 - 1 downto 0) := (others => '0');
 	
-	signal local_read, local_read_q, local_read_qq : std_logic := '0';
+	signal local_read, local_read_q, local_read_qq, local_read_qqq, local_read_qqqq, local_read_qqqqq : std_logic := '0';
 
 begin
 
@@ -293,7 +293,8 @@ begin
 			--if (sf_afull_q = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
 			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
 			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and local_fee_busy = '1') then
-			if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and fee_dataready_qqqqq = '1') then --FEE_DATAREADY_IN = '1') then
+			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and fee_dataready_qqqqq = '1') then --FEE_DATAREADY_IN = '1') then
+			if (save_current_state = SAVE_DATA and local_read_qqqq = '1' and fee_dataready_qqqq = '1') then
 				sf_wr_en <= '1';
 			elsif (save_current_state = SAVE_PRE_DATA) then
 				sf_wr_en <= '1';
@@ -340,7 +341,7 @@ begin
 					save_eod <= '0';
 
 				when SAVE_DATA =>
-					sf_data  <= sf_data_q;
+					sf_data  <= sf_data_qqqq;
 					save_eod <= '0';
 
 				when ADD_SUBSUB1 =>
@@ -639,6 +640,9 @@ begin
 			
 			local_read_q <= local_read;
 			local_read_qq <= local_read_q;
+			local_read_qqq <= local_read_qq;
+			local_read_qqqq <= local_read_qqq;
+			local_read_qqqqq <= local_read_qqqq;
 			
 		end if;
 	end process FEE_READ_PROC;
