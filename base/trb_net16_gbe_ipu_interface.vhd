@@ -72,7 +72,7 @@ end entity trb_net16_gbe_ipu_interface;
 architecture RTL of trb_net16_gbe_ipu_interface is
 	attribute syn_encoding : string;
 
-	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, PRE_SAVE_DATA, SAVE_PRE_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, ADD_MISSING, TERMINATE, SEND_TERM_PULSE, THROTTLE_PAUSE, CLOSE, FINISH_4_WORDS, CLEANUP);
+	type saveStates is (IDLE, SAVE_EVT_ADDR, WAIT_FOR_DATA, PRE_SAVE_DATA, SAVE_PRE_DATA, SAVE_DATA, ADD_SUBSUB1, ADD_SUBSUB2, ADD_SUBSUB3, ADD_SUBSUB4, TERMINATE, SEND_TERM_PULSE, CLOSE, CLEANUP);
 	signal save_current_state, save_next_state : saveStates;
 	attribute syn_encoding of save_current_state : signal is "onehot";
 
@@ -106,14 +106,10 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal size_check_ctr                                                       : integer range 0 to 7;
 	signal sf_data_q, sf_data_qq, sf_data_qqq, sf_data_qqqq, sf_data_qqqqq, sf_data_qqqqqq      : std_logic_vector(15 downto 0);
 	signal sf_wr_q, sf_wr_lock                                                  : std_logic;
-	signal save_eod_q, save_eod_qq, save_eod_qqq, save_eod_qqqq, save_eod_qqqqq : std_logic;
-	signal sf_wr_qq, sf_wr_qqq, sf_wr_qqqq, sf_wr_qqqqq                         : std_logic;
 	signal too_large_dropped                                                    : std_logic_vector(31 downto 0);
 	signal previous_ttype, previous_bank                                        : std_logic_vector(3 downto 0);
 	signal sf_afull_real                                                        : std_logic;
 	signal sf_cnt                                                               : std_logic_vector(15 downto 0);
-
-	signal local_fee_busy, local_fee_busy_q, local_fee_busy_qq, local_fee_busy_qqq, local_fee_busy_qqqq, local_fee_busy_qqqqq, local_fee_busy_qqqqqq, local_fee_busy_qqqqqqq, local_fee_busy_qqqqqqqq : std_logic;
 
 	attribute syn_keep : string;
 	attribute syn_keep of sf_cnt : signal is "true";
@@ -126,16 +122,9 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal last_three_bytes    : std_logic_vector(3 downto 0);
 	signal sf_eos_q, sf_eos_qq : std_logic;
 	signal eos_ctr             : std_logic_vector(3 downto 0);
-
-	signal stream_bytes_ps : std_logic_vector(31 downto 0);
-	signal one_sec_ctr     : std_logic_vector(31 downto 0);
-	signal one_sec_tick    : std_logic;
-	signal pause_ctr	   : std_logic_vector(31 downto 0);
 	
 	signal fee_dataready, fee_dataready_q, fee_dataready_qq, fee_dataready_qqq, fee_dataready_qqqq, fee_dataready_qqqqq : std_logic;
-	
 	signal temp_data_store : std_logic_vector(6 * 16 - 1 downto 0) := (others => '0');
-	
 	signal local_read, local_read_q, local_read_qq, local_read_qqq, local_read_qqqq, local_read_qqqqq, local_read_qqqqqq, local_read_qqqqqqq, local_read_qqqqqqqq, local_read_qqqqqqqqq : std_logic := '0';
 
 begin
@@ -153,7 +142,7 @@ begin
 		end if;
 	end process SAVE_MACHINE_PROC;
 
-	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, pause_ctr, local_fee_busy, saved_size, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
+	SAVE_MACHINE : process(save_current_state, CTS_START_READOUT_IN, FEE_BUSY_IN, CTS_READ_IN, size_check_ctr)
 	begin
 		rec_state <= x"0";
 		case (save_current_state) is
@@ -195,8 +184,7 @@ begin
 
 			when SAVE_DATA =>
 				rec_state <= x"4";
-				--if (FEE_BUSY_IN = '0') then
-				if (local_fee_busy = '0') then
+				if (FEE_BUSY_IN = '0') then
 					save_next_state <= TERMINATE;
 				else
 					save_next_state <= SAVE_DATA;
@@ -216,23 +204,7 @@ begin
 
 			when CLOSE =>
 				rec_state <= x"6";
-				--if (CTS_START_READOUT_IN = '0') then
-					if (saved_size = x"0000" & "0") then
-						save_next_state <= ADD_SUBSUB1;
-					else
-						save_next_state <= ADD_MISSING;
-					end if;
-				--else
-				--	save_next_state <= CLOSE;
-				--end if;
-
-			when ADD_MISSING =>
-				rec_state <= x"d";
-				if (saved_size = x"0000" & "1") then
-					save_next_state <= ADD_SUBSUB1;
-				else
-					save_next_state <= ADD_MISSING;
-				end if;
+				save_next_state <= ADD_SUBSUB1;
 
 			when ADD_SUBSUB1 =>
 				rec_state       <= x"7";
@@ -248,19 +220,10 @@ begin
 
 			when ADD_SUBSUB4 =>
 				rec_state       <= x"a";
-				save_next_state <= FINISH_4_WORDS;
-
-			when FINISH_4_WORDS =>
-				rec_state <= x"b";
-				if (size_check_ctr = 1) then
-					save_next_state <= CLEANUP;
-				else
-					save_next_state <= FINISH_4_WORDS;
-				end if;
+				save_next_state <= CLEANUP;
 
 			when CLEANUP =>
 				rec_state       <= x"c";
-				--save_next_state <= THROTTLE_PAUSE; -- IDLE;
 				if (CTS_START_READOUT_IN = '0') then
 					save_next_state <= IDLE;
 				else
@@ -272,64 +235,21 @@ begin
 		end case;
 	end process SAVE_MACHINE;
 	
-	process(CLK_IPU)
-	begin
-		if rising_edge(CLK_IPU) then
-			if (save_current_state = IDLE) then
-				pause_ctr <= (others => '0');
-			elsif (save_current_state = THROTTLE_PAUSE) then
-				pause_ctr <= pause_ctr + x"1";
-			else
-				pause_ctr <= pause_ctr;
-			end if;
-		end if;
-	end process;	
 
 	SF_WR_EN_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-
-
-			--if (sf_afull_q = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
-			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and FEE_BUSY_IN = '1') then
-			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and FEE_DATAREADY_IN = '1' and local_fee_busy = '1') then
-			--if (sf_afull_qqqqq = '0' and save_current_state = SAVE_DATA and fee_dataready_qqqqq = '1') then --FEE_DATAREADY_IN = '1') then
 			if (save_current_state = SAVE_DATA and local_read_qqqqqqqqq = '1' and fee_dataready_qqqqq = '1') then
 				sf_wr_en <= '1';
 			elsif (save_current_state = SAVE_PRE_DATA) then
 				sf_wr_en <= '1';
 			elsif (save_current_state = ADD_SUBSUB1 or save_current_state = ADD_SUBSUB2 or save_current_state = ADD_SUBSUB3 or save_current_state = ADD_SUBSUB4) then
 				sf_wr_en <= '1';
-			elsif (save_current_state = FINISH_4_WORDS) then
-				sf_wr_en <= '1';
-			elsif (save_current_state = ADD_MISSING) then
-				sf_wr_en <= '1';
 			else
 				sf_wr_en <= '0';
 			end if;
 		end if;
 	end process SF_WR_EN_PROC;
-
-	LOCAL_BUSY_PROC : process(CLK_IPU)
-	begin
-		if rising_edge(CLK_IPU) then
-			if (save_current_state = IDLE) then
-				longer_busy_ctr <= x"14";
-			elsif (save_current_state = SAVE_DATA and FEE_BUSY_IN = '0' and sf_afull_qqqqq = '0') then
-				longer_busy_ctr <= longer_busy_ctr - x"1";
-			else
-				longer_busy_ctr <= longer_busy_ctr;
-			end if;
-
-			if (FEE_BUSY_IN = '1') then
-				local_fee_busy <= '1';
-			elsif (save_current_state = SAVE_DATA and longer_busy_ctr > x"00") then
-				local_fee_busy <= '1';
-			else
-				local_fee_busy <= '0';
-			end if;
-		end if;
-	end process LOCAL_BUSY_PROC;
 
 	SF_DATA_EOD_PROC : process(CLK_IPU)
 	begin
@@ -377,24 +297,12 @@ begin
 			sf_data_qqqq  <= sf_data_qqq;
 			sf_data_qqqqq <= sf_data_qqqq;
 			sf_data_qqqqqq <= sf_data_qqqqq;
-
-			save_eod_q     <= save_eod;
-			save_eod_qq    <= save_eod_q;
-			save_eod_qqq   <= save_eod_qq;
-			save_eod_qqqq  <= save_eod_qqq;
-			save_eod_qqqqq <= save_eod_qqqq;
 			
 			sf_afull_q     <= sf_afull;
 			sf_afull_qq    <= sf_afull_q;
 			sf_afull_qqq   <= sf_afull_qq;
 			sf_afull_qqqq  <= sf_afull_qqq;
 			sf_afull_qqqqq <= sf_afull_qqqq;
-			
-			sf_wr_q     <= sf_wr_en and (not sf_wr_lock) and DATA_GBE_ENABLE_IN;
-			sf_wr_qq    <= sf_wr_q;
-			sf_wr_qqq   <= sf_wr_qq;
-			sf_wr_qqqq  <= sf_wr_qqq;
-			sf_wr_qqqqq <= sf_wr_qqqq;	
 			
 			fee_dataready <= FEE_DATAREADY_IN;	
 			fee_dataready_q <= fee_dataready;
@@ -422,18 +330,10 @@ begin
 			
 			if (save_current_state = IDLE) then
 				sf_wr_lock <= '1';
-				saved_size <= (others => '0');
 			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr = 3 and FEE_DATAREADY_IN = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
 				sf_wr_lock <= '0';
-				saved_size <= (FEE_DATA_IN & "0") + x"1";
-
---			elsif (save_current_state = PRE_SAVE_DATA and sf_wr_q = '1') then
---				saved_size <= saved_size - x"1";
---			elsif (save_current_state = ADD_MISSING) then
---				saved_size <= saved_size - x"1";
 			else
 				sf_wr_lock <= sf_wr_lock;
-				saved_size <= saved_size;
 			end if;
 			
 		end if;
@@ -451,37 +351,6 @@ begin
 			end if;
 		end if;
 	end process;
-
---	process(CLK_IPU)
---	begin
---		if rising_edge(CLK_IPU) then
---			if (save_current_state = IDLE) then
---				size_check_ctr <= 0;
---			elsif (save_current_state = SAVE_DATA and sf_wr_en = '1' and size_check_ctr /= 4) then
---				size_check_ctr <= size_check_ctr + 1;
---			elsif (save_current_state = FINISH_4_WORDS and size_check_ctr /= 0) then
---				size_check_ctr <= size_check_ctr - 1;
---			else
---				size_check_ctr <= size_check_ctr;
---			end if;
---
---			if (save_current_state = IDLE) then
---				sf_wr_lock <= '1';
---				saved_size <= (others => '0');
---			elsif (save_current_state = SAVE_DATA and size_check_ctr = 2 and sf_wr_en = '1' and (sf_data & "00") < ("00" & MAX_SUBEVENT_SIZE_IN)) then -- condition to ALLOW an event to be passed forward
---				sf_wr_lock <= '0';
---				saved_size <= (sf_data & "0") + x"1";
---			elsif (save_current_state = SAVE_DATA and sf_wr_q = '1') then
---				saved_size <= saved_size - x"1";
---			elsif (save_current_state = ADD_MISSING) then
---				saved_size <= saved_size - x"1";
---			else
---				sf_wr_lock <= sf_wr_lock;
---				saved_size <= saved_size;
---			end if;
---
---		end if;
---	end process;
 
 	process(RESET, CLK_IPU)
 	begin
@@ -501,7 +370,6 @@ begin
 		if (RESET = '1') then
 			saved_events_ctr <= (others => '0');
 		elsif rising_edge(CLK_IPU) then
-			--if (save_current_state = ADD_SUBSUB4 and sf_wr_lock = '0' and DATA_GBE_ENABLE_IN = '1') then
 			if (save_current_state = SEND_TERM_PULSE and DATA_GBE_ENABLE_IN = '1') then
 				saved_events_ctr <= saved_events_ctr + x"1";
 			else
@@ -513,8 +381,7 @@ begin
 	CTS_DATAREADY_PROC : process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			--if (save_current_state = SAVE_DATA and FEE_BUSY_IN = '0') then
-			if (save_current_state = SAVE_DATA and local_fee_busy = '0') then
+			if (save_current_state = SAVE_DATA and FEE_BUSY_IN = '0') then
 				CTS_DATAREADY_OUT <= '1';
 			elsif (save_current_state = TERMINATE) then
 				CTS_DATAREADY_OUT <= '1';
@@ -657,13 +524,13 @@ begin
 	THE_SPLIT_FIFO : entity work.fifo_32kx18x9_wcnt -- fifo_32kx16x8_mb2  --fifo_16kx18x9
 		port map(
 			-- Byte swapping for correct byte order on readout side of FIFO
-			Data(7 downto 0)  => sf_data_qqqqq(15 downto 8),
+			Data(7 downto 0)  => sf_data(15 downto 8),
 			Data(8)           => '0',
-			Data(16 downto 9) => sf_data_qqqqq(7 downto 0),
-			Data(17)          => save_eod_qqqqq,
+			Data(16 downto 9) => sf_data(7 downto 0),
+			Data(17)          => save_eod,
 			WrClock           => CLK_IPU,
 			RdClock           => CLK_GBE,
-			WrEn              => sf_wr_q, -- sf_wr_en
+			WrEn              => sf_wr_en,
 			RdEn              => sf_rd_en,
 			Reset             => sf_reset,
 			RPReset           => sf_reset,
