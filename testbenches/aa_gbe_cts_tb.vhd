@@ -614,7 +614,7 @@ cts_rdo_trigger <= cts_trigger_out;
 		
 		wait for 21 us;
 			
-		for i in 0 to 1000 loop
+		for i in 0 to 1000000 loop
 		
 			cts_ext_trigger <= '1';
 			wait for 150 ns;
