@@ -135,6 +135,8 @@ architecture RTL of trb_net16_gbe_ipu_interface is
 	signal fee_dataready, fee_dataready_q, fee_dataready_qq, fee_dataready_qqq, fee_dataready_qqqq, fee_dataready_qqqqq : std_logic;
 	
 	signal temp_data_store : std_logic_vector(6 * 16 - 1 downto 0) := (others => '0');
+	
+	signal local_read, local_read_q, local_read_qq : std_logic := '0';
 
 begin
 
@@ -374,7 +376,7 @@ begin
 	process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			if (sf_wr_en = '1') then
+			if ( (local_read = '1' or local_read_q = '1' or local_read_qq = '1') and FEE_DATAREADY_IN = '1') then
 				sf_data_q     <= sf_data;
 				sf_data_qq    <= sf_data_q;
 				sf_data_qqq   <= sf_data_qq;
@@ -650,19 +652,25 @@ begin
 		if rising_edge(CLK_IPU) then
 			if (save_current_state = SAVE_DATA) then
 				if (sf_afull = '0' or overwrite_afull = '1') then
-					FEE_READ_OUT <= '1';
+					local_read <= '1';
 				else
-					FEE_READ_OUT <= '0';
+					local_read <= '0';
 				end if;
 			elsif (save_current_state = SAVE_PRE_DATA) then
-				FEE_READ_OUT <= '0';
+				local_read <= '0';
 			elsif (save_current_state = PRE_SAVE_DATA and size_check_ctr > 3) then				
-				FEE_READ_OUT <= '0';
+				local_read <= '0';
 			else
-				FEE_READ_OUT <= '1';
+				local_read <= '1';
 			end if;
+			
+			local_read_q <= local_read;
+			local_read_qq <= local_read_q;
+			
 		end if;
 	end process FEE_READ_PROC;
+	
+	FEE_READ_OUT <= local_read;
 
 	THE_SPLIT_FIFO : entity work.fifo_32kx18x9_wcnt -- fifo_32kx16x8_mb2  --fifo_16kx18x9
 		port map(
