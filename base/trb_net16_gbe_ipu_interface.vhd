@@ -295,7 +295,7 @@ begin
 			sf_afull_qqq   <= sf_afull_qq;
 			sf_afull_qqqq  <= sf_afull_qqq;
 			
-			fee_dataready <= FEE_DATAREADY_IN and local_read;	
+			fee_dataready <= FEE_DATAREADY_IN and local_read_q;	
 			fee_dataready_q <= fee_dataready;
 			fee_dataready_qq <= fee_dataready_q;
 			fee_dataready_qqq <= fee_dataready_qq;
