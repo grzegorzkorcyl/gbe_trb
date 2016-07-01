@@ -369,56 +369,37 @@ begin
 	process(CLK_IPU)
 	begin
 		if rising_edge(CLK_IPU) then
-			if ( (local_read = '1' or local_read_q = '1' or local_read_qq = '1') and FEE_DATAREADY_IN = '1') then
-				sf_data_q     <= FEE_DATA_IN; --sf_data;
-				sf_data_qq    <= sf_data_q;
-				sf_data_qqq   <= sf_data_qq;
-				sf_data_qqqq  <= sf_data_qqq;
-				sf_data_qqqqq <= sf_data_qqqq;
+			
+			sf_data_q     <= FEE_DATA_IN;
+			sf_data_qq    <= sf_data_q;
+			sf_data_qqq   <= sf_data_qq;
+			sf_data_qqqq  <= sf_data_qqq;
+			sf_data_qqqqq <= sf_data_qqqq;
 
-				save_eod_q     <= save_eod;
-				save_eod_qq    <= save_eod_q;
-				save_eod_qqq   <= save_eod_qq;
-				save_eod_qqqq  <= save_eod_qqq;
-				save_eod_qqqqq <= save_eod_qqqq;
-				
-				sf_afull_q     <= sf_afull;
-				sf_afull_qq    <= sf_afull_q;
-				sf_afull_qqq   <= sf_afull_qq;
-				sf_afull_qqqq  <= sf_afull_qqq;
-				sf_afull_qqqqq <= sf_afull_qqqq;
-			else
-				sf_data_q     <= sf_data_q;
-				sf_data_qq    <= sf_data_qq;
-				sf_data_qqq   <= sf_data_qqq;
-				sf_data_qqqq  <= sf_data_qqqq;
-				sf_data_qqqqq <= sf_data_qqqqq;
-
-				save_eod_q     <= save_eod_q;
-				save_eod_qq    <= save_eod_qq;
-				save_eod_qqq   <= save_eod_qqq;
-				save_eod_qqqq  <= save_eod_qqqq;
-				save_eod_qqqqq <= save_eod_qqqq;
-				
-				sf_afull_q     <= sf_afull_q;
-				sf_afull_qq    <= sf_afull_qq;
-				sf_afull_qqq   <= sf_afull_qqq;
-				sf_afull_qqqq  <= sf_afull_qqqq;
-				sf_afull_qqqqq <= sf_afull_qqqqq;
-			end if;
-
+			save_eod_q     <= save_eod;
+			save_eod_qq    <= save_eod_q;
+			save_eod_qqq   <= save_eod_qq;
+			save_eod_qqqq  <= save_eod_qqq;
+			save_eod_qqqqq <= save_eod_qqqq;
+			
+			sf_afull_q     <= sf_afull;
+			sf_afull_qq    <= sf_afull_q;
+			sf_afull_qqq   <= sf_afull_qq;
+			sf_afull_qqqq  <= sf_afull_qqq;
+			sf_afull_qqqqq <= sf_afull_qqqq;
+			
 			sf_wr_q     <= sf_wr_en and (not sf_wr_lock) and DATA_GBE_ENABLE_IN;
 			sf_wr_qq    <= sf_wr_q;
 			sf_wr_qqq   <= sf_wr_qq;
 			sf_wr_qqqq  <= sf_wr_qqq;
 			sf_wr_qqqqq <= sf_wr_qqqq;	
 			
+			fee_dataready <= FEE_DATAREADY_IN;	
 			fee_dataready_q <= fee_dataready;
 			fee_dataready_qq <= fee_dataready_q;
 			fee_dataready_qqq <= fee_dataready_qq;
 			fee_dataready_qqqq <= fee_dataready_qqq;
-			fee_dataready_qqqqq <= fee_dataready_qqqq;
-			fee_dataready <= FEE_DATAREADY_IN;		
+			fee_dataready_qqqqq <= fee_dataready_qqqq;	
 
 		end if;
 	end process;
