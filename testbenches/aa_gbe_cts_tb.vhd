@@ -614,16 +614,18 @@ cts_rdo_trigger <= cts_trigger_out;
 		
 		wait for 21 us;
 			
-		for i in 0 to 1000000 loop
-		
 			cts_ext_trigger <= '1';
-			wait for 150 ns;
-			cts_ext_trigger <= '0';
 			
-			wait until falling_edge(cts_ipu_busy);
-			wait for 100 ns;
+		--for i in 0 to 1000000 loop
+		
+		--	cts_ext_trigger <= '1';
+		--	wait for 150 ns;
+		--	cts_ext_trigger <= '0';
+			
+		--	wait until falling_edge(cts_ipu_busy);
+		--	wait for 100 ns;
 
-		end loop;
+		--end loop;
 
 		wait;
 	end process;
