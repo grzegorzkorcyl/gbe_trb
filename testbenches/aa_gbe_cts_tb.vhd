@@ -352,7 +352,7 @@ end generate;
 		uniform(seed1, seed2, rand);
 		data_size := integer(range_of_rand * rand);
 		
-		for i in 1 to data_size + 10 loop
+		for i in 1 to data_size + 12 loop
 			fee_data_i <= std_logic_vector(to_unsigned(ctr, 32));
 			wait until rising_edge(clk_sys);
 			ctr := ctr + 1;
@@ -621,7 +621,7 @@ cts_rdo_trigger <= cts_trigger_out;
 			cts_ext_trigger <= '0';
 			
 			wait until falling_edge(cts_ipu_busy);
-			wait for 500 ns;
+			wait for 100 ns;
 
 		end loop;
 
