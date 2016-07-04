@@ -621,7 +621,7 @@ cts_rdo_trigger <= cts_trigger_out;
 			cts_ext_trigger <= '0';
 			
 			wait until falling_edge(cts_ipu_busy);
-			wait for 1 us;
+			wait for 500 ns;
 
 		end loop;
 
