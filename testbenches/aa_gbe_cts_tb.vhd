@@ -608,14 +608,19 @@ cts_rdo_trigger <= cts_trigger_out;
 	process
 	begin
 		reset <= '1';
-		--cts_ext_trigger <= '0';
+		cts_ext_trigger <= '0';
 		gsr_n <= '0';
 		wait for 100 ns;
 		reset <= '0';
 		gsr_n <= '1';
-		ready <= '0';
 		wait for 21 us;
-		ready <= '1';
+		
+		loop
+			cts_ext_trigger <= '1';
+			wait for 150 ns;
+			cts_ext_trigger <= '0';
+			wait for 100 ns;
+		end loop;
 		--	cts_ext_trigger <= '1';
 			
 		--for i in 0 to 1000000 loop
@@ -632,16 +637,6 @@ cts_rdo_trigger <= cts_trigger_out;
 		wait;
 	end process;
 	
-	process
-	begin
-		cts_ext_trigger <= '0';
-		wait until ready = '1';
-		
-		wait for 100 ns;
-		cts_ext_trigger <= '1';
-		wait for 150 ns;
-		cts_ext_trigger <= '0';
-		
-	end process;
+	
 
 end; 
