@@ -87,6 +87,8 @@ ARCHITECTURE behavior OF aa_gbe_cts_tb IS
 	signal cts_code                    : std_logic_vector(7 downto 0);
 	signal cts_info		               : std_logic_vector(7 downto 0);
 	signal cts_readout_type, valid_trigger            : std_logic_vector(3 downto 0);
+	
+	signal ready : std_logic := '0';
 
 begin
 
@@ -606,15 +608,15 @@ cts_rdo_trigger <= cts_trigger_out;
 	process
 	begin
 		reset <= '1';
-		cts_ext_trigger <= '0';
+		--cts_ext_trigger <= '0';
 		gsr_n <= '0';
 		wait for 100 ns;
 		reset <= '0';
 		gsr_n <= '1';
-		
+		ready <= '0';
 		wait for 21 us;
-			
-			cts_ext_trigger <= '1';
+		ready <= '1';
+		--	cts_ext_trigger <= '1';
 			
 		--for i in 0 to 1000000 loop
 		
@@ -628,6 +630,18 @@ cts_rdo_trigger <= cts_trigger_out;
 		--end loop;
 
 		wait;
+	end process;
+	
+	process
+	begin
+		cts_ext_trigger <= '0';
+		wait until ready = '1';
+		
+		wait for 100 ns;
+		cts_ext_trigger <= '1';
+		wait for 150 ns;
+		cts_ext_trigger <= '0';
+		
 	end process;
 
 end; 
