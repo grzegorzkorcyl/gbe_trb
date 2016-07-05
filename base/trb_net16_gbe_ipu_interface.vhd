@@ -159,7 +159,7 @@ begin
 				end if;
 				
 			when PRE_SAVE_DATA =>
-				rec_state <= x"e";
+				rec_state <= x"d";
 				if (size_check_ctr = 5) then
 					save_next_state <= SAVE_PRE_DATA;
 				else
