@@ -619,7 +619,7 @@ cts_rdo_trigger <= cts_trigger_out;
 			cts_ext_trigger <= '1';
 			wait for 150 ns;
 			cts_ext_trigger <= '0';
-			wait for 100 ns;
+			wait for 1 us;
 		end loop;
 		--	cts_ext_trigger <= '1';
 			
