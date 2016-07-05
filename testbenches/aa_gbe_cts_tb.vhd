@@ -262,7 +262,7 @@ begin
 			MED_CTRL_OP_OUT                    => open, --med_ctrl_op(2 * 16 - 1 downto 1 * 16),
 
 			--Timing trigger in
-			TRG_TIMING_TRG_RECEIVED_IN         => cts_ext_trigger,
+			TRG_TIMING_TRG_RECEIVED_IN         => cts_trigger_out,
 			--LVL1 trigger to FEE
 			LVL1_TRG_DATA_VALID_OUT            => valid_trigger(i),
 			LVL1_VALID_TIMING_TRG_OUT          => open,
