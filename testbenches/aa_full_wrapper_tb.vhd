@@ -25,7 +25,7 @@ begin
 			DO_SIMULATION             => 1,
 			INCLUDE_DEBUG             => 0,
 			USE_INTERNAL_TRBNET_DUMMY => 0,
-			USE_EXTERNAL_TRBNET_DUMMY => 1,
+			USE_EXTERNAL_TRBNET_DUMMY => 0,
 			RX_PATH_ENABLE            => 1,
 			FIXED_SIZE_MODE           => 1,
 			INCREMENTAL_MODE          => 0,
