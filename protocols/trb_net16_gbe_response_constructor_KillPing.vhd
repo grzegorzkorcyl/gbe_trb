@@ -61,6 +61,7 @@ port (
 -- END OF INTERFACE
 
 	MY_TRBNET_ADDRESS_IN : in std_logic_vector(15 downto 0);
+	ISSUE_REBOOT_OUT : out std_logic;
 
 -- debug
 	DEBUG_OUT		: out	std_logic_vector(63 downto 0)

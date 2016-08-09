@@ -81,6 +81,7 @@ entity trb_net16_gbe_protocol_selector is
 		MAKE_RESET_OUT                : out std_logic;
 
 		MY_TRBNET_ADDRESS_IN		  : in  std_logic_vector(15 downto 0);
+		ISSUE_REBOOT_OUT : out std_logic;
 		
 		-- signal for data readout
 		-- CTS interface
@@ -325,6 +326,7 @@ begin
 				---- INTERFACE
 				MY_MAC_IN              => MY_MAC_IN,
 				MY_TRBNET_ADDRESS_IN   => MY_TRBNET_ADDRESS_IN,
+				ISSUE_REBOOT_OUT	   => ISSUE_REBOOT_OUT,
 				MY_IP_IN               => my_ip,
 				PS_DATA_IN             => PS_DATA_IN,
 				PS_WR_EN_IN            => PS_WR_EN_IN,

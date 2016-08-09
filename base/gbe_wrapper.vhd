@@ -64,6 +64,7 @@ entity gbe_wrapper is
 		FEE_BUSY_IN              : in  std_logic;
 		-- SlowControl
 		MY_TRBNET_ADDRESS_IN	 : in std_logic_vector(15 downto 0);
+		ISSUE_REBOOT_OUT : out std_logic;
 		MC_UNIQUE_ID_IN          : in  std_logic_vector(63 downto 0);
 		GSC_CLK_IN               : in  std_logic;
 		GSC_INIT_DATAREADY_OUT   : out std_logic;
@@ -191,6 +192,8 @@ architecture RTL of gbe_wrapper is
 
 	signal cfg_autothrottle   : std_logic;
 	signal cfg_throttle_pause : std_logic_vector(15 downto 0);
+	
+	signal issue_reboot : std_logic_vector(3 downto 0);
 
 begin
 	mac_impl_gen : if DO_SIMULATION = 0 generate
@@ -210,6 +213,8 @@ begin
 	all_links_ready <= '1' when dhcp_done = x"f" else '0';
 
 	MAKE_RESET_OUT <= '1' when make_reset3 = '1' or make_reset2 = '1' or make_reset1 = '1' or make_reset0 = '1' else '0';
+	
+	ISSUE_REBOOT_OUT <= '0' when issue_reboot = "0000" else '1';
 
 	physical_impl_gen : if DO_SIMULATION = 0 generate
 		physical : entity work.gbe_med_interface
@@ -285,6 +290,7 @@ begin
 				MY_MAC_IN                => mac_3,
 				DHCP_DONE_OUT            => dhcp_done(3),
 				MY_TRBNET_ADDRESS_IN	 => MY_TRBNET_ADDRESS_IN,
+				ISSUE_REBOOT_OUT		 => issue_reboot(i),
 				MAC_READY_CONF_IN        => mac_ready_conf(3),
 				MAC_RECONF_OUT           => mac_reconf(3),
 				MAC_AN_READY_IN          => mac_an_ready(3),
@@ -407,6 +413,7 @@ begin
 				MY_MAC_IN                => mac_2,
 				DHCP_DONE_OUT            => dhcp_done(2),
 				MY_TRBNET_ADDRESS_IN	 => MY_TRBNET_ADDRESS_IN,
+				ISSUE_REBOOT_OUT		 => issue_reboot(i),
 				MAC_READY_CONF_IN        => mac_ready_conf(2),
 				MAC_RECONF_OUT           => mac_reconf(2),
 				MAC_AN_READY_IN          => mac_an_ready(2),
@@ -529,6 +536,7 @@ begin
 				MY_MAC_IN                => mac_1,
 				DHCP_DONE_OUT            => dhcp_done(1),
 				MY_TRBNET_ADDRESS_IN	 => MY_TRBNET_ADDRESS_IN,
+				ISSUE_REBOOT_OUT		 => issue_reboot(i),
 				MAC_READY_CONF_IN        => mac_ready_conf(1),
 				MAC_RECONF_OUT           => mac_reconf(1),
 				MAC_AN_READY_IN          => mac_an_ready(1),
@@ -651,6 +659,7 @@ begin
 				MY_MAC_IN                => mac_0,
 				DHCP_DONE_OUT            => dhcp_done(0),
 				MY_TRBNET_ADDRESS_IN	 => MY_TRBNET_ADDRESS_IN,
+				ISSUE_REBOOT_OUT		 => issue_reboot(i),
 				MAC_READY_CONF_IN        => mac_ready_conf(0),
 				MAC_RECONF_OUT           => mac_reconf(0),
 				MAC_AN_READY_IN          => mac_an_ready(0),
