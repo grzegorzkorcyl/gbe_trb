@@ -315,7 +315,7 @@ begin
 
 	ping_gen : if INCLUDE_PING = '1' generate
 		--protocol No. 3 Ping
-		Ping : trb_net16_gbe_response_constructor_KillPing
+		Ping : entity work.trb_net16_gbe_response_constructor_KillPing
 			generic map(STAT_ADDRESS_BASE => 3
 			)
 			port map(
