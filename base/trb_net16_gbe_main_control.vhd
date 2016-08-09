@@ -42,7 +42,7 @@ entity trb_net16_gbe_main_control is
 		MC_IDLE_TOO_LONG_OUT          : out std_logic;
 		MC_DHCP_DONE_OUT              : out std_logic;
 		MC_MY_MAC_IN                  : in  std_logic_vector(47 downto 0);
-
+		MY_TRBNET_ADDRESS_IN		  : in  std_logic_vector(15 downto 0);
 		-- signals to/from receive controller
 		RC_FRAME_WAITING_IN           : in  std_logic;
 		RC_LOADING_DONE_OUT           : out std_logic;
@@ -319,6 +319,8 @@ begin
 			GSC_REPLY_READ_OUT            => GSC_REPLY_READ_OUT,
 			GSC_BUSY_IN                   => GSC_BUSY_IN,
 			MAKE_RESET_OUT                => MAKE_RESET_OUT,
+
+			MY_TRBNET_ADDRESS_IN	 	  => MY_TRBNET_ADDRESS_IN,
 
 			-- CTS interface
 			CTS_NUMBER_IN                 => CTS_NUMBER_IN,

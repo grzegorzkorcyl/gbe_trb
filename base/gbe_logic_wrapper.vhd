@@ -40,6 +40,7 @@ entity gbe_logic_wrapper is
 		GSR_N                    : in  std_logic;
 		MY_MAC_IN                : in  std_logic_vector(47 downto 0);
 		DHCP_DONE_OUT            : out std_logic;
+		MY_TRBNET_ADDRESS_IN	 : in std_logic_vector(15 downto 0);
 
 		-- connection to MAC
 		MAC_READY_CONF_IN        : in  std_logic;
@@ -287,6 +288,7 @@ begin
 				MC_IDLE_TOO_LONG_OUT          => open,
 				MC_DHCP_DONE_OUT              => dhcp_done,
 				MC_MY_MAC_IN                  => MY_MAC_IN,
+				MY_TRBNET_ADDRESS_IN	 	  => MY_TRBNET_ADDRESS_IN,
 
 				-- signals to/from receive controller
 				RC_FRAME_WAITING_IN           => rc_frame_ready,

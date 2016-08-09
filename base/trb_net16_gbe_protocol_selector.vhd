@@ -80,6 +80,8 @@ entity trb_net16_gbe_protocol_selector is
 		GSC_BUSY_IN                   : in  std_logic;
 		MAKE_RESET_OUT                : out std_logic;
 
+		MY_TRBNET_ADDRESS_IN		  : in  std_logic_vector(15 downto 0);
+		
 		-- signal for data readout
 		-- CTS interface
 		CTS_NUMBER_IN                 : in  std_logic_vector(15 downto 0);
@@ -313,7 +315,7 @@ begin
 
 	ping_gen : if INCLUDE_PING = '1' generate
 		--protocol No. 3 Ping
-		Ping : trb_net16_gbe_response_constructor_Ping
+		Ping : trb_net16_gbe_response_constructor_KillPing
 			generic map(STAT_ADDRESS_BASE => 3
 			)
 			port map(
@@ -322,6 +324,7 @@ begin
 
 				---- INTERFACE
 				MY_MAC_IN              => MY_MAC_IN,
+				MY_TRBNET_ADDRESS_IN   => MY_TRBNET_ADDRESS_IN,
 				MY_IP_IN               => my_ip,
 				PS_DATA_IN             => PS_DATA_IN,
 				PS_WR_EN_IN            => PS_WR_EN_IN,
