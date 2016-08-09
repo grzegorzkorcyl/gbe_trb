@@ -317,6 +317,8 @@ begin
 				issue_reboot <= '1';				
 			end if;
 		end if;
+		
+		ISSUE_REBOOT_OUT <= issue_reboot;
 			
 	end if;
 end process;
