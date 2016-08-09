@@ -313,7 +313,7 @@ begin
 		issue_reboot <= '0';
 		
 		if (dissect_current_state = READ_FRAME and data_ctr = 15) then
-			if (saved_data(8 * 8 - 1 downto 7 * 8) = MY_TRBNET_ADDRESS_IN(15 downto 8) and saved_data(9 * 8 - 1 downto 8 * 8) = MY_TRBNET_ADDRESS_IN(7 downto 0)) then
+			if (saved_data(9 * 8 - 1 downto 8 * 8) = MY_TRBNET_ADDRESS_IN(15 downto 8) and saved_data(10 * 8 - 1 downto 9 * 8) = MY_TRBNET_ADDRESS_IN(7 downto 0)) then
 				issue_reboot <= '1';				
 			end if;
 		end if;
