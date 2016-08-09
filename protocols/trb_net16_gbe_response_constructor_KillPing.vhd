@@ -95,6 +95,8 @@ signal checksum_l, checksum_r   : std_logic_vector(19 downto 0);
 signal checksum_ll, checksum_rr : std_logic_vector(15 downto 0);
 signal checksum_lll, checksum_rrr : std_logic_vector(15 downto 0);
 
+signal issue_reboot : std_logic;
+
 begin
 
 DISSECT_MACHINE_PROC : process(RESET, CLK)
@@ -301,6 +303,22 @@ begin
 		end if;
 	end if;
 end process ADDR_PROC;
+
+
+process(CLK)
+begin
+	if rising_edge(CLK) then
+		
+		issue_reboot <= '0';
+		
+		if (dissect_current_state = READ_FRAME and data_ctr = 15) then
+			if (saved_data(8 * 8 - 1 downto 7 * 8) = MY_TRBNET_ADDRESS_IN(15 downto 8) and saved_data(9 * 8 - 1 downto 8 * 8) = MY_TRBNET_ADDRESS_IN(7 downto 0)) then
+				issue_reboot <= '1';				
+			end if;
+		end if;
+			
+	end if;
+end process;
 
 -- statistics
 

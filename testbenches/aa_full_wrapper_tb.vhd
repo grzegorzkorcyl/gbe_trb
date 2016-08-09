@@ -67,7 +67,7 @@ begin
 			FEE_READ_OUT             => open,
 			FEE_STATUS_BITS_IN       => (others => '0'),
 			FEE_BUSY_IN              => '0',
-			MY_TRBNET_ADDRESS_IN	 => x"abcd",
+			MY_TRBNET_ADDRESS_IN	 => x"e001",
 			MC_UNIQUE_ID_IN          => (others => '0'),
 			GSC_CLK_IN               => clk_sys,
 			GSC_INIT_DATAREADY_OUT   => open,
