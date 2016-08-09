@@ -1432,17 +1432,17 @@ begin
 		wait until rising_edge(clk_125_rx_from_pcs(0));
 		mac_rx_write(0) <= '1';
 	-- dest mac
-		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
 		wait until rising_edge(clk_125_rx_from_pcs(0));
-		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
 		wait until rising_edge(clk_125_rx_from_pcs(0));
-		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"be";
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
 		wait until rising_edge(clk_125_rx_from_pcs(0));
-		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
 		wait until rising_edge(clk_125_rx_from_pcs(0));
-		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
 		wait until rising_edge(clk_125_rx_from_pcs(0));
-		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
 		wait until rising_edge(clk_125_rx_from_pcs(0));
 	-- src mac
 		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
