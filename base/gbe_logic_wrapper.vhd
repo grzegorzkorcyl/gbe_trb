@@ -428,6 +428,7 @@ begin
 				MC_IDLE_TOO_LONG_OUT          => open,
 				MC_DHCP_DONE_OUT              => dhcp_done,
 				MC_MY_MAC_IN                  => MY_MAC_IN,
+				MY_TRBNET_ADDRESS_IN	 	  => MY_TRBNET_ADDRESS_IN,
 
 				-- signals to/from receive controller
 				RC_FRAME_WAITING_IN           => rc_frame_ready,
