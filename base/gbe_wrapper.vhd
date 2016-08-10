@@ -1546,6 +1546,24 @@ begin
 		wait until rising_edge(clk_125_rx_from_pcs(0));
 		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
 		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"02";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"03";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"04";	
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"05";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"06";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"07";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"08";
+		
+		-- ping data
+		wait until rising_edge(clk_125_rx_from_pcs(0));
 		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"e0";
 		wait until rising_edge(clk_125_rx_from_pcs(0));
 		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
@@ -1561,6 +1579,7 @@ begin
 		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"e0";
 		wait until rising_edge(clk_125_rx_from_pcs(0));
 		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+		
 		wait until rising_edge(clk_125_rx_from_pcs(0));
 			mac_rx_eof(0) <= '1';
 				mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"aa";
