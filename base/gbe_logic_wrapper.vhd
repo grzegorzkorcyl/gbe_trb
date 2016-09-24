@@ -246,6 +246,7 @@ architecture RTL of gbe_logic_wrapper is
 	signal dbg_ft              : std_logic_vector(63 downto 0);
 	signal dbg_q               : std_logic_vector(15 downto 0);
 	signal make_reset          : std_logic;
+	signal frame_pause : std_logic_vector(31 downto 0);
 
 begin
 	reset_sync : process(GSR_N, CLK_SYS_IN)
@@ -382,7 +383,7 @@ begin
 				CFG_MAX_SINGLE_SUB_IN         => CFG_MAX_SINGLE_SUB_IN,
 				CFG_ADDITIONAL_HDR_IN         => CFG_ADDITIONAL_HDR_IN,
 				CFG_MAX_REPLY_SIZE_IN         => CFG_MAX_REPLY_SIZE_IN,
-				CFG_AUTO_THROTTLE_IN          => CFG_AUTO_THROTTLE_IN,
+				CFG_AUTO_THROTTLE_IN          => '0', --CFG_AUTO_THROTTLE_IN,
 				CFG_THROTTLE_PAUSE_IN         => (others => '0'), --CFG_THROTTLE_PAUSE_IN,
 				TSM_HADDR_OUT                 => open, --mac_haddr,
 				TSM_HDATA_OUT                 => open, --mac_hdataout,
@@ -712,7 +713,7 @@ begin
 			FLAGS_OFFSET_IN        => fc_flags_offset,
 			TTL_IN                 => fc_ttl,
 			PROTOCOL_IN            => fc_protocol,
-			FRAME_DELAY_IN         => CFG_THROTTLE_PAUSE_IN, --(others => '0'),
+			FRAME_DELAY_IN         => frame_pause, --(others => '0'),
 			RD_CLK                 => CLK_125_IN,
 			FT_DATA_OUT            => ft_data,
 			FT_TX_EMPTY_OUT        => ft_tx_empty,
@@ -723,6 +724,8 @@ begin
 			MONITOR_TX_BYTES_OUT   => monitor_tx_bytes,
 			MONITOR_TX_FRAMES_OUT  => monitor_tx_frames
 		);
+		
+	frame_pause <= x"0000" & CFG_THROTTLE_PAUSE_IN;
 
 	MAC_TX_DATA_OUT <= ft_data(7 downto 0);
 
