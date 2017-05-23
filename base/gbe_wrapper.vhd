@@ -1588,6 +1588,64 @@ begin
 		mac_rx_write(0) <='0';
 		mac_rx_eof(0) <= '0';
 
+
+		wait for 10 us;
+
+-- ETHERNET PAUSE FRAME
+
+
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_write(0) <= '1';
+	-- dest mac
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"80";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"c2";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+	-- src mac
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"aa";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"bb";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"cc";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"dd";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ee";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+	-- frame type
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"88";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"08";
+		wait until rising_edge(clk_125_rx_from_pcs(0));	
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"01";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"ff";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+
+		for empty_b_ctr in 0 to 40 loop
+		  mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+		  wait until rising_edge(clk_125_rx_from_pcs(0));
+		end loop;
+		mac_rx_eof(0) <= '1';
+		mac_rx_data(1 * 8 - 1 downto 0 * 8)		<= x"00";
+		wait until rising_edge(clk_125_rx_from_pcs(0));
+		mac_rx_write(0) <='0';
+		mac_rx_eof(0) <= '0';
+
 			wait;
 
 		end process testbench_proc;

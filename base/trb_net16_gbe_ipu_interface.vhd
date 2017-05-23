@@ -808,7 +808,8 @@ begin
 		if rising_edge(CLK_GBE) then
 			if (load_current_state = IDLE) then
 				trigger_type <= x"0";
-			elsif (load_current_state = REMOVE and sf_rd_en = '1' and loaded_bytes_ctr = x"0005") then
+			--elsif (load_current_state = REMOVE and sf_rd_en = '1' and loaded_bytes_ctr = x"0005") then
+			elsif (load_current_state = REMOVE and sf_rd_en = '1' and loaded_bytes_ctr = x"0003") then
 				trigger_type <= pc_data(7 downto 4);
 			else
 				trigger_type <= trigger_type;
