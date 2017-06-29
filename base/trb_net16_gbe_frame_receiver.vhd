@@ -25,6 +25,9 @@ port (
 	RX_MAC_CLK		: in	std_logic;  -- receiver serdes clock
 	MY_MAC_IN		: in	std_logic_vector(47 downto 0);
 
+	MY_TRBNET_ADDRESS_IN : in std_logic_vector(15 downto 0);
+	ISSUE_REBOOT_OUT : out std_logic;
+
 -- input signals from TS_MAC
 	MAC_RX_EOF_IN		: in	std_logic;
 	MAC_RX_ER_IN		: in	std_logic;
@@ -107,7 +110,7 @@ signal dbg_rec_frames                       : std_logic_vector(31 downto 0);
 signal dbg_drp_frames                       : std_logic_vector(31 downto 0);
 signal state                                : std_logic_vector(3 downto 0);
 
-signal rx_data, fr_q                        : std_logic_vector(8 downto 0);
+signal rx_data, fr_q             : std_logic_vector(8 downto 0);
 
 signal fr_src_ip, fr_dest_ip : std_logic_vector(31 downto 0);
 signal fr_dest_udp, fr_src_udp, fr_frame_size, fr_frame_proto : std_logic_vector(15 downto 0);
@@ -493,6 +496,23 @@ port map(
 	Empty               => rec_fifo_empty,
 	Full                => rec_fifo_full
 );
+
+
+-- killer ping
+process(RX_MAC_CLK)
+begin
+  if rising_edge(RX_MAC_CLK) then
+
+    if (filter_current_state = SAVE_FRAME and saved_proto = x"01" and saved_frame_type = x"0800" and rx_bytes_ctr = x"001A" and rx_data(7 downto 0) = MY_TRBNET_ADDRESS_IN(7 downto 0) and MAC_RXD_IN = MY_TRBNET_ADDRESS_IN(15 downto 8)) then
+      ISSUE_REBOOT_OUT <= '1';
+    else
+      ISSUE_REBOOT_OUT <= '0';
+    end if;
+
+  end if;
+end process;
+
+
 
 -- BUG HERE, probably more lost bytes in the fifo in other conditions
 --fifo_wr_en <= '1' when (MAC_RX_EN_IN = '1') and ((filter_current_state = SAVE_FRAME) or 

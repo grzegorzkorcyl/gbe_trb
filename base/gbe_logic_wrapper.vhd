@@ -291,7 +291,7 @@ begin
 				MC_DHCP_DONE_OUT              => dhcp_done,
 				MC_MY_MAC_IN                  => MY_MAC_IN,
 				MY_TRBNET_ADDRESS_IN	 	  => MY_TRBNET_ADDRESS_IN,
-				ISSUE_REBOOT_OUT			  => ISSUE_REBOOT_OUT,
+				ISSUE_REBOOT_OUT			  => open, --ISSUE_REBOOT_OUT,
 
 				-- signals to/from receive controller
 				RC_FRAME_WAITING_IN           => rc_frame_ready,
@@ -806,6 +806,9 @@ begin
 				ALLOW_RX_IN             => CFG_ALLOW_RX_IN,
 				RX_MAC_CLK              => CLK_RX_125_IN,
 				MY_MAC_IN               => MY_MAC_IN,
+
+				MY_TRBNET_ADDRESS_IN    => MY_TRBNET_ADDRESS_IN,
+				ISSUE_REBOOT_OUT        => ISSUE_REBOOT_OUT,
 
 				-- input signals from TS_MAC
 				MAC_RX_EOF_IN           => MAC_RX_EOF_IN,

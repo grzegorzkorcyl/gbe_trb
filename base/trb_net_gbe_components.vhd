@@ -722,6 +722,8 @@ port (
 	ALLOW_RX_IN		: in	std_logic;
 	RX_MAC_CLK		: in	std_logic;  -- receiver serdes clock
 	MY_MAC_IN		: in	std_logic_vector(47 downto 0);
+	MY_TRBNET_ADDRESS_IN    : in	std_logic_vector(15 downto 0);
+	ISSUE_REBOOT_OUT 	: out std_logic;
 
 -- input signals from TS_MAC
 	MAC_RX_EOF_IN		: in	std_logic;
